@@ -266,6 +266,47 @@
 </head>
 <body>
 
+<div id="password-gate" style="
+  position: fixed; inset: 0; z-index: 9999;
+  background: #1B4F8A;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'DM Sans', system-ui, sans-serif;
+">
+  <div style="
+    background: #fff; border-radius: 16px;
+    padding: 2.5rem 2rem; width: 340px; text-align: center;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+  ">
+    <div style="font-size: 2rem; margin-bottom: 0.5rem;">🕍</div>
+    <div style="font-family: 'DM Serif Display', Georgia, serif; font-size: 1.4rem; color: #1B4F8A; margin-bottom: 0.25rem;">SVAJ Survey Analysis</div>
+    <div style="font-size: 12px; color: #9B9B9B; margin-bottom: 1.75rem; letter-spacing: 0.04em; text-transform: uppercase;">Strategic Planning Committee · Confidential</div>
+    <input id="pw-input" type="password" placeholder="Enter password" autofocus
+      style="
+        width: 100%; padding: 0.65rem 1rem; font-size: 15px;
+        border: 1.5px solid #E2E2E2; border-radius: 8px;
+        font-family: 'DM Sans', sans-serif; outline: none;
+        margin-bottom: 0.75rem; transition: border-color 0.15s;
+      "
+      onkeydown="if(event.key==='Enter') checkPassword()"
+      onfocus="this.style.borderColor='#3B79C3'"
+      onblur="this.style.borderColor='#E2E2E2'"
+    />
+    <div id="pw-error" style="font-size: 12px; color: #B83A2E; min-height: 16px; margin-bottom: 0.75rem;"></div>
+    <button onclick="checkPassword()" style="
+      width: 100%; padding: 0.7rem; background: #1B4F8A; color: white;
+      border: none; border-radius: 8px; font-size: 15px; font-weight: 500;
+      font-family: 'DM Sans', sans-serif; cursor: pointer;
+      transition: background 0.15s;
+    "
+    onmouseover="this.style.background='#3B79C3'"
+    onmouseout="this.style.background='#1B4F8A'"
+    >Enter</button>
+  </div>
+</div>
+
+<div id="main-content" style="display:none;">
+
+
 <header>
   <div class="header-inner">
     <div class="header-label">Strategic Planning Committee · Confidential</div>
@@ -753,6 +794,24 @@ new Chart(document.getElementById('womenChart'), {
     cutout: '58%'
   }
 });
+</script>
+
+</div>
+
+<script>
+function checkPassword() {
+  var val = document.getElementById('pw-input').value;
+  if (val === 'rav-ari') {
+    document.getElementById('password-gate').style.display = 'none';
+    document.getElementById('main-content').style.display = 'block';
+  } else {
+    var err = document.getElementById('pw-error');
+    err.textContent = 'Incorrect password. Please try again.';
+    document.getElementById('pw-input').value = '';
+    document.getElementById('pw-input').focus();
+    setTimeout(function(){ err.textContent = ''; }, 3000);
+  }
+}
 </script>
 
 </body>
