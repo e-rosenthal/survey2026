@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SVAJ Strategic Survey Analysis · May 2026</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --blue: #1B4F8A;
+    --blue-light: #EEF4FB;
+    --blue-mid: #3B79C3;
+    --red: #B83A2E;
+    --red-light: #FDF0EF;
+    --gold: #C28430;
+    --gold-light: #FDF6ED;
+    --green: #2A7A5A;
+    --green-light: #EEF7F3;
+    --text: #1A1A1A;
+    --text-muted: #6B6B6B;
+    --text-faint: #9B9B9B;
+    --border: #E2E2E2;
+    --bg: #F8F6F1;
+    --card: #FFFFFF;
+    --serif: 'DM Serif Display', Georgia, serif;
+    --sans: 'DM Sans', system-ui, sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--text);
+    font-size: 15px;
+    line-height: 1.6;
+  }
+
+  /* HEADER */
+  header {
+    background: var(--blue);
+    color: white;
+    padding: 3rem 2rem 2.5rem;
+    position: relative;
+    overflow: hidden;
+  }
+  header::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 280px; height: 280px;
+    border: 40px solid rgba(255,255,255,0.06);
+    border-radius: 50%;
+  }
+  header::after {
+    content: '';
+    position: absolute;
+    bottom: -80px; left: 40%;
+    width: 200px; height: 200px;
+    border: 30px solid rgba(255,255,255,0.04);
+    border-radius: 50%;
+  }
+  .header-inner { max-width: 900px; margin: 0 auto; position: relative; z-index: 1; }
+  .header-label {
+    font-size: 11px; font-weight: 600; letter-spacing: 0.12em;
+    text-transform: uppercase; color: rgba(255,255,255,0.55);
+    margin-bottom: 0.75rem;
+  }
+  header h1 {
+    font-family: var(--serif);
+    font-size: clamp(1.8rem, 4vw, 2.8rem);
+    font-weight: 400;
+    line-height: 1.15;
+    margin-bottom: 1rem;
+  }
+  header h1 em { font-style: italic; color: rgba(255,255,255,0.7); }
+  .header-meta {
+    display: flex; flex-wrap: wrap; gap: 1.5rem;
+    font-size: 13px; color: rgba(255,255,255,0.6);
+  }
+  .header-meta span { display: flex; align-items: center; gap: 6px; }
+
+  /* LAYOUT */
+  main { max-width: 900px; margin: 0 auto; padding: 2.5rem 1.5rem 4rem; }
+
+  section { margin-bottom: 3rem; }
+
+  h2 {
+    font-family: var(--serif);
+    font-size: 1.5rem;
+    font-weight: 400;
+    color: var(--blue);
+    margin-bottom: 1.25rem;
+    padding-bottom: 0.6rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  h3 {
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 0.85rem;
+  }
+
+  /* STAT GRID */
+  .stat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 12px;
+    margin-bottom: 2rem;
+  }
+  .stat-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1rem 1.25rem;
+    text-align: center;
+  }
+  .stat-card .num {
+    font-family: var(--serif);
+    font-size: 2rem;
+    color: var(--blue);
+    line-height: 1.1;
+    margin-bottom: 4px;
+  }
+  .stat-card .label {
+    font-size: 12px;
+    color: var(--text-muted);
+    line-height: 1.3;
+  }
+
+  /* CHART CARDS */
+  .chart-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 1.5rem;
+  }
+  @media (max-width: 640px) { .chart-grid { grid-template-columns: 1fr; } }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.25rem;
+  }
+  .card.full { grid-column: 1 / -1; }
+  .card-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+  .card-sub {
+    font-size: 11px;
+    color: var(--text-faint);
+    margin-bottom: 1rem;
+  }
+  .chart-wrap { position: relative; width: 100%; }
+
+  /* ALERT BOXES */
+  .alert {
+    border-radius: 8px;
+    padding: 0.85rem 1rem;
+    font-size: 13px;
+    margin-top: 0.75rem;
+    line-height: 1.5;
+  }
+  .alert-red { background: var(--red-light); color: var(--red); border-left: 3px solid var(--red); }
+  .alert-blue { background: var(--blue-light); color: var(--blue); border-left: 3px solid var(--blue-mid); }
+  .alert-gold { background: var(--gold-light); color: var(--gold); border-left: 3px solid var(--gold); }
+  .alert-green { background: var(--green-light); color: var(--green); border-left: 3px solid var(--green); }
+
+  /* BAR HORIZONTAL */
+  .hbar-list { display: flex; flex-direction: column; gap: 10px; }
+  .hbar-row { display: flex; align-items: center; gap: 10px; }
+  .hbar-label { font-size: 12px; color: var(--text-muted); min-width: 180px; flex-shrink: 0; text-align: right; }
+  .hbar-track { flex: 1; background: #EEE; border-radius: 4px; height: 14px; overflow: hidden; }
+  .hbar-fill { height: 100%; border-radius: 4px; }
+  .hbar-val { font-size: 12px; font-weight: 600; min-width: 36px; }
+
+  /* WOMEN'S DONUT LEGEND */
+  .legend { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 10px; font-size: 12px; color: var(--text-muted); }
+  .legend span { display: flex; align-items: center; gap: 5px; }
+  .legend-dot { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
+
+  /* MISSION BAR */
+  .mission-bars { display: flex; flex-direction: column; gap: 8px; }
+  .mission-row { display: flex; align-items: center; gap: 10px; }
+  .mission-label { font-size: 12px; color: var(--text-muted); width: 130px; flex-shrink: 0; }
+  .mission-track { flex: 1; background: #EEE; border-radius: 4px; height: 16px; overflow: hidden; }
+  .mission-fill { height: 100%; border-radius: 4px; background: var(--blue-mid); }
+  .mission-pct { font-size: 12px; font-weight: 600; width: 38px; text-align: right; color: var(--blue); }
+
+  /* YOUTH SATISFACTION ROW */
+  .youth-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-bottom: 0.75rem;
+  }
+  @media (max-width: 500px) { .youth-grid { grid-template-columns: repeat(2, 1fr); } }
+  .youth-cell {
+    background: #F4F4F4;
+    border-radius: 8px;
+    padding: 0.75rem;
+    text-align: center;
+  }
+  .youth-num { font-family: var(--serif); font-size: 1.5rem; }
+  .youth-pct { font-size: 10px; color: var(--text-faint); }
+
+  /* NARRATIVE SECTIONS */
+  .narrative { margin-bottom: 2rem; }
+  .narrative p { color: #3A3A3A; font-size: 15px; line-height: 1.75; margin-bottom: 0.85rem; }
+  .narrative strong { font-weight: 600; color: var(--text); }
+
+  .theme-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px;
+    margin-top: 1rem;
+  }
+  .theme-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1rem 1.1rem;
+  }
+  .theme-card .theme-icon {
+    font-size: 1.3rem;
+    margin-bottom: 6px;
+  }
+  .theme-card .theme-title { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+  .theme-card .theme-body { font-size: 12px; color: var(--text-muted); line-height: 1.5; }
+
+  /* IMPLICATIONS */
+  .impl-list { display: flex; flex-direction: column; gap: 12px; }
+  .impl-item {
+    display: flex; gap: 12px; align-items: flex-start;
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 10px; padding: 1rem 1.1rem;
+  }
+  .impl-num {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: var(--blue); color: white;
+    font-size: 12px; font-weight: 600;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; margin-top: 1px;
+  }
+  .impl-text h4 { font-size: 14px; font-weight: 600; margin-bottom: 3px; }
+  .impl-text p { font-size: 13px; color: var(--text-muted); line-height: 1.5; }
+
+  footer {
+    background: var(--card);
+    border-top: 1px solid var(--border);
+    padding: 1.5rem;
+    text-align: center;
+    font-size: 12px;
+    color: var(--text-faint);
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="header-label">Strategic Planning Committee · Confidential</div>
+    <h1>Skokie Valley Agudath Jacob<br><em>Community Stakeholder Survey Analysis</em></h1>
+    <div class="header-meta">
+      <span>📋 83 responses</span>
+      <span>📅 May 2026</span>
+      <span>👥 75 current full members</span>
+    </div>
+  </div>
+</header>
+
+<main>
+
+  <!-- DEMOGRAPHICS -->
+  <section>
+    <h2>Respondent overview</h2>
+    <div class="stat-grid">
+      <div class="stat-card"><div class="num">83</div><div class="label">Total responses</div></div>
+      <div class="stat-card"><div class="num">90%</div><div class="label">Current full members</div></div>
+      <div class="stat-card"><div class="num">2019</div><div class="label">Median join year</div></div>
+      <div class="stat-card"><div class="num">~47</div><div class="label">Median respondent age</div></div>
+      <div class="stat-card"><div class="num">49%</div><div class="label">Households with children</div></div>
+      <div class="stat-card"><div class="num">59%</div><div class="label">Female respondents</div></div>
+    </div>
+    <div class="alert alert-blue">
+      The respondent base skews toward established, engaged members — largely settled in the Skokie area (only 9 of 83 consider themselves new to Chicago), with tenure ranging from 1986 to 2025. This is a well-rooted population offering longitudinal perspective.
+    </div>
+  </section>
+
+  <!-- SATISFACTION -->
+  <section>
+    <h2>Satisfaction scores</h2>
+    <div class="card full">
+      <div class="card-title">Overall quality ratings by area</div>
+      <div class="card-sub">1 = very dissatisfied · 5 = very satisfied</div>
+      <div class="chart-wrap" style="height:320px;"><canvas id="satChart" role="img" aria-label="Satisfaction bar chart. Rabbinic team 4.72, lifecycle 4.54, chesed 4.55, communication 4.51, davening 4.41, belonging 4.38, Israel 4.15, facilities 4.01, adult ed 3.95, youth 3.11."></canvas></div>
+    </div>
+    <div class="alert alert-red" style="margin-top:12px;">
+      <strong>Youth and family programming scores 3.11</strong> — a full 0.84 points below the next-lowest area (adult education at 3.95), and 36% of respondents who rated it are dissatisfied or very dissatisfied. This is the clearest operational gap in the survey.
+    </div>
+    <div class="alert alert-green" style="margin-top:8px;">
+      The rabbinic team scores 4.72 — the highest-rated item in the entire survey — and Rav Ari and Rav Hody are named by name in dozens of open-ended responses as SVAJ's primary differentiator.
+    </div>
+  </section>
+
+  <!-- YOUTH PROGRAMMING DETAIL -->
+  <section>
+    <h2>Youth programming satisfaction breakdown</h2>
+    <div class="youth-grid">
+      <div class="youth-cell">
+        <div class="youth-num" style="color:#2A7A5A;">15%</div>
+        <div style="font-size:13px; font-weight:600; margin:2px 0;">Very satisfied</div>
+        <div class="youth-pct">6 respondents</div>
+      </div>
+      <div class="youth-cell">
+        <div class="youth-num" style="color:#3B79C3;">49%</div>
+        <div style="font-size:13px; font-weight:600; margin:2px 0;">Satisfied</div>
+        <div class="youth-pct">20 respondents</div>
+      </div>
+      <div class="youth-cell">
+        <div class="youth-num" style="color:#C28430;">29%</div>
+        <div style="font-size:13px; font-weight:600; margin:2px 0;">Dissatisfied</div>
+        <div class="youth-pct">12 respondents</div>
+      </div>
+      <div class="youth-cell">
+        <div class="youth-num" style="color:#B83A2E;">7%</div>
+        <div style="font-size:13px; font-weight:600; margin:2px 0;">Very dissatisfied</div>
+        <div class="youth-pct">3 respondents</div>
+      </div>
+    </div>
+    <div class="narrative">
+      <p>Open-ended feedback is pointed: programming feels too basic and geared toward public-school-age kids rather than the actual member base. Teens aren't attending because their friends aren't there. Several respondents specifically ask for teens to be integrated into the main shul rather than siloed. One member's suggestion: <em>"Have a teen Shabbat where teens lead davening in the main shul — not a separate teen minyan. Teens can be part of the community."</em></p>
+    </div>
+  </section>
+
+  <!-- MISSION STATEMENT -->
+  <section>
+    <h2>Mission statement alignment</h2>
+    <div class="card full">
+      <div class="card-title">How well does the mission statement reflect what matters most to you?</div>
+      <div class="card-sub">Mean score: 3.91 / 5.00</div>
+      <div class="mission-bars" style="margin-top:1rem;">
+        <div class="mission-row">
+          <div class="mission-label">Extremely well</div>
+          <div class="mission-track"><div class="mission-fill" style="width:22%;"></div></div>
+          <div class="mission-pct">22%</div>
+        </div>
+        <div class="mission-row">
+          <div class="mission-label">Very well</div>
+          <div class="mission-track"><div class="mission-fill" style="width:55%;"></div></div>
+          <div class="mission-pct">55%</div>
+        </div>
+        <div class="mission-row">
+          <div class="mission-label">Moderately</div>
+          <div class="mission-track"><div class="mission-fill" style="width:16%; background:#B0B0B0;"></div></div>
+          <div class="mission-pct" style="color:var(--text-muted);">16%</div>
+        </div>
+        <div class="mission-row">
+          <div class="mission-label">Slightly</div>
+          <div class="mission-track"><div class="mission-fill" style="width:4%; background:#D85A30;"></div></div>
+          <div class="mission-pct" style="color:var(--red);">4%</div>
+        </div>
+        <div class="mission-row">
+          <div class="mission-label">Not at all</div>
+          <div class="mission-track"><div class="mission-fill" style="width:2%; background:#B83A2E;"></div></div>
+          <div class="mission-pct" style="color:var(--red);">2%</div>
+        </div>
+      </div>
+    </div>
+    <div class="alert alert-blue" style="margin-top:12px;">77% say "very well" or "extremely well" — strong mission resonance overall. The shul's three stated pillars (halachic commitment, inclusion/ahavat achim, intellectual Torah discussion) each score above 4.0 on fulfillment.</div>
+  </section>
+
+  <!-- VALUES + STRATEGIC PRIORITIES SIDE BY SIDE -->
+  <section>
+    <h2>Values and strategic priorities</h2>
+    <div class="chart-grid">
+      <div class="card">
+        <div class="card-title">How central going forward?</div>
+        <div class="card-sub">1–5 scale (1 = not at all, 5 = extremely)</div>
+        <div class="chart-wrap" style="height:280px;"><canvas id="valChart" role="img" aria-label="Values importance. Welcoming 4.77 leads. Civic engagement lowest at 3.89."></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Strategic priority ratings</div>
+        <div class="card-sub">Average importance score, 1–5</div>
+        <div class="chart-wrap" style="height:280px;"><canvas id="stratChart" role="img" aria-label="Strategic priorities. Financial sustainability 3.88 leads. Wellness and intergenerational lowest at 3.38."></canvas></div>
+      </div>
+    </div>
+    <div class="alert alert-gold">
+      <strong>"Welcoming community" scores 4.77</strong> — the highest-rated value in the survey, well above halachic commitment (4.32) and Torah learning (4.30). Members clearly see the welcoming culture as SVAJ's defining characteristic and top priority going forward.
+    </div>
+  </section>
+
+  <!-- WHAT MAKES SVAJ DISTINCT -->
+  <section>
+    <h2>What makes SVAJ distinct</h2>
+    <div class="narrative">
+      <p>The open-ended distinctiveness question drew ~70 responses and is strikingly consistent. The dominant theme across the board: <strong>inclusive, non-judgmental, welcoming — within a halachic framework.</strong> Members describe SVAJ as a "big tent" Modern Orthodox community where people aren't defined by their hat, observance level, economic status, or background.</p>
+      <p>Specific things members highlight: the parking lot doesn't judge you, women are genuinely integrated (not an afterthought), the culture flows directly from the rabbinic team's tone, and members actively introduce themselves to newcomers. One member: <em>"SVAJ is the only community I've found with commitment to both halachic integrity and genuine inclusion at its core."</em></p>
+    </div>
+    <div class="theme-grid">
+      <div class="theme-card">
+        <div class="theme-icon">🤝</div>
+        <div class="theme-title">Non-judgmental culture</div>
+        <div class="theme-body">Repeatedly described as rare in the Orthodox world. No judgment about how you arrive, what you wear, or your level of observance.</div>
+      </div>
+      <div class="theme-card">
+        <div class="theme-icon">🕍</div>
+        <div class="theme-title">Big-tent halachic commitment</div>
+        <div class="theme-body">"Left-wing Modern Orthodoxy" that stays within halacha while welcoming those who don't. Multiple members call this a rare combination nationally.</div>
+      </div>
+      <div class="theme-card">
+        <div class="theme-icon">✡️</div>
+        <div class="theme-title">Rabbinic leadership</div>
+        <div class="theme-body">Rav Ari and Rav Hody named in dozens of responses. The culture is described as flowing directly from their tone and leadership style.</div>
+      </div>
+      <div class="theme-card">
+        <div class="theme-icon">🇮🇱</div>
+        <div class="theme-title">Unwavering Israel connection</div>
+        <div class="theme-body">Pro-Israel identity is named as a distinguishing feature, especially given today's environment in liberal Jewish spaces.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- WHAT DREW PEOPLE + BARRIERS -->
+  <section>
+    <h2>Attraction and engagement barriers</h2>
+    <div class="chart-grid">
+      <div class="card">
+        <div class="card-title">What primarily drew people to SVAJ</div>
+        <div class="card-sub">Mentions (up to 3 per respondent)</div>
+        <div class="chart-wrap" style="height:240px;"><canvas id="drewChart" role="img" aria-label="What drew people. Rabbi/clergy 48 mentions leads. Welcoming atmosphere 40, hashkafic alignment 38, friends/family 31, location 16."></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Barriers to deeper engagement</div>
+        <div class="card-sub">Mentions (multi-select)</div>
+        <div class="chart-wrap" style="height:240px;"><canvas id="barrierChart" role="img" aria-label="Barriers. Programs don't match 30, schedule conflicts 29, already engaged enough 23, not socially connected 17, childcare 16."></canvas></div>
+      </div>
+    </div>
+    <div class="alert alert-gold" style="margin-top:4px;">
+      The top two barriers — "programs don't match my life stage" (30) and "schedule conflicts" (29) — point to a program-design problem more than a will-to-engage problem. "I don't feel socially connected" at 17 mentions is also meaningful and consistent with open-ended comments about cliques.
+    </div>
+  </section>
+
+  <!-- ENGAGEMENT FREQUENCY -->
+  <section>
+    <h2>Engagement frequency</h2>
+    <div class="card full">
+      <div class="card-title">How often do members engage across activities?</div>
+      <div class="card-sub">1 = rarely/never · 5 = weekly</div>
+      <div class="chart-wrap" style="height:220px;"><canvas id="engChart" role="img" aria-label="Shabbat davening 4.01 far exceeds all other activities. Social events 2.16, chesed 2.00, shiurim 1.95, volunteer work 1.88, youth 1.77, weekday davening 1.65."></canvas></div>
+    </div>
+    <div class="alert alert-blue" style="margin-top:12px;">
+      Shabbat davening (4.01) is the overwhelming primary touchpoint for engagement — everything else scores below 2.2. This means the Shabbat morning experience is the core product for most members, and improvements there have outsized leverage on community satisfaction.
+    </div>
+  </section>
+
+  <!-- WOMEN'S PARTICIPATION -->
+  <section>
+    <h2>Women's participation</h2>
+    <div class="chart-grid">
+      <div class="card">
+        <div class="card-title">Preference on women's ritual roles</div>
+        <div class="card-sub">82 respondents</div>
+        <div class="chart-wrap" style="height:200px;"><canvas id="womenChart" role="img" aria-label="56% say current level is appropriate, 42% prefer expanded roles, 2% prefer less participation."></canvas></div>
+        <div class="legend" style="margin-top:10px;">
+          <span><span class="legend-dot" style="background:#1B4F8A;"></span>Appropriate 56%</span>
+          <span><span class="legend-dot" style="background:#6B6B6B;"></span>Expand roles 42%</span>
+          <span><span class="legend-dot" style="background:#B83A2E;"></span>Less 2%</span>
+        </div>
+      </div>
+      <div class="card" style="display:flex; flex-direction:column; justify-content:center;">
+        <div class="alert alert-gold" style="margin-bottom:12px;">
+          <strong>41.5% want expanded women's roles</strong> — this is not a fringe view. Open-ended requests include a full-time female clergy member present locally, expanded women-led halachic Torah learning, and more ritual opportunities.
+        </div>
+        <div class="alert alert-red">
+          At least one member flags the opposite concern: that certain practices at Neilah are moving past what's halachically appropriate and creating a "slippery slope" risk. This is SVAJ's most active and sensitive internal tension.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- RISKS + OPPORTUNITIES THEMES -->
+  <section>
+    <h2>Biggest opportunities and risks</h2>
+
+    <h3 style="margin-bottom:.75rem;">Top opportunity themes (open-ended)</h3>
+    <div class="theme-grid" style="margin-bottom:1.5rem;">
+      <div class="theme-card" style="border-left:3px solid var(--blue);">
+        <div class="theme-title" style="color:var(--blue);">Youth & teen engagement</div>
+        <div class="theme-body">Most common opportunity cited. Structured tween/teen programs, integration into main shul, compelling spiritual experiences before college.</div>
+      </div>
+      <div class="theme-card" style="border-left:3px solid var(--blue);">
+        <div class="theme-title" style="color:var(--blue);">Women in clergy/leadership</div>
+        <div class="theme-body">Multiple calls for a full-time, locally present female clergy member. Also: expanded women-led halachic learning.</div>
+      </div>
+      <div class="theme-card" style="border-left:3px solid var(--blue);">
+        <div class="theme-title" style="color:var(--blue);">National model for centrist Orthodoxy</div>
+        <div class="theme-body">"Become the standard bearer of inclusive centrist Orthodox Judaism nationally" — named explicitly by multiple respondents.</div>
+      </div>
+      <div class="theme-card" style="border-left:3px solid var(--blue);">
+        <div class="theme-title" style="color:var(--blue);">Singles & young adults</div>
+        <div class="theme-body">Multiple calls for programming connecting young singles, post-college adults, widows, and divorced members.</div>
+      </div>
+    </div>
+
+    <h3 style="margin-bottom:.75rem;">Top risk themes (open-ended)</h3>
+    <div class="theme-grid">
+      <div class="theme-card" style="border-left:3px solid var(--red);">
+        <div class="theme-title" style="color:var(--red);">Growth eroding community warmth</div>
+        <div class="theme-body">Most frequently cited risk. Losing the tight-knit feel, people slipping through the cracks, sanctuary/kiddush crowding, rabbis stretched too thin.</div>
+      </div>
+      <div class="theme-card" style="border-left:3px solid var(--red);">
+        <div class="theme-title" style="color:var(--red);">Rabbi dependency</div>
+        <div class="theme-body">One vision response literally reads: "1. Rav 2. Ari 3. will 4. still 5. be 6. here." Clergy turnover is named as a top risk.</div>
+      </div>
+      <div class="theme-card" style="border-left:3px solid var(--red);">
+        <div class="theme-title" style="color:var(--red);">Kol Sasson relationship</div>
+        <div class="theme-body">Multiple members flag the KS arrangement as a source of tension — facility burden, board representation, and divergent member interests.</div>
+      </div>
+      <div class="theme-card" style="border-left:3px solid var(--red);">
+        <div class="theme-title" style="color:var(--red);">Hashkafic drift or identity loss</div>
+        <div class="theme-body">Some fear moving too far left halachically; others fear moving right. "Cannot be all things to all congregants" appears multiple times.</div>
+      </div>
+      <div class="theme-card" style="border-left:3px solid var(--red);">
+        <div class="theme-title" style="color:var(--red);">Physical security</div>
+        <div class="theme-body">Antisemitism and external threats cited repeatedly. Multiple members specifically mention the fence and security protocols — acknowledging the necessity while noting the cost to welcoming aesthetics.</div>
+      </div>
+      <div class="theme-card" style="border-left:3px solid var(--red);">
+        <div class="theme-title" style="color:var(--red);">Financial sustainability</div>
+        <div class="theme-body">Economic pressure on Orthodox families, fundraising capacity, and the cost of programming growth all flagged. Top strategic priority in the quantitative data.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- GROUPS TO BETTER INCLUDE -->
+  <section>
+    <h2>Groups that could be better included</h2>
+    <div class="narrative">
+      <p>28% of respondents said SVAJ could do more for specific populations. The most frequently cited groups: <strong>older adults and seniors</strong> (mentioned in ~10 responses, including one account of a senior who has never been invited to a meal), <strong>newcomers to the community</strong>, <strong>young singles</strong>, <strong>people with disabilities</strong> (accessibility and staircase), and <strong>individuals navigating personal challenges</strong> (divorce, loss, illness).</p>
+    </div>
+    <div class="alert alert-blue">23 of 83 respondents (28%) said "No — Skokie Valley is welcoming to all." That's a meaningful baseline of satisfaction, but it means 72% either identified specific gaps or weren't sure.</div>
+  </section>
+
+  <!-- STRATEGIC IMPLICATIONS -->
+  <section>
+    <h2>Strategic implications for the planning committee</h2>
+    <div class="impl-list">
+      <div class="impl-item">
+        <div class="impl-num">1</div>
+        <div class="impl-text">
+          <h4>Fix youth programming — structurally, not incrementally</h4>
+          <p>This is the clearest, most data-backed gap. 36% dissatisfied, lowest score of any area. Needs dedicated investment in structure, staffing, and teen integration into main shul life — not minor tweaks.</p>
+        </div>
+      </div>
+      <div class="impl-item">
+        <div class="impl-num">2</div>
+        <div class="impl-text">
+          <h4>Develop a deliberate growth management strategy</h4>
+          <p>The single most common risk theme is that growth is eroding the warmth that makes SVAJ distinctive. Newcomer integration, intentional social mixing, and space/kiddush design all need strategic attention.</p>
+        </div>
+      </div>
+      <div class="impl-item">
+        <div class="impl-num">3</div>
+        <div class="impl-text">
+          <h4>Reduce single points of failure in clergy and leadership</h4>
+          <p>Rabbi-dependency is explicit in the survey — multiple respondents named clergy turnover as the top risk. Lay leadership development and volunteer pipeline investment are the lever here.</p>
+        </div>
+      </div>
+      <div class="impl-item">
+        <div class="impl-num">4</div>
+        <div class="impl-text">
+          <h4>Address the physical plant</h4>
+          <p>Staircase accessibility, social hall capacity, and kitchen upgrades appear enough across open-ended responses to warrant capital planning. Financial sustainability is the top-ranked strategic priority — these likely connect.</p>
+        </div>
+      </div>
+      <div class="impl-item">
+        <div class="impl-num">5</div>
+        <div class="impl-text">
+          <h4>Make proactive decisions on women's roles and KS relationship</h4>
+          <p>Neither issue will resolve on its own. Both deserve values-grounded, intentional decision-making — the survey shows clear community interest in more clarity, not continued drift.</p>
+        </div>
+      </div>
+      <div class="impl-item">
+        <div class="impl-num">6</div>
+        <div class="impl-text">
+          <h4>Double down on the welcoming culture — it's the brand</h4>
+          <p>"Welcoming community" is the highest-rated value (4.77) and appears in vision words, distinctiveness descriptions, and attraction factors more than any other theme. Any strategic decision should be filtered through its effect on this.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  Skokie Valley Agudath Jacob · Strategic Planning Committee · Survey conducted May 2026 · 83 respondents · Confidential
+</footer>
+
+<script>
+const BLUE = '#1B4F8A';
+const BLUE_MID = '#3B79C3';
+const RED = '#B83A2E';
+const GOLD = '#C28430';
+const GREEN = '#2A7A5A';
+const GRAY = '#9B9B9B';
+
+const gridColor = 'rgba(0,0,0,0.07)';
+const tickColor = '#6B6B6B';
+const tickFont = { family: "'DM Sans', sans-serif", size: 11 };
+
+new Chart(document.getElementById('satChart'), {
+  type: 'bar',
+  data: {
+    labels: ['Rabbinic team','Lifecycle events','Chesed','Leadership comms','Shabbat davening','Community belonging','Israel programming','Facilities','Adult education','Youth programming'],
+    datasets: [{
+      data: [4.72, 4.54, 4.55, 4.51, 4.41, 4.38, 4.15, 4.01, 3.95, 3.11],
+      backgroundColor: [BLUE,BLUE,BLUE,BLUE,BLUE,BLUE,BLUE,BLUE_MID,BLUE_MID,RED],
+      borderRadius: 4, borderSkipped: false
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { grid: { display: false }, ticks: { color: tickColor, font: tickFont, maxRotation: 30 } },
+      y: { grid: { color: gridColor }, ticks: { color: tickColor, font: tickFont }, min: 2.5, max: 5.0 }
+    }
+  }
+});
+
+new Chart(document.getElementById('valChart'), {
+  type: 'bar',
+  data: {
+    labels: ['Welcoming','Inspiring davening','Inclusion','Youth/family','Intellectual openness','Israel connection','Halachic commitment','Torah learning','Chesed','Intergenerational','Civic engagement'],
+    datasets: [{
+      data: [4.77, 4.44, 4.39, 4.33, 4.33, 4.33, 4.32, 4.30, 4.23, 3.91, 3.89],
+      backgroundColor: BLUE, borderRadius: 3, borderSkipped: false
+    }]
+  },
+  options: {
+    indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { grid: { color: gridColor }, ticks: { color: tickColor, font: tickFont }, min: 3.0, max: 5.0 },
+      y: { grid: { display: false }, ticks: { color: tickColor, font: { family: "'DM Sans', sans-serif", size: 10 } } }
+    }
+  }
+});
+
+new Chart(document.getElementById('stratChart'), {
+  type: 'bar',
+  data: {
+    labels: ['Financial sustainability','Youth/tween/teen','Adult education','Membership growth','Facilities','Leadership pipeline','Shabbat experience','Programming clarity','Chesed infra','Volunteer engagement','Welcoming/inclusive','Family engagement','Communications','Israel connection','Broader community','Intergenerational','Wellness'],
+    datasets: [{
+      data: [3.88,3.79,3.77,3.74,3.74,3.71,3.66,3.64,3.63,3.62,3.62,3.61,3.55,3.53,3.41,3.38,3.38],
+      backgroundColor: BLUE_MID, borderRadius: 3, borderSkipped: false
+    }]
+  },
+  options: {
+    indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { grid: { color: gridColor }, ticks: { color: tickColor, font: tickFont }, min: 2.8, max: 4.2 },
+      y: { grid: { display: false }, ticks: { color: tickColor, font: { family: "'DM Sans', sans-serif", size: 9 } } }
+    }
+  }
+});
+
+new Chart(document.getElementById('drewChart'), {
+  type: 'bar',
+  data: {
+    labels: ['Rabbi / clergy','Welcoming atmosphere','Hashkafic alignment','Friends / family','Location','Other'],
+    datasets: [{
+      data: [48, 40, 38, 31, 16, 10],
+      backgroundColor: [BLUE,BLUE,BLUE_MID,BLUE_MID,GRAY,GRAY],
+      borderRadius: 4, borderSkipped: false
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { grid: { display: false }, ticks: { color: tickColor, font: tickFont, maxRotation: 25 } },
+      y: { grid: { color: gridColor }, ticks: { color: tickColor, font: tickFont } }
+    }
+  }
+});
+
+new Chart(document.getElementById('barrierChart'), {
+  type: 'bar',
+  data: {
+    labels: ["Programs don't match","Schedule conflicts","Already engaged","Not connected","Childcare","Accessibility","Cost","Unsure what's available"],
+    datasets: [{
+      data: [30, 29, 23, 17, 16, 6, 3, 3],
+      backgroundColor: [RED,RED,GRAY,GOLD,GOLD,GRAY,GRAY,GRAY],
+      borderRadius: 4, borderSkipped: false
+    }]
+  },
+  options: {
+    indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { grid: { color: gridColor }, ticks: { color: tickColor, font: tickFont } },
+      y: { grid: { display: false }, ticks: { color: tickColor, font: { family: "'DM Sans', sans-serif", size: 10 } } }
+    }
+  }
+});
+
+new Chart(document.getElementById('engChart'), {
+  type: 'bar',
+  data: {
+    labels: ['Shabbat davening','Social events','Chesed','Shiurim / learning','Volunteer work','Youth programming','Weekday davening'],
+    datasets: [{
+      data: [4.01, 2.16, 2.00, 1.95, 1.88, 1.77, 1.65],
+      backgroundColor: [BLUE,BLUE_MID,BLUE_MID,BLUE_MID,BLUE_MID,BLUE_MID,GRAY],
+      borderRadius: 4, borderSkipped: false
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { grid: { display: false }, ticks: { color: tickColor, font: tickFont, maxRotation: 25 } },
+      y: { grid: { color: gridColor }, ticks: { color: tickColor, font: tickFont }, min: 0, max: 5 }
+    }
+  }
+});
+
+new Chart(document.getElementById('womenChart'), {
+  type: 'doughnut',
+  data: {
+    labels: ['Current level appropriate (56%)','Expand roles (42%)','Prefer less (2%)'],
+    datasets: [{
+      data: [46, 34, 2],
+      backgroundColor: [BLUE, GRAY, RED],
+      borderWidth: 2, borderColor: '#ffffff'
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: { display: true, position: 'bottom', labels: { color: tickColor, font: { family: "'DM Sans', sans-serif", size: 11 }, boxWidth: 10, padding: 10 } }
+    },
+    cutout: '58%'
+  }
+});
+</script>
+
+</body>
+</html>
