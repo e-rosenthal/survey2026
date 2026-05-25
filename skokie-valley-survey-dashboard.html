@@ -110,6 +110,15 @@
       color: #1d2430;
     }
 
+    .btn.small {
+      min-height: 30px;
+      padding: 5px 9px;
+      border-color: rgba(255,255,255,.34);
+      background: rgba(255,255,255,.12);
+      color: white;
+      font-size: 12px;
+    }
+
     .layout {
       display: grid;
       grid-template-columns: 320px minmax(0, 1fr);
@@ -774,7 +783,7 @@
     <div class="top-actions">
       <span class="chip" id="respondentChip">Showing 0 of 0 respondents</span>
       <span class="chip subtle" id="dataSourceChip" title="Data source">Data: loading default CSV</span>
-      <button class="btn" id="replaceCsvButton" type="button">Replace CSV</button>
+      <button class="btn small" id="replaceCsvButton" type="button">Upload CSV</button>
       <input id="csvReplace" class="hidden" type="file" accept=".csv,text/csv">
       <button class="btn primary" id="resetFilters" type="button">Reset all filters</button>
     </div>
