@@ -447,6 +447,21 @@
 
     .switch-row input { accent-color: var(--navy); }
 
+    .method-note {
+      padding: 14px 16px;
+      background: #fffdf5;
+      border: 1px solid #eadcae;
+      border-left: 4px solid var(--gold);
+      border-radius: 8px;
+    }
+
+    .method-note p {
+      margin: 6px 0 0;
+      color: #5f5431;
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
     .compare-controls {
       display: none;
       margin: 0 0 12px;
@@ -968,6 +983,11 @@
 
       <section id="priorities" class="tab-panel">
         <div class="grid-1">
+          <div class="method-note">
+            <label class="switch-row" style="justify-content:flex-start; color:#1e3a5f;"><input id="normalizeToggle" type="checkbox" checked> Show relative differences (normalized)</label>
+            <p><strong>Methodology:</strong> The normalized view uses within-respondent mean-centering for each rating battery. For every respondent, the dashboard subtracts that person’s average rating across the values or priority items from each item rating, then averages those differences across respondents. A positive score means an item was rated above that respondent’s own baseline; a negative score means below baseline. Raw 1–5 averages remain available by turning this off.</p>
+          </div>
+
           <div class="chart-card">
             <h2 class="chart-title" id="valuesTitle">Community Values</h2>
             <p class="chart-subtitle" id="valuesSubtitle">Filtered segment compared with the full response set when filters are active</p>
@@ -1682,6 +1702,10 @@
         document.getElementById("compareControls").classList.toggle("visible", event.target.checked);
         renderPriorities(filteredRows);
       });
+      document.getElementById("normalizeToggle").addEventListener("change", () => {
+        renderValues(filteredRows);
+        renderPriorities(filteredRows);
+      });
       document.getElementById("rawSearch").addEventListener("input", event => {
         rawSearchTerm = event.target.value.trim().toLowerCase();
         if (currentTab === "raw") renderRawData(filteredRows);
@@ -1878,9 +1902,13 @@
     }
 
     function renderValues(data) {
+      const normalized = isNormalizedMode();
       setTitle("valuesTitle", `Community Values (n=${data.length})`);
+      document.getElementById("valuesSubtitle").textContent = normalized
+        ? "Relative score: points above/below each respondent’s values-battery average"
+        : "Raw average on the original 1–5 scale";
       const labels = valuesItems.map(item => item[1]);
-      const filteredValues = valuesItems.map(([col]) => avg(data, row => scoreValue(row.raw[col], likertMap)));
+      const filteredValues = valuesItems.map(([col]) => batteryAverage(data, valuesItems, col, value => scoreValue(value, likertMap), normalized));
       const datasets = [{
         label: hasActiveFilters() ? "Filtered segment" : "All respondents",
         data: filteredValues,
@@ -1892,13 +1920,14 @@
       if (hasActiveFilters()) {
         datasets.push({
           label: "All respondents",
-          data: valuesItems.map(([col]) => avg(rows, row => scoreValue(row.raw[col], likertMap))),
+          data: valuesItems.map(([col]) => batteryAverage(rows, valuesItems, col, value => scoreValue(value, likertMap), normalized)),
           borderColor: "#c9a84c",
           backgroundColor: "rgba(201, 168, 76, .12)",
           pointBackgroundColor: "#c9a84c",
           borderWidth: 2
         });
       }
+      const scale = normalized ? relativeScale(datasets.flatMap(dataset => dataset.data)) : { min: 0, max: 5, stepSize: 1 };
       createChart("valuesChart", {
         type: "radar",
         data: { labels, datasets },
@@ -1907,9 +1936,9 @@
           maintainAspectRatio: false,
           scales: {
             r: {
-              min: 0,
-              max: 5,
-              ticks: { stepSize: 1, backdropColor: "transparent" },
+              min: scale.min,
+              max: scale.max,
+              ticks: { stepSize: scale.stepSize, backdropColor: "transparent", callback: value => normalized ? signedNumber(value) : value },
               grid: { color: "#f0f0f0" },
               angleLines: { color: "#f0f0f0" },
               pointLabels: { color: "#26344c", font: { size: 11, weight: "700" } }
@@ -1917,7 +1946,13 @@
           },
           plugins: {
             legend: { position: "bottom" },
-            tooltip: { callbacks: { label: ctx => `${ctx.dataset.label}: ${formatAvg(ctx.raw)}` } }
+            tooltip: {
+              callbacks: {
+                label: ctx => normalized
+                  ? `${ctx.dataset.label}: ${signedNumber(ctx.raw)} pts vs respondent baseline`
+                  : `${ctx.dataset.label}: ${formatAvg(ctx.raw)}`
+              }
+            }
           }
         }
       });
@@ -1925,13 +1960,20 @@
 
     function renderPriorities(data) {
       const compare = document.getElementById("compareToggle").checked;
+      const normalized = isNormalizedMode();
       setTitle("prioritiesTitle", `Strategic Priorities (n=${data.length})`);
+      document.getElementById("prioritiesSubtitle").textContent = normalized
+        ? "Ranked by relative score after within-respondent centering"
+        : "Ranked by average importance score";
       if (compare) {
         renderPriorityCompare(data);
       } else {
         document.getElementById("priorityFlags").classList.remove("visible");
         const ranked = priorityItems.map(([col, label]) => {
-          const values = data.map(row => numberValue(row.raw[col])).filter(v => v !== null);
+          const values = data.map(row => normalized
+            ? normalizedBatteryScore(row, priorityItems, col, numberValue)
+            : numberValue(row.raw[col])
+          ).filter(v => v !== null);
           return { label, avg: mean(values), count: values.length };
         }).sort((a, b) => (b.avg ?? 0) - (a.avg ?? 0));
         setChartHeight("prioritiesChart", dynamicBarHeight(ranked.length));
@@ -1940,20 +1982,23 @@
           data: {
             labels: ranked.map(item => item.label),
             datasets: [{
-              label: "Average importance",
+              label: normalized ? "Relative priority" : "Average importance",
               data: ranked.map(item => item.avg),
-              backgroundColor: ranked.map(item => priorityColor(item.avg)),
-              borderColor: ranked.map(item => darken(priorityColor(item.avg))),
+              backgroundColor: ranked.map(item => normalized ? relativeColor(item.avg) : priorityColor(item.avg)),
+              borderColor: ranked.map(item => darken(normalized ? relativeColor(item.avg) : priorityColor(item.avg))),
               borderWidth: 1,
               counts: ranked.map(item => item.count)
             }]
           },
-          options: horizontalScoreOptions("Average importance", false)
+          options: normalized
+            ? horizontalRelativeOptions("Points vs respondent average", false, relativeScale(ranked.map(item => item.avg)))
+            : horizontalScoreOptions("Average importance", false)
         });
       }
     }
 
     function renderPriorityCompare(data) {
+      const normalized = isNormalizedMode();
       const selected = Array.from(compareSegments).slice(0, 4);
       const baseRows = data;
       const segmentRows = selected.map(stage => ({
@@ -1961,17 +2006,25 @@
         rows: baseRows.filter(row => row.familyStage === stage)
       }));
       const labels = priorityItems.map(item => item[1]);
-      const segmentScores = segmentRows.map(segment => priorityItems.map(([col]) => avg(segment.rows, row => numberValue(row.raw[col]))));
+      const segmentScores = segmentRows.map(segment => priorityItems.map(([col]) => avg(segment.rows, row => normalized
+        ? normalizedBatteryScore(row, priorityItems, col, numberValue)
+        : numberValue(row.raw[col])
+      )));
       const flags = [];
       const flagText = [];
       labels.forEach((label, index) => {
         const values = segmentScores.map(scores => scores[index]).filter(value => value !== null && Number.isFinite(value));
-        if (values.length >= 2 && Math.max(...values) - Math.min(...values) > 0.5) {
+        const threshold = normalized ? 0.25 : 0.5;
+        if (values.length >= 2 && Math.max(...values) - Math.min(...values) > threshold) {
           flags.push(index);
-          flagText.push(`${label}: ${formatAvg(Math.min(...values))}–${formatAvg(Math.max(...values))}`);
+          flagText.push(`${label}: ${normalized ? signedNumber(Math.min(...values)) : formatAvg(Math.min(...values))}–${normalized ? signedNumber(Math.max(...values)) : formatAvg(Math.max(...values))}`);
         }
       });
       const colors = ["#1e3a5f", "#c9a84c", "#22863a", "#dc2626"];
+      const scale = relativeScale(segmentScores.flat());
+      const baseOptions = normalized
+        ? horizontalRelativeOptions("Points vs respondent average", false, scale)
+        : horizontalScoreOptions("Average importance", false);
       setChartHeight("prioritiesChart", dynamicBarHeight(labels.length));
       createChart("prioritiesChart", {
         type: "bar",
@@ -1986,9 +2039,9 @@
           }))
         },
         options: {
-          ...horizontalScoreOptions("Average importance", false),
+          ...baseOptions,
           plugins: {
-            ...horizontalScoreOptions("Average importance", false).plugins,
+            ...baseOptions.plugins,
             differenceFlag: { flags }
           }
         }
@@ -1996,7 +2049,7 @@
       const flagsNode = document.getElementById("priorityFlags");
       flagsNode.classList.toggle("visible", flagText.length > 0);
       flagsNode.innerHTML = flagText.length
-        ? `<strong>Flagged differences greater than 0.5 points:</strong> ${flagText.slice(0, 8).join("; ")}${flagText.length > 8 ? "." : ""}`
+        ? `<strong>Flagged differences greater than ${normalized ? "0.25 normalized" : "0.5 raw"} points:</strong> ${flagText.slice(0, 8).join("; ")}${flagText.length > 8 ? "." : ""}`
         : "";
     }
 
@@ -2388,6 +2441,40 @@
       };
     }
 
+    function horizontalRelativeOptions(axisLabel, showCounts, scale) {
+      return {
+        indexAxis: "y",
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          x: {
+            min: scale.min,
+            max: scale.max,
+            title: { display: true, text: axisLabel, color: "#6b7280", font: { size: 11, weight: "700" } },
+            ticks: { stepSize: scale.stepSize, callback: value => signedNumber(value) },
+            grid: { color: "#f0f0f0" }
+          },
+          y: {
+            ticks: { autoSkip: false, font: { size: 11, weight: "500" } },
+            grid: { display: false }
+          }
+        },
+        plugins: {
+          legend: { display: false },
+          valueLabel: { enabled: true },
+          tooltip: {
+            callbacks: {
+              label(ctx) {
+                const score = signedNumber(ctx.raw);
+                if (!showCounts || !ctx.dataset.counts) return `${ctx.dataset.label}: ${score} pts vs baseline`;
+                return `${ctx.dataset.label}: ${score} pts vs baseline (${ctx.dataset.counts[ctx.dataIndex]} responses)`;
+              }
+            }
+          }
+        }
+      };
+    }
+
     function counts(data, accessor, orderedLabels = null) {
       const map = new Map();
       data.forEach(row => {
@@ -2431,6 +2518,40 @@
       if (map[text] !== undefined) return map[text];
       const n = Number.parseFloat(text);
       return Number.isFinite(n) ? n : null;
+    }
+
+    function isNormalizedMode() {
+      const toggle = document.getElementById("normalizeToggle");
+      return Boolean(toggle && toggle.checked);
+    }
+
+    function batteryScores(row, items, parser) {
+      return items.map(([col]) => parser(row.raw[col])).filter(value => value !== null && Number.isFinite(value));
+    }
+
+    function normalizedBatteryScore(row, items, col, parser) {
+      const score = parser(row.raw[col]);
+      if (score === null || !Number.isFinite(score)) return null;
+      const scores = batteryScores(row, items, parser);
+      if (!scores.length) return null;
+      return score - mean(scores);
+    }
+
+    function batteryAverage(data, items, col, parser, normalized) {
+      return avg(data, row => normalized ? normalizedBatteryScore(row, items, col, parser) : parser(row.raw[col]));
+    }
+
+    function relativeScale(values) {
+      const nums = values.filter(value => value !== null && Number.isFinite(value));
+      const maxAbs = Math.max(0.35, ...nums.map(value => Math.abs(value)));
+      const bound = Math.ceil(maxAbs * 4) / 4;
+      return { min: -bound, max: bound, stepSize: bound <= 0.5 ? 0.25 : 0.5 };
+    }
+
+    function signedNumber(value) {
+      if (value === null || value === undefined || !Number.isFinite(value)) return "—";
+      const rounded = Number(value).toFixed(2);
+      return value > 0 ? `+${rounded}` : rounded;
     }
 
     function avg(data, accessor) {
@@ -2486,6 +2607,13 @@
       if (score < 3) return "#dc2626";
       if (score <= 3.5) return "#f59e0b";
       return "#22863a";
+    }
+
+    function relativeColor(score) {
+      if (score === null || !Number.isFinite(score)) return "#9ca3af";
+      if (score > 0.08) return "#22863a";
+      if (score < -0.08) return "#dc2626";
+      return "#c9a84c";
     }
 
     function navyPalette(index) {
