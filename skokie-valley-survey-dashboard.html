@@ -79,6 +79,14 @@
       white-space: nowrap;
     }
 
+    .chip.subtle {
+      max-width: 260px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      background: rgba(255,255,255,.08);
+      font-size: 12px;
+    }
+
     .btn {
       border: 1px solid var(--line);
       background: white;
@@ -726,6 +734,10 @@
         justify-content: flex-start;
       }
 
+      .chip.subtle {
+        max-width: min(92vw, 360px);
+      }
+
       main {
         padding: 16px 12px 24px;
       }
@@ -761,6 +773,9 @@
     <h1 class="title">Skokie Valley Strategic Planning — Survey Explorer</h1>
     <div class="top-actions">
       <span class="chip" id="respondentChip">Showing 0 of 0 respondents</span>
+      <span class="chip subtle" id="dataSourceChip" title="Data source">Data: loading default CSV</span>
+      <button class="btn" id="replaceCsvButton" type="button">Replace CSV</button>
+      <input id="csvReplace" class="hidden" type="file" accept=".csv,text/csv">
       <button class="btn primary" id="resetFilters" type="button">Reset all filters</button>
     </div>
   </header>
@@ -823,8 +838,8 @@
 
       <div class="load-error" id="loadError">
         <h2>CSV could not be loaded automatically</h2>
-        <p>Keep this HTML file in the same folder as <strong>Skokie Valley Community Stakeholder Survey (Responses) - Form Responses 1.csv</strong>.</p>
-        <p>Some browsers block local CSV loading from a dragged-in HTML file. Select the CSV below to continue without a server.</p>
+        <p>This dashboard looks for <strong>Skokie Valley Community Stakeholder Survey (Responses) - Form Responses 1.csv</strong> in the same directory as the HTML file. On GitHub Pages, upload both files to the same folder and it will load by default.</p>
+        <p>You can also add <strong>?csv=URL_TO_CSV</strong> to the dashboard URL, or select a CSV below to replace the data locally.</p>
         <input id="csvFallback" type="file" accept=".csv,text/csv">
       </div>
 
@@ -1219,6 +1234,8 @@
     let feedbackSearchTerm = "";
     let feedbackQuestionFilter = "All";
     let feedbackThemeFilter = "All";
+    let controlsReady = false;
+    let globalControlsBound = false;
 
     Chart.defaults.font.family = "Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif";
     Chart.defaults.color = "#3c465a";
@@ -1291,45 +1308,81 @@
       headers = parsed.data[0] || [];
       const body = parsed.data.slice(1).filter(row => row.some(cell => String(cell || "").trim() !== ""));
       rows = body.map((row, index) => deriveRow(row, index));
+      afterDataLoaded("Uploaded CSV");
+    }
+
+    function afterDataLoaded(sourceLabel) {
       document.getElementById("loadError").style.display = "none";
-      initializeControls();
+      setDataSource(sourceLabel);
+      if (!controlsReady) {
+        initializeControls();
+        controlsReady = true;
+      }
       applyFilters();
     }
 
     function loadCSV() {
-      Papa.parse(CSV_FILE, {
+      const csvUrl = defaultCsvUrl();
+      setDataSource(`Loading ${sourceName(csvUrl)}`);
+      Papa.parse(csvUrl, {
         download: true,
         skipEmptyLines: "greedy",
         complete(results) {
           headers = results.data[0] || [];
           const body = results.data.slice(1).filter(row => row.some(cell => String(cell || "").trim() !== ""));
           rows = body.map((row, index) => deriveRow(row, index));
-          initializeControls();
-          applyFilters();
+          afterDataLoaded(sourceName(csvUrl));
         },
         error(error) {
-          showLoadError(error);
+          showLoadError(error, csvUrl);
         }
       });
     }
 
-    function showLoadError(error) {
+    function defaultCsvUrl() {
+      const params = new URLSearchParams(window.location.search);
+      const override = params.get("csv");
+      if (override) return new URL(override, window.location.href).href;
+      return new URL(CSV_FILE, window.location.href).href;
+    }
+
+    function sourceName(source) {
+      try {
+        const url = new URL(source, window.location.href);
+        return decodeURIComponent(url.pathname.split("/").pop() || CSV_FILE);
+      } catch (error) {
+        return source || CSV_FILE;
+      }
+    }
+
+    function setDataSource(label) {
+      const chip = document.getElementById("dataSourceChip");
+      chip.textContent = `Data: ${label}`;
+      chip.title = `Data source: ${label}`;
+    }
+
+    function loadCSVFile(file, label = file.name) {
+      if (!file) return;
+      Papa.parse(file, {
+        skipEmptyLines: "greedy",
+        complete(results) {
+          headers = results.data[0] || [];
+          const body = results.data.slice(1).filter(row => row.some(cell => String(cell || "").trim() !== ""));
+          rows = body.map((row, index) => deriveRow(row, index));
+          afterDataLoaded(label);
+        },
+        error(err) {
+          document.getElementById("loadError").style.display = "block";
+          document.getElementById("loadError").querySelector("p").textContent = "The selected CSV could not be parsed.";
+          console.warn(err);
+        }
+      });
+    }
+
+    function showLoadError(error, attemptedUrl) {
       console.warn("CSV load error", error);
+      setDataSource(`could not load ${sourceName(attemptedUrl)}`);
       document.getElementById("loadError").style.display = "block";
-      document.getElementById("csvFallback").addEventListener("change", event => {
-        const file = event.target.files && event.target.files[0];
-        if (!file) return;
-        Papa.parse(file, {
-          complete(results) {
-            const csv = Papa.unparse(results.data);
-            parseCSVText(csv);
-          },
-          error(err) {
-            document.getElementById("loadError").querySelector("p").textContent = "The selected CSV could not be parsed.";
-            console.warn(err);
-          }
-        });
-      }, { once: true });
     }
 
     function deriveRow(row, index) {
@@ -1457,7 +1510,6 @@
       buildMappedCheckboxGroup("secondaryShul", shulOptions);
       buildCompareOptions();
       buildFeedbackControls();
-      bindGlobalControls();
     }
 
     function buildCheckboxGroup(key, options, type = "checkbox", segmented = false) {
@@ -1552,7 +1604,20 @@
     }
 
     function bindGlobalControls() {
+      if (globalControlsBound) return;
+      globalControlsBound = true;
       document.getElementById("resetFilters").addEventListener("click", resetFilters);
+      document.getElementById("replaceCsvButton").addEventListener("click", () => {
+        document.getElementById("csvReplace").click();
+      });
+      document.getElementById("csvReplace").addEventListener("change", event => {
+        loadCSVFile(event.target.files && event.target.files[0]);
+        event.target.value = "";
+      });
+      document.getElementById("csvFallback").addEventListener("change", event => {
+        loadCSVFile(event.target.files && event.target.files[0]);
+        event.target.value = "";
+      });
       document.getElementById("filterToggle").addEventListener("click", () => {
         const panel = document.getElementById("filtersPanel");
         panel.classList.toggle("open");
@@ -1606,7 +1671,8 @@
         secondaryShul: new Set()
       });
       document.querySelectorAll("#filtersPanel input[type='checkbox']").forEach(input => input.checked = false);
-      document.querySelector('input[name="gender"][value="All"]').checked = true;
+      const genderAll = document.querySelector('input[name="gender"][value="All"]');
+      if (genderAll) genderAll.checked = true;
       applyFilters();
     }
 
@@ -2409,6 +2475,7 @@
       return String(value).replace(/"/g, '\\"');
     }
 
+    bindGlobalControls();
     loadCSV();
   </script>
 </body>
