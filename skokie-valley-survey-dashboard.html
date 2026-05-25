@@ -12,25 +12,27 @@
       --navy-2: #274d7d;
       --gold: #c9a84c;
       --gold-soft: #f2e7c2;
-      --bg: #f5f7fa;
+      --bg: #f4f5f7;
       --panel: #ffffff;
       --ink: #172033;
-      --muted: #697386;
-      --line: #dfe5ee;
-      --red: #c04b49;
-      --yellow: #d7a83e;
-      --green: #3f8f68;
-      --shadow: 0 12px 28px rgba(20, 37, 60, .09);
+      --muted: #6b7280;
+      --muted-soft: #9ca3af;
+      --line: #e5e7eb;
+      --grid: #f0f0f0;
+      --red: #dc2626;
+      --yellow: #f59e0b;
+      --green: #22863a;
     }
 
     * { box-sizing: border-box; }
     html { scroll-behavior: smooth; }
     body {
       margin: 0;
-      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
       color: var(--ink);
       background: var(--bg);
       letter-spacing: 0;
+      font-size: 13px;
     }
 
     button, input, select {
@@ -40,22 +42,23 @@
     .topbar {
       position: sticky;
       top: 0;
-      z-index: 20;
+      z-index: 100;
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 16px;
-      padding: 14px 22px;
+      min-height: 60px;
+      padding: 10px 18px;
       background: var(--navy);
       color: white;
-      box-shadow: var(--shadow);
+      box-shadow: 0 2px 8px rgba(0,0,0,.3);
     }
 
     .title {
       margin: 0;
-      font-size: clamp(17px, 2vw, 24px);
+      font-size: 16px;
       line-height: 1.2;
-      font-weight: 760;
+      font-weight: 700;
     }
 
     .top-actions {
@@ -69,13 +72,14 @@
     .chip {
       display: inline-flex;
       align-items: center;
-      min-height: 34px;
-      padding: 7px 12px;
-      border: 1px solid rgba(255,255,255,.28);
+      min-height: 30px;
+      padding: 5px 14px;
+      border: 1px solid rgba(255,255,255,.2);
       background: rgba(255,255,255,.12);
       color: white;
-      border-radius: 999px;
+      border-radius: 20px;
       font-weight: 700;
+      font-size: 12px;
       white-space: nowrap;
     }
 
@@ -83,8 +87,11 @@
       max-width: 260px;
       overflow: hidden;
       text-overflow: ellipsis;
-      background: rgba(255,255,255,.08);
+      background: rgba(255,255,255,.12);
+      border-color: rgba(255,255,255,.2);
+      color: rgba(255,255,255,.86);
       font-size: 12px;
+      font-weight: 500;
     }
 
     .btn {
@@ -92,16 +99,16 @@
       background: white;
       color: var(--navy);
       border-radius: 6px;
-      min-height: 36px;
-      padding: 8px 12px;
-      font-weight: 750;
+      min-height: 32px;
+      padding: 6px 10px;
+      font-size: 13px;
+      font-weight: 700;
       cursor: pointer;
-      transition: transform .16s ease, box-shadow .16s ease, background .16s ease, border-color .16s ease;
+      transition: background .16s ease, border-color .16s ease;
     }
 
     .btn:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 8px 16px rgba(20, 37, 60, .12);
+      background: #f9fafb;
     }
 
     .btn.primary {
@@ -110,30 +117,41 @@
       color: #1d2430;
     }
 
+    .btn.primary:hover {
+      background: #d6b75b;
+      border-color: #d6b75b;
+    }
+
     .btn.small {
       min-height: 30px;
-      padding: 5px 9px;
-      border-color: rgba(255,255,255,.34);
+      padding: 5px 12px;
+      border-color: rgba(255,255,255,.2);
       background: rgba(255,255,255,.12);
-      color: white;
+      color: rgba(255,255,255,.88);
       font-size: 12px;
+      font-weight: 500;
+    }
+
+    .btn.small:hover {
+      background: rgba(255,255,255,.18);
+      border-color: rgba(255,255,255,.28);
     }
 
     .layout {
       display: grid;
-      grid-template-columns: 320px minmax(0, 1fr);
-      min-height: calc(100vh - 64px);
+      grid-template-columns: 280px minmax(0, 1fr);
+      min-height: calc(100vh - 60px);
     }
 
     aside {
       position: sticky;
-      top: 64px;
+      top: 60px;
       align-self: start;
-      max-height: calc(100vh - 64px);
+      max-height: calc(100vh - 60px);
       overflow: auto;
-      padding: 18px 16px 26px;
+      padding: 16px 14px 20px;
       border-right: 1px solid var(--line);
-      background: #fbfcfe;
+      background: #fbfbfc;
     }
 
     .mobile-filter-bar {
@@ -148,12 +166,13 @@
       align-items: center;
       justify-content: space-between;
       gap: 10px;
-      margin-bottom: 12px;
+      margin-bottom: 8px;
     }
 
     .filter-heading h2 {
       margin: 0;
-      font-size: 17px;
+      font-size: 15px;
+      font-weight: 700;
       color: var(--navy);
     }
 
@@ -164,25 +183,27 @@
     }
 
     .filter-group {
-      padding: 14px 0;
+      padding: 12px 0 18px;
       border-top: 1px solid var(--line);
     }
 
     .filter-group h3 {
-      margin: 0 0 10px;
-      font-size: 13px;
+      margin: 0 0 8px;
+      font-size: 11px;
       color: var(--navy);
       text-transform: uppercase;
-      letter-spacing: .02em;
+      letter-spacing: .08em;
+      font-weight: 700;
     }
 
     .option {
       display: flex;
       align-items: flex-start;
       gap: 8px;
-      margin: 8px 0;
+      margin: 6px 0;
       color: #26344c;
       font-size: 13px;
+      font-weight: 400;
       line-height: 1.25;
       cursor: pointer;
     }
@@ -215,22 +236,22 @@
     .segmented {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 7px;
+      gap: 6px;
     }
 
     .segmented label {
-      min-height: 34px;
+      min-height: 30px;
       display: flex;
       align-items: center;
       justify-content: center;
       text-align: center;
-      padding: 6px 8px;
+      padding: 5px 8px;
       border: 1px solid var(--line);
       background: white;
       border-radius: 6px;
       cursor: pointer;
       font-size: 12px;
-      font-weight: 750;
+      font-weight: 500;
       color: var(--navy);
       transition: background .16s ease, color .16s ease, border-color .16s ease;
     }
@@ -249,24 +270,24 @@
 
     main {
       min-width: 0;
-      padding: 22px;
+      padding: 16px;
     }
 
     .warning {
       display: none;
-      margin-bottom: 16px;
-      padding: 12px 14px;
+      margin-bottom: 12px;
+      padding: 10px 12px;
       border: 1px solid #e2bf58;
       border-left: 5px solid var(--gold);
       background: #fff8df;
       color: #604400;
       border-radius: 6px;
-      font-weight: 750;
+      font-weight: 700;
     }
 
     .load-error {
       display: none;
-      margin: 18px 0;
+      margin: 16px 0;
       padding: 16px;
       border: 1px solid #e4b2b0;
       border-left: 5px solid var(--red);
@@ -283,8 +304,13 @@
       display: flex;
       gap: 8px;
       flex-wrap: wrap;
-      margin-bottom: 18px;
+      position: sticky;
+      top: 60px;
+      z-index: 99;
+      margin: -16px -16px 16px;
+      padding: 0 16px;
       border-bottom: 1px solid var(--line);
+      background: var(--bg);
     }
 
     .tab-btn {
@@ -292,14 +318,16 @@
       border-bottom: 3px solid transparent;
       background: transparent;
       color: var(--muted);
-      padding: 12px 12px 10px;
-      font-weight: 800;
+      padding: 16px 18px;
+      font-size: 14px;
+      font-weight: 500;
       cursor: pointer;
       transition: color .16s ease, border-color .16s ease;
     }
 
     .tab-btn.active {
       color: var(--navy);
+      font-weight: 700;
       border-color: var(--gold);
     }
 
@@ -317,7 +345,7 @@
     .metrics {
       display: grid;
       grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 14px;
+      gap: 16px;
       margin-bottom: 16px;
     }
 
@@ -325,27 +353,26 @@
       background: var(--panel);
       border: 1px solid var(--line);
       border-radius: 8px;
-      box-shadow: 0 8px 22px rgba(20, 37, 60, .05);
     }
 
     .stat-card {
       padding: 16px;
-      min-height: 105px;
+      min-height: 92px;
     }
 
     .stat-label {
-      margin: 0 0 10px;
+      margin: 0 0 8px;
       color: var(--muted);
       font-size: 12px;
-      font-weight: 850;
+      font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: .02em;
+      letter-spacing: .08em;
     }
 
     .stat-value {
-      font-size: 30px;
+      font-size: 26px;
       line-height: 1;
-      font-weight: 850;
+      font-weight: 700;
       color: var(--navy);
     }
 
@@ -367,7 +394,7 @@
     }
 
     .chart-card {
-      padding: 15px;
+      padding: 20px;
       min-width: 0;
     }
 
@@ -376,14 +403,15 @@
       justify-content: space-between;
       gap: 12px;
       align-items: flex-start;
-      margin-bottom: 10px;
+      margin-bottom: 8px;
     }
 
     .chart-title {
       margin: 0;
       color: var(--navy);
-      font-size: 16px;
+      font-size: 15px;
       line-height: 1.25;
+      font-weight: 700;
     }
 
     .chart-subtitle {
@@ -395,12 +423,16 @@
     .chart-wrap {
       position: relative;
       width: 100%;
-      height: 280px;
+      height: 240px;
     }
 
-    .chart-wrap.short { height: 230px; }
-    .chart-wrap.tall { height: 520px; }
-    .chart-wrap.radar { height: 430px; }
+    .chart-wrap.short { height: 180px; }
+    .chart-wrap.tall { height: 380px; }
+    .chart-wrap.radar { height: 420px; }
+    .chart-wrap.donut {
+      height: 260px;
+      max-height: 260px;
+    }
 
     .switch-row {
       display: flex;
@@ -474,11 +506,11 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 12px;
+      gap: 8px;
       flex-wrap: wrap;
       margin-bottom: 12px;
       padding: 12px;
-      background: #f8fafc;
+      background: #ffffff;
       border: 1px solid var(--line);
       border-radius: 8px;
     }
@@ -487,7 +519,7 @@
     .toolbar-right {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
       flex-wrap: wrap;
     }
 
@@ -497,17 +529,17 @@
       gap: 7px;
       color: var(--muted);
       font-size: 13px;
-      font-weight: 750;
+      font-weight: 400;
     }
 
     .field input,
     .field select {
-      min-height: 34px;
+      min-height: 32px;
       border: 1px solid var(--line);
       border-radius: 6px;
       background: white;
       color: var(--ink);
-      padding: 7px 9px;
+      padding: 6px 8px;
       max-width: 280px;
     }
 
@@ -555,7 +587,7 @@
       background: #edf2f7;
       color: var(--navy);
       text-align: center;
-      font-weight: 850;
+      font-weight: 700;
     }
 
     .sheet-table .row-num {
@@ -593,23 +625,23 @@
       background: white;
       border: 1px solid var(--line);
       border-radius: 8px;
-      box-shadow: 0 8px 22px rgba(20, 37, 60, .05);
     }
 
     .mini-stat strong {
       display: block;
       color: var(--navy);
-      font-size: 24px;
+      font-size: 22px;
       line-height: 1;
       margin-bottom: 6px;
+      font-weight: 700;
     }
 
     .mini-stat span {
       color: var(--muted);
       font-size: 12px;
-      font-weight: 750;
+      font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: .02em;
+      letter-spacing: .08em;
     }
 
     .theme-strip {
@@ -626,7 +658,7 @@
       border-radius: 999px;
       padding: 7px 10px;
       font-size: 12px;
-      font-weight: 800;
+      font-weight: 700;
     }
 
     .feedback-grid {
@@ -637,12 +669,11 @@
 
     .feedback-card {
       position: relative;
-      padding: 14px;
+      padding: 12px;
       border: 1px solid var(--line);
       border-top: 4px solid var(--gold);
       border-radius: 8px;
       background: white;
-      box-shadow: 0 8px 22px rgba(20, 37, 60, .05);
     }
 
     .feedback-card.priority-high { border-top-color: var(--red); }
@@ -657,24 +688,24 @@
       margin-bottom: 8px;
       color: var(--muted);
       font-size: 11px;
-      font-weight: 850;
+      font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: .02em;
+      letter-spacing: .08em;
     }
 
     .feedback-question {
       margin: 0 0 9px;
       color: var(--navy);
       font-size: 13px;
-      font-weight: 850;
+      font-weight: 700;
       line-height: 1.3;
     }
 
     .feedback-text {
       margin: 0 0 12px;
       color: #273247;
-      font-size: 14px;
-      line-height: 1.45;
+      font-size: 13px;
+      line-height: 1.42;
     }
 
     .feedback-tags {
@@ -692,12 +723,12 @@
       background: #eef3f8;
       color: var(--navy);
       font-size: 11px;
-      font-weight: 800;
+      font-weight: 700;
     }
 
     .hidden { display: none !important; }
 
-    @media (max-width: 1000px) {
+    @media (max-width: 900px) {
       .layout {
         grid-template-columns: 1fr;
       }
@@ -736,7 +767,7 @@
       .topbar {
         align-items: flex-start;
         flex-direction: column;
-        padding: 13px 14px;
+        padding: 12px 14px;
       }
 
       .top-actions {
@@ -765,11 +796,13 @@
         max-width: 210px;
       }
 
-      .chart-wrap.tall { height: 590px; }
       .chart-wrap.radar { height: 360px; }
       .tabs {
         overflow-x: auto;
         flex-wrap: nowrap;
+        top: 0;
+        margin: -16px -12px 16px;
+        padding: 0 12px;
       }
       .tab-btn {
         flex: 0 0 auto;
@@ -922,12 +955,12 @@
           <div class="grid-2">
             <div class="chart-card" id="youthCard">
               <h2 class="chart-title" id="youthTitle">Youth Programming Satisfaction</h2>
-              <div class="chart-wrap"><canvas id="youthChart"></canvas></div>
+              <div class="chart-wrap donut"><canvas id="youthChart"></canvas></div>
               <div class="empty-state" id="youthEmpty">No youth programming ratings in this filtered set.</div>
             </div>
             <div class="chart-card">
               <h2 class="chart-title" id="womenTitle">Women’s Participation Preference</h2>
-              <div class="chart-wrap"><canvas id="womenChart"></canvas></div>
+              <div class="chart-wrap donut"><canvas id="womenChart"></canvas></div>
             </div>
           </div>
         </div>
@@ -1178,7 +1211,7 @@
     const feedbackThemes = [
       { label: "Youth & family", color: "#1e3a5f", terms: ["youth", "teen", "tween", "child", "children", "kids", "family", "families", "parent", "parents", "babysit", "childcare", "teiku", "tot shabbat"] },
       { label: "Davening & ritual", color: "#c9a84c", terms: ["daven", "minyan", "shabbat", "yom tov", "ritual", "tefillah", "kiddush", "gabbai", "gabbaim", "fast", "faster", "mechitza"] },
-      { label: "Learning & Torah", color: "#3f8f68", terms: ["torah", "learning", "shiur", "shiurim", "education", "class", "classes", "text", "intellectual"] },
+      { label: "Learning & Torah", color: "#22863a", terms: ["torah", "learning", "shiur", "shiurim", "education", "class", "classes", "text", "intellectual"] },
       { label: "Inclusion & belonging", color: "#7a5ea8", terms: ["welcome", "welcoming", "inclusive", "inclusion", "excluded", "overlooked", "uncomfortable", "cliquish", "connected", "belong", "single", "singles", "convert", "ger", "baal", "lgbtq"] },
       { label: "Communication & planning", color: "#4f83b4", terms: ["communication", "communicate", "planning", "transparency", "calendar", "email", "announce", "awareness", "clear", "organized"] },
       { label: "Volunteering & leadership", color: "#8e7330", terms: ["volunteer", "volunteering", "committee", "leadership", "board", "ask", "role", "roles", "lay"] },
@@ -1246,11 +1279,14 @@
     let controlsReady = false;
     let globalControlsBound = false;
 
-    Chart.defaults.font.family = "Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif";
+    Chart.defaults.font.family = "-apple-system, BlinkMacSystemFont, Segoe UI, system-ui, sans-serif";
+    Chart.defaults.font.size = 11;
     Chart.defaults.color = "#3c465a";
     Chart.defaults.plugins.tooltip.backgroundColor = "#172033";
     Chart.defaults.plugins.tooltip.padding = 10;
     Chart.defaults.plugins.tooltip.cornerRadius = 6;
+    Chart.defaults.elements.bar.borderRadius = 4;
+    Chart.defaults.elements.bar.borderSkipped = false;
 
     const differenceFlagPlugin = {
       id: "differenceFlag",
@@ -1264,7 +1300,7 @@
         ctx.fillStyle = "#c9a84c";
         ctx.strokeStyle = "#1e3a5f";
         ctx.lineWidth = 1;
-        ctx.font = "bold 11px Inter, sans-serif";
+        ctx.font = "700 11px -apple-system, BlinkMacSystemFont, Segoe UI, system-ui, sans-serif";
         pluginOptions.flags.forEach(index => {
           const y = yScale.getPixelForValue(index);
           const x = Math.min(chartArea.right - 14, xScale.getPixelForValue(5) - 8);
@@ -1293,7 +1329,7 @@
         const meta = chart.getDatasetMeta(0);
         ctx.save();
         ctx.fillStyle = "#172033";
-        ctx.font = "700 11px Inter, sans-serif";
+        ctx.font = "700 11px -apple-system, BlinkMacSystemFont, Segoe UI, system-ui, sans-serif";
         ctx.textBaseline = "middle";
         meta.data.forEach((bar, index) => {
           const value = dataset.data[index];
@@ -1827,7 +1863,7 @@
       document.getElementById("youthChart").classList.toggle("hidden", youthTotal === 0);
       document.getElementById("youthEmpty").style.display = youthTotal === 0 ? "flex" : "none";
       if (youthTotal > 0) {
-        renderDonut("youthChart", youthCounts, ["#3f8f68", "#8abf70", "#d7a83e", "#c04b49"]);
+        renderDonut("youthChart", youthCounts, ["#22863a", "#86b875", "#f59e0b", "#dc2626"]);
       } else {
         destroyChart("youthChart");
       }
@@ -1838,7 +1874,7 @@
         "Prefer less participation"
       ]);
       setTitle("womenTitle", `Women’s Participation Preference (n=${data.length}; answered=${sumCounts(womenCounts)})`);
-      renderDonut("womenChart", womenCounts, ["#1e3a5f", "#c9a84c", "#c04b49"]);
+      renderDonut("womenChart", womenCounts, ["#1e3a5f", "#c9a84c", "#dc2626"]);
     }
 
     function renderValues(data) {
@@ -1874,8 +1910,8 @@
               min: 0,
               max: 5,
               ticks: { stepSize: 1, backdropColor: "transparent" },
-              grid: { color: "rgba(105, 115, 134, .25)" },
-              angleLines: { color: "rgba(105, 115, 134, .25)" },
+              grid: { color: "#f0f0f0" },
+              angleLines: { color: "#f0f0f0" },
               pointLabels: { color: "#26344c", font: { size: 11, weight: "700" } }
             }
           },
@@ -1898,6 +1934,7 @@
           const values = data.map(row => numberValue(row.raw[col])).filter(v => v !== null);
           return { label, avg: mean(values), count: values.length };
         }).sort((a, b) => (b.avg ?? 0) - (a.avg ?? 0));
+        setChartHeight("prioritiesChart", dynamicBarHeight(ranked.length));
         createChart("prioritiesChart", {
           type: "bar",
           data: {
@@ -1934,7 +1971,8 @@
           flagText.push(`${label}: ${formatAvg(Math.min(...values))}–${formatAvg(Math.max(...values))}`);
         }
       });
-      const colors = ["#1e3a5f", "#c9a84c", "#3f8f68", "#c04b49"];
+      const colors = ["#1e3a5f", "#c9a84c", "#22863a", "#dc2626"];
+      setChartHeight("prioritiesChart", dynamicBarHeight(labels.length));
       createChart("prioritiesChart", {
         type: "bar",
         data: {
@@ -2135,6 +2173,7 @@
         const values = data.map(row => scoreValue(row.raw[col], scoreMap)).filter(v => v !== null);
         return { label, avg: mean(values), count: values.length };
       }).sort((a, b) => (b.avg ?? 0) - (a.avg ?? 0));
+      setChartHeight(canvasId, dynamicBarHeight(ranked.length));
       createChart(canvasId, {
         type: "bar",
         data: {
@@ -2155,7 +2194,7 @@
     function renderDistributionStack(canvasId, data, items, scoreMap, categories) {
       const labels = items.map(item => item[1]);
       const totals = items.map(([col]) => data.map(row => scoreValue(row.raw[col], scoreMap)).filter(v => v !== null).length);
-      const palette = ["#3f8f68", "#8abf70", "#d7a83e", "#dd8a58", "#c04b49"];
+      const palette = ["#22863a", "#86b875", "#f59e0b", "#f0b36a", "#dc2626"];
       const datasets = categories.map((category, index) => ({
         label: category,
         data: items.map(([col], itemIndex) => {
@@ -2170,6 +2209,7 @@
         borderWidth: 1
       }));
 
+      setChartHeight(canvasId, dynamicBarHeight(labels.length));
       createChart(canvasId, {
         type: "bar",
         data: { labels, datasets },
@@ -2178,8 +2218,8 @@
           responsive: true,
           maintainAspectRatio: false,
           scales: {
-            x: { stacked: true, min: 0, max: 100, ticks: { callback: value => `${value}%` }, grid: { color: "rgba(105,115,134,.16)" } },
-            y: { stacked: true, ticks: { autoSkip: false, font: { size: 11, weight: "650" } }, grid: { display: false } }
+            x: { stacked: true, min: 0, max: 100, ticks: { callback: value => `${value}%` }, grid: { color: "#f0f0f0" } },
+            y: { stacked: true, ticks: { autoSkip: false, font: { size: 11, weight: "500" } }, grid: { display: false } }
           },
           plugins: {
             legend: { position: "bottom" },
@@ -2215,8 +2255,8 @@
           responsive: true,
           maintainAspectRatio: false,
           scales: {
-            x: { beginAtZero: true, ticks: { precision: 0, autoSkip: false, maxRotation: 35, minRotation: 0 }, grid: { display: options.indexAxis === "y", color: "rgba(105,115,134,.13)" } },
-            y: { beginAtZero: true, ticks: { precision: 0, autoSkip: false, font: { size: 11, weight: "650" } }, grid: { color: "rgba(105,115,134,.13)" } }
+            x: { beginAtZero: true, ticks: { precision: 0, autoSkip: false, maxRotation: 35, minRotation: 0 }, grid: { display: options.indexAxis === "y", color: "#f0f0f0" } },
+            y: { beginAtZero: true, ticks: { precision: 0, autoSkip: false, font: { size: 11, weight: "500" } }, grid: { color: "#f0f0f0" } }
           },
           plugins: {
             legend: { display: false },
@@ -2228,6 +2268,7 @@
 
     function renderRankedCountBar(canvasId, countRows) {
       const sorted = [...countRows].sort((a, b) => b.count - a.count);
+      setChartHeight(canvasId, dynamicBarHeight(sorted.length));
       createChart(canvasId, {
         type: "bar",
         data: {
@@ -2245,8 +2286,8 @@
           responsive: true,
           maintainAspectRatio: false,
           scales: {
-            x: { beginAtZero: true, ticks: { precision: 0 }, grid: { color: "rgba(105,115,134,.14)" } },
-            y: { ticks: { autoSkip: false, font: { size: 11, weight: "650" } }, grid: { display: false } }
+            x: { beginAtZero: true, ticks: { precision: 0 }, grid: { color: "#f0f0f0" } },
+            y: { ticks: { autoSkip: false, font: { size: 11, weight: "500" } }, grid: { display: false } }
           },
           plugins: {
             legend: { display: false },
@@ -2271,7 +2312,7 @@
         },
         options: {
           responsive: true,
-          maintainAspectRatio: false,
+          maintainAspectRatio: true,
           cutout: "58%",
           plugins: {
             legend: { position: "bottom" },
@@ -2295,6 +2336,17 @@
       charts[canvasId] = new Chart(ctx, config);
     }
 
+    function dynamicBarHeight(labelCount) {
+      return Math.max(300, Math.max(1, labelCount) * 38);
+    }
+
+    function setChartHeight(canvasId, height) {
+      const canvas = document.getElementById(canvasId);
+      if (canvas && canvas.parentElement) {
+        canvas.parentElement.style.height = `${height}px`;
+      }
+    }
+
     function destroyChart(canvasId) {
       if (charts[canvasId]) {
         charts[canvasId].destroy();
@@ -2311,21 +2363,21 @@
           x: {
             min: 0,
             max: 5,
-            title: { display: true, text: axisLabel, color: "#697386", font: { weight: "750" } },
+            title: { display: true, text: axisLabel, color: "#6b7280", font: { size: 11, weight: "700" } },
             ticks: { stepSize: 1 },
-            grid: { color: "rgba(105,115,134,.16)" }
+            grid: { color: "#f0f0f0" }
           },
           y: {
-            ticks: { autoSkip: false, font: { size: 11, weight: "650" } },
+            ticks: { autoSkip: false, font: { size: 11, weight: "500" } },
             grid: { display: false }
           }
         },
-          plugins: {
-            legend: { display: false },
-            valueLabel: { enabled: true },
-            tooltip: {
-              callbacks: {
-                label(ctx) {
+        plugins: {
+          legend: { display: false },
+          valueLabel: { enabled: true },
+          tooltip: {
+            callbacks: {
+              label(ctx) {
                 const score = formatAvg(ctx.raw);
                 if (!showCounts || !ctx.dataset.counts) return `${ctx.dataset.label}: ${score}`;
                 return `${ctx.dataset.label}: ${score} (${ctx.dataset.counts[ctx.dataIndex]} responses)`;
@@ -2418,11 +2470,11 @@
     }
 
     function scoreColor(score) {
-      if (score === null) return "#d8dee8";
+      if (score === null) return "#9ca3af";
       const t = Math.max(0, Math.min(1, (score - 1) / 4));
-      const red = [192, 75, 73];
-      const yellow = [215, 168, 62];
-      const green = [63, 143, 104];
+      const red = [220, 38, 38];
+      const yellow = [245, 158, 11];
+      const green = [34, 134, 58];
       const start = t < .5 ? red : yellow;
       const end = t < .5 ? yellow : green;
       const local = t < .5 ? t * 2 : (t - .5) * 2;
@@ -2430,10 +2482,10 @@
     }
 
     function priorityColor(score) {
-      if (score === null) return "#d8dee8";
-      if (score < 3) return "#c04b49";
-      if (score <= 3.5) return "#d7a83e";
-      return "#3f8f68";
+      if (score === null) return "#9ca3af";
+      if (score < 3) return "#dc2626";
+      if (score <= 3.5) return "#f59e0b";
+      return "#22863a";
     }
 
     function navyPalette(index) {
@@ -2445,7 +2497,7 @@
     }
 
     function scorePalette(index) {
-      return ["#c04b49", "#dd8a58", "#d7a83e", "#8abf70", "#3f8f68"][index % 5];
+      return ["#dc2626", "#f0b36a", "#f59e0b", "#86b875", "#22863a"][index % 5];
     }
 
     function darken(hex) {
