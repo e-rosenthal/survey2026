@@ -1134,7 +1134,7 @@
         <div class="toolbar">
           <div class="toolbar-left">
             <label class="field">Search sheet <input id="rawSearch" type="search" placeholder="Search any cell"></label>
-            <label class="field"><input id="rawRespectFilters" type="checkbox"> Respect filters</label>
+            <label class="field"><input id="rawShowAllRows" type="checkbox"> Show all rows (ignore filters)</label>
             <label class="field"><input id="rawExpandLong" type="checkbox" checked> Wrap long responses</label>
           </div>
           <div class="toolbar-right">
@@ -1770,7 +1770,7 @@
         rawSearchTerm = event.target.value.trim().toLowerCase();
         if (currentTab === "raw") renderRawData(filteredRows);
       });
-      document.getElementById("rawRespectFilters").addEventListener("change", () => {
+      document.getElementById("rawShowAllRows").addEventListener("change", () => {
         if (currentTab === "raw") renderRawData(filteredRows);
       });
       document.getElementById("rawExpandLong").addEventListener("change", () => {
@@ -2191,13 +2191,13 @@
     }
 
     function renderRawData(data) {
-      const respectFilters = document.getElementById("rawRespectFilters").checked;
+      const showAllRows = document.getElementById("rawShowAllRows").checked;
       const wrapLong = document.getElementById("rawExpandLong").checked;
-      const sourceRows = respectFilters ? data : rows;
+      const sourceRows = showAllRows ? rows : data;
       const matchingRows = rawSearchTerm
         ? sourceRows.filter(row => row.raw.some(cell => normalize(cell).toLowerCase().includes(rawSearchTerm)))
         : sourceRows;
-      document.getElementById("rawCount").textContent = `${matchingRows.length} rows${respectFilters ? " after filters" : ""}`;
+      document.getElementById("rawCount").textContent = `${matchingRows.length} rows${showAllRows ? " total" : " after filters"}`;
 
       const columnCount = headers.length || (rows.length ? Math.max(...rows.map(row => row.raw.length)) : 0);
       const letters = Array.from({ length: columnCount }, (_, index) => columnLetter(index + 1));
@@ -2435,14 +2435,16 @@
     }
 
     function renderDonut(canvasId, countObject, colors) {
-      const entries = Object.entries(countObject).filter(([, count]) => count > 0);
+      const entries = Array.isArray(countObject)
+        ? countObject.map(item => [item.label, item.count]).filter(([, count]) => count > 0)
+        : Object.entries(countObject).filter(([, count]) => count > 0);
       createChart(canvasId, {
         type: "doughnut",
         data: {
           labels: entries.map(([label]) => label),
           datasets: [{
             data: entries.map(([, count]) => count),
-            backgroundColor: colors,
+            backgroundColor: entries.map((_, index) => colors[index % colors.length]),
             borderColor: "white",
             borderWidth: 2
           }]
