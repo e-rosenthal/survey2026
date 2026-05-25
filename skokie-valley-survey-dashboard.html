@@ -583,7 +583,7 @@
     .sheet-table td {
       max-width: 260px;
       min-width: 130px;
-      height: 32px;
+      min-height: 32px;
       padding: 7px 9px;
       border-right: 1px solid var(--line);
       border-bottom: 1px solid var(--line);
@@ -593,6 +593,28 @@
       overflow: hidden;
       text-overflow: ellipsis;
       background: white;
+    }
+
+    .sheet-table td.long-cell {
+      min-width: 340px;
+      max-width: 520px;
+      white-space: normal;
+      overflow: visible;
+      text-overflow: clip;
+      line-height: 1.35;
+      cursor: pointer;
+    }
+
+    .sheet-table tr.expanded-row td {
+      max-height: none;
+      white-space: normal;
+      overflow: visible;
+    }
+
+    .sheet-table td.selected-cell {
+      outline: 2px solid var(--gold);
+      outline-offset: -2px;
+      background: #fffaf0;
     }
 
     .sheet-table thead th {
@@ -626,6 +648,36 @@
       background: #fffaf0;
       color: var(--navy);
       font-weight: 800;
+    }
+
+    .raw-reader {
+      margin-top: 12px;
+      padding: 14px 16px;
+      border: 1px solid var(--line);
+      border-left: 4px solid var(--gold);
+      border-radius: 8px;
+      background: white;
+    }
+
+    .raw-reader h3 {
+      margin: 0 0 6px;
+      color: var(--navy);
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    .raw-reader-meta {
+      margin: 0 0 10px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .raw-reader-text {
+      margin: 0;
+      white-space: pre-wrap;
+      color: var(--ink);
+      font-size: 14px;
+      line-height: 1.5;
     }
 
     .insight-stats {
@@ -1083,6 +1135,7 @@
           <div class="toolbar-left">
             <label class="field">Search sheet <input id="rawSearch" type="search" placeholder="Search any cell"></label>
             <label class="field"><input id="rawRespectFilters" type="checkbox"> Respect filters</label>
+            <label class="field"><input id="rawExpandLong" type="checkbox" checked> Wrap long responses</label>
           </div>
           <div class="toolbar-right">
             <span class="filter-count" id="rawCount">0 rows</span>
@@ -1090,6 +1143,11 @@
         </div>
         <div class="sheet-shell">
           <table class="sheet-table" id="rawTable" aria-label="Raw CSV data"></table>
+        </div>
+        <div class="raw-reader" id="rawReader">
+          <h3>Full response reader</h3>
+          <p class="raw-reader-meta">Click any cell in the raw data table to read the full response here.</p>
+          <p class="raw-reader-text" id="rawReaderText">No cell selected.</p>
         </div>
       </section>
     </main>
@@ -1211,6 +1269,8 @@
       [79, "Supporting member wellness and mental health"],
       [80, "Developing lay and volunteer leadership pipeline"]
     ];
+
+    const longResponseColumns = new Set([13, 14, 19, 31, 49, 53, 54, 56, 57, 58, 60, 61, 62, 63, 81, 82, 83]);
 
     const feedbackQuestions = [
       { col: 13, label: "Youth/family strengths", category: "Strength" },
@@ -1713,6 +1773,9 @@
       document.getElementById("rawRespectFilters").addEventListener("change", () => {
         if (currentTab === "raw") renderRawData(filteredRows);
       });
+      document.getElementById("rawExpandLong").addEventListener("change", () => {
+        if (currentTab === "raw") renderRawData(filteredRows);
+      });
       document.getElementById("feedbackSearch").addEventListener("input", event => {
         feedbackSearchTerm = event.target.value.trim().toLowerCase();
         if (currentTab === "feedback") renderFeedback(filteredRows);
@@ -2129,6 +2192,7 @@
 
     function renderRawData(data) {
       const respectFilters = document.getElementById("rawRespectFilters").checked;
+      const wrapLong = document.getElementById("rawExpandLong").checked;
       const sourceRows = respectFilters ? data : rows;
       const matchingRows = rawSearchTerm
         ? sourceRows.filter(row => row.raw.some(cell => normalize(cell).toLowerCase().includes(rawSearchTerm)))
@@ -2138,15 +2202,35 @@
       const columnCount = headers.length || (rows.length ? Math.max(...rows.map(row => row.raw.length)) : 0);
       const letters = Array.from({ length: columnCount }, (_, index) => columnLetter(index + 1));
       const headerCells = letters.map(letter => `<th>${letter}</th>`).join("");
-      const csvHeaderRow = `<tr class="header-row"><th class="row-num">1</th>${Array.from({ length: columnCount }, (_, col) => `<td title="${escapeAttr(headers[col] || "")}">${escapeHtml(headers[col] || "")}</td>`).join("")}</tr>`;
+      const csvHeaderRow = `<tr class="header-row"><th class="row-num">1</th>${Array.from({ length: columnCount }, (_, col) => `<td class="${rawCellClass(col, wrapLong)}" data-row="1" data-col="${col}" data-question="${escapeAttr(headers[col] || "")}" data-value="${escapeAttr(headers[col] || "")}" title="${escapeAttr(headers[col] || "")}">${escapeHtml(headers[col] || "")}</td>`).join("")}</tr>`;
       const bodyRows = matchingRows.map(row => {
         const cells = Array.from({ length: columnCount }, (_, col) => {
           const value = normalize(row.raw[col]);
-          return `<td title="${escapeAttr(value)}">${escapeHtml(value)}</td>`;
+          return `<td class="${rawCellClass(col, wrapLong)}" data-row="${row.index + 2}" data-col="${col}" data-question="${escapeAttr(headers[col] || columnLetter(col + 1))}" data-value="${escapeAttr(value)}" title="${escapeAttr(value)}">${escapeHtml(value)}</td>`;
         }).join("");
-        return `<tr><th class="row-num">${row.index + 2}</th>${cells}</tr>`;
+        return `<tr class="${wrapLong ? "expanded-row" : ""}"><th class="row-num">${row.index + 2}</th>${cells}</tr>`;
       }).join("");
       document.getElementById("rawTable").innerHTML = `<thead><tr><th class="row-num"></th>${headerCells}</tr></thead><tbody>${csvHeaderRow}${bodyRows}</tbody>`;
+      document.querySelectorAll("#rawTable td").forEach(cell => {
+        cell.addEventListener("click", () => showRawCell(cell));
+      });
+    }
+
+    function rawCellClass(col, wrapLong) {
+      return wrapLong && longResponseColumns.has(col) ? "long-cell" : "";
+    }
+
+    function showRawCell(cell) {
+      document.querySelectorAll("#rawTable .selected-cell").forEach(node => node.classList.remove("selected-cell"));
+      cell.classList.add("selected-cell");
+      const rowNumber = cell.dataset.row;
+      const colIndex = Number(cell.dataset.col);
+      const colLabel = columnLetter(colIndex + 1);
+      const question = cell.dataset.question || colLabel;
+      const value = cell.dataset.value || "";
+      document.getElementById("rawReader").querySelector("h3").textContent = `${colLabel}${rowNumber}: ${question}`;
+      document.getElementById("rawReader").querySelector(".raw-reader-meta").textContent = `Row ${rowNumber}, column ${colIndex + 1}`;
+      document.getElementById("rawReaderText").textContent = value || "(blank)";
     }
 
     function collectFeedback(data) {
