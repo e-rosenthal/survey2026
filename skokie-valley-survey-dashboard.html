@@ -1,0 +1,2415 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Skokie Valley Strategic Planning — Survey Explorer</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <style>
+    :root {
+      --navy: #1e3a5f;
+      --navy-2: #274d7d;
+      --gold: #c9a84c;
+      --gold-soft: #f2e7c2;
+      --bg: #f5f7fa;
+      --panel: #ffffff;
+      --ink: #172033;
+      --muted: #697386;
+      --line: #dfe5ee;
+      --red: #c04b49;
+      --yellow: #d7a83e;
+      --green: #3f8f68;
+      --shadow: 0 12px 28px rgba(20, 37, 60, .09);
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--ink);
+      background: var(--bg);
+      letter-spacing: 0;
+    }
+
+    button, input, select {
+      font: inherit;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 14px 22px;
+      background: var(--navy);
+      color: white;
+      box-shadow: var(--shadow);
+    }
+
+    .title {
+      margin: 0;
+      font-size: clamp(17px, 2vw, 24px);
+      line-height: 1.2;
+      font-weight: 760;
+    }
+
+    .top-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      min-height: 34px;
+      padding: 7px 12px;
+      border: 1px solid rgba(255,255,255,.28);
+      background: rgba(255,255,255,.12);
+      color: white;
+      border-radius: 999px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .btn {
+      border: 1px solid var(--line);
+      background: white;
+      color: var(--navy);
+      border-radius: 6px;
+      min-height: 36px;
+      padding: 8px 12px;
+      font-weight: 750;
+      cursor: pointer;
+      transition: transform .16s ease, box-shadow .16s ease, background .16s ease, border-color .16s ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 16px rgba(20, 37, 60, .12);
+    }
+
+    .btn.primary {
+      background: var(--gold);
+      border-color: var(--gold);
+      color: #1d2430;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 320px minmax(0, 1fr);
+      min-height: calc(100vh - 64px);
+    }
+
+    aside {
+      position: sticky;
+      top: 64px;
+      align-self: start;
+      max-height: calc(100vh - 64px);
+      overflow: auto;
+      padding: 18px 16px 26px;
+      border-right: 1px solid var(--line);
+      background: #fbfcfe;
+    }
+
+    .mobile-filter-bar {
+      display: none;
+      padding: 12px 14px;
+      background: #fbfcfe;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .filter-heading {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .filter-heading h2 {
+      margin: 0;
+      font-size: 17px;
+      color: var(--navy);
+    }
+
+    .filter-count {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 750;
+    }
+
+    .filter-group {
+      padding: 14px 0;
+      border-top: 1px solid var(--line);
+    }
+
+    .filter-group h3 {
+      margin: 0 0 10px;
+      font-size: 13px;
+      color: var(--navy);
+      text-transform: uppercase;
+      letter-spacing: .02em;
+    }
+
+    .option {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      margin: 8px 0;
+      color: #26344c;
+      font-size: 13px;
+      line-height: 1.25;
+      cursor: pointer;
+    }
+
+    .option input {
+      margin-top: 1px;
+      accent-color: var(--navy);
+      flex: 0 0 auto;
+    }
+
+    .option-text {
+      display: flex;
+      width: 100%;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .count-pill {
+      flex: 0 0 auto;
+      min-width: 26px;
+      text-align: center;
+      padding: 1px 7px;
+      border-radius: 999px;
+      background: #edf2f7;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .segmented {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 7px;
+    }
+
+    .segmented label {
+      min-height: 34px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 6px 8px;
+      border: 1px solid var(--line);
+      background: white;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 750;
+      color: var(--navy);
+      transition: background .16s ease, color .16s ease, border-color .16s ease;
+    }
+
+    .segmented input {
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .segmented label:has(input:checked) {
+      background: var(--navy);
+      color: white;
+      border-color: var(--navy);
+    }
+
+    main {
+      min-width: 0;
+      padding: 22px;
+    }
+
+    .warning {
+      display: none;
+      margin-bottom: 16px;
+      padding: 12px 14px;
+      border: 1px solid #e2bf58;
+      border-left: 5px solid var(--gold);
+      background: #fff8df;
+      color: #604400;
+      border-radius: 6px;
+      font-weight: 750;
+    }
+
+    .load-error {
+      display: none;
+      margin: 18px 0;
+      padding: 16px;
+      border: 1px solid #e4b2b0;
+      border-left: 5px solid var(--red);
+      background: #fff7f7;
+      border-radius: 6px;
+      color: #542322;
+    }
+
+    .load-error h2 { margin: 0 0 8px; font-size: 18px; }
+    .load-error p { margin: 6px 0; color: #66312f; }
+    .load-error input { margin-top: 10px; max-width: 100%; }
+
+    .tabs {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 18px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .tab-btn {
+      border: 0;
+      border-bottom: 3px solid transparent;
+      background: transparent;
+      color: var(--muted);
+      padding: 12px 12px 10px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: color .16s ease, border-color .16s ease;
+    }
+
+    .tab-btn.active {
+      color: var(--navy);
+      border-color: var(--gold);
+    }
+
+    .tab-panel { display: none; }
+    .tab-panel.active {
+      display: block;
+      animation: fadeIn .22s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: .55; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+      margin-bottom: 16px;
+    }
+
+    .stat-card, .chart-card, .control-card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: 0 8px 22px rgba(20, 37, 60, .05);
+    }
+
+    .stat-card {
+      padding: 16px;
+      min-height: 105px;
+    }
+
+    .stat-label {
+      margin: 0 0 10px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 850;
+      text-transform: uppercase;
+      letter-spacing: .02em;
+    }
+
+    .stat-value {
+      font-size: 30px;
+      line-height: 1;
+      font-weight: 850;
+      color: var(--navy);
+    }
+
+    .stat-note {
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .grid-1 {
+      display: grid;
+      gap: 16px;
+    }
+
+    .chart-card {
+      padding: 15px;
+      min-width: 0;
+    }
+
+    .chart-title-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: flex-start;
+      margin-bottom: 10px;
+    }
+
+    .chart-title {
+      margin: 0;
+      color: var(--navy);
+      font-size: 16px;
+      line-height: 1.25;
+    }
+
+    .chart-subtitle {
+      margin: 3px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .chart-wrap {
+      position: relative;
+      width: 100%;
+      height: 280px;
+    }
+
+    .chart-wrap.short { height: 230px; }
+    .chart-wrap.tall { height: 520px; }
+    .chart-wrap.radar { height: 430px; }
+
+    .switch-row {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 750;
+      white-space: nowrap;
+    }
+
+    .switch-row input { accent-color: var(--navy); }
+
+    .compare-controls {
+      display: none;
+      margin: 0 0 12px;
+      padding: 12px;
+      background: #f8fafc;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+    }
+
+    .compare-controls.visible { display: block; }
+
+    .compare-options {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 14px;
+      margin-top: 8px;
+    }
+
+    .compare-options label {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: #26344c;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .compare-options input { accent-color: var(--navy); }
+
+    .flags {
+      display: none;
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .flags.visible { display: block; }
+
+    .empty-state {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      min-height: 170px;
+      color: var(--muted);
+      text-align: center;
+      border: 1px dashed var(--line);
+      border-radius: 8px;
+      background: #fafbfc;
+      padding: 16px;
+      font-weight: 700;
+    }
+
+    .toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+      padding: 12px;
+      background: #f8fafc;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+    }
+
+    .toolbar-left,
+    .toolbar-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .field {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 750;
+    }
+
+    .field input,
+    .field select {
+      min-height: 34px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: white;
+      color: var(--ink);
+      padding: 7px 9px;
+      max-width: 280px;
+    }
+
+    .field input[type="checkbox"] {
+      min-height: auto;
+      accent-color: var(--navy);
+    }
+
+    .sheet-shell {
+      overflow: auto;
+      max-height: 72vh;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: white;
+    }
+
+    .sheet-table {
+      border-collapse: separate;
+      border-spacing: 0;
+      min-width: 7200px;
+      width: max-content;
+      font-size: 12px;
+    }
+
+    .sheet-table th,
+    .sheet-table td {
+      max-width: 260px;
+      min-width: 130px;
+      height: 32px;
+      padding: 7px 9px;
+      border-right: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      vertical-align: top;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      background: white;
+    }
+
+    .sheet-table thead th {
+      position: sticky;
+      top: 0;
+      z-index: 4;
+      background: #edf2f7;
+      color: var(--navy);
+      text-align: center;
+      font-weight: 850;
+    }
+
+    .sheet-table .row-num {
+      position: sticky;
+      left: 0;
+      z-index: 3;
+      min-width: 58px;
+      max-width: 58px;
+      text-align: right;
+      color: var(--muted);
+      background: #f3f6fa;
+      font-weight: 800;
+    }
+
+    .sheet-table thead .row-num {
+      z-index: 5;
+      text-align: center;
+    }
+
+    .sheet-table .header-row td {
+      background: #fffaf0;
+      color: var(--navy);
+      font-weight: 800;
+    }
+
+    .insight-stats {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .mini-stat {
+      padding: 13px;
+      background: white;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: 0 8px 22px rgba(20, 37, 60, .05);
+    }
+
+    .mini-stat strong {
+      display: block;
+      color: var(--navy);
+      font-size: 24px;
+      line-height: 1;
+      margin-bottom: 6px;
+    }
+
+    .mini-stat span {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 750;
+      text-transform: uppercase;
+      letter-spacing: .02em;
+    }
+
+    .theme-strip {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 0 0 14px;
+    }
+
+    .theme-pill {
+      border: 1px solid var(--line);
+      background: white;
+      color: var(--navy);
+      border-radius: 999px;
+      padding: 7px 10px;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .feedback-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .feedback-card {
+      position: relative;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-top: 4px solid var(--gold);
+      border-radius: 8px;
+      background: white;
+      box-shadow: 0 8px 22px rgba(20, 37, 60, .05);
+    }
+
+    .feedback-card.priority-high { border-top-color: var(--red); }
+    .feedback-card.priority-medium { border-top-color: var(--gold); }
+    .feedback-card.priority-low { border-top-color: var(--green); }
+
+    .feedback-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 8px;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 850;
+      text-transform: uppercase;
+      letter-spacing: .02em;
+    }
+
+    .feedback-question {
+      margin: 0 0 9px;
+      color: var(--navy);
+      font-size: 13px;
+      font-weight: 850;
+      line-height: 1.3;
+    }
+
+    .feedback-text {
+      margin: 0 0 12px;
+      color: #273247;
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
+    .feedback-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .feedback-tag {
+      display: inline-flex;
+      align-items: center;
+      min-height: 24px;
+      padding: 4px 7px;
+      border-radius: 999px;
+      background: #eef3f8;
+      color: var(--navy);
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .hidden { display: none !important; }
+
+    @media (max-width: 1000px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      aside {
+        position: static;
+        max-height: none;
+        display: none;
+        border-right: 0;
+        border-bottom: 1px solid var(--line);
+      }
+
+      aside.open { display: block; }
+
+      .mobile-filter-bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+      }
+
+      .metrics {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .insight-stats {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .feedback-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 760px) {
+      .topbar {
+        align-items: flex-start;
+        flex-direction: column;
+        padding: 13px 14px;
+      }
+
+      .top-actions {
+        justify-content: flex-start;
+      }
+
+      main {
+        padding: 16px 12px 24px;
+      }
+
+      .metrics, .grid-2 {
+        grid-template-columns: 1fr;
+      }
+
+      .insight-stats,
+      .feedback-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .field input,
+      .field select {
+        max-width: 210px;
+      }
+
+      .chart-wrap.tall { height: 590px; }
+      .chart-wrap.radar { height: 360px; }
+      .tabs {
+        overflow-x: auto;
+        flex-wrap: nowrap;
+      }
+      .tab-btn {
+        flex: 0 0 auto;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <h1 class="title">Skokie Valley Strategic Planning — Survey Explorer</h1>
+    <div class="top-actions">
+      <span class="chip" id="respondentChip">Showing 0 of 0 respondents</span>
+      <button class="btn primary" id="resetFilters" type="button">Reset all filters</button>
+    </div>
+  </header>
+
+  <div class="mobile-filter-bar">
+    <strong>Filters</strong>
+    <button class="btn" id="filterToggle" type="button">Show filters</button>
+  </div>
+
+  <div class="layout">
+    <aside id="filtersPanel">
+      <div class="filter-heading">
+        <h2>Filters</h2>
+        <span class="filter-count" id="filterSummary">0 active</span>
+      </div>
+
+      <section class="filter-group" data-filter-group="familyStage">
+        <h3>Family stage</h3>
+        <div data-options="familyStage"></div>
+      </section>
+
+      <section class="filter-group" data-filter-group="tenureBucket">
+        <h3>Member tenure</h3>
+        <div class="segmented" data-options="tenureBucket"></div>
+      </section>
+
+      <section class="filter-group" data-filter-group="ageBucket">
+        <h3>Age group</h3>
+        <div data-options="ageBucket"></div>
+      </section>
+
+      <section class="filter-group" data-filter-group="gender">
+        <h3>Gender</h3>
+        <div class="segmented" data-options="gender"></div>
+      </section>
+
+      <section class="filter-group" data-filter-group="householdType">
+        <h3>Household type</h3>
+        <div data-options="householdType"></div>
+      </section>
+
+      <section class="filter-group" data-filter-group="householdIds">
+        <h3>Household identifiers</h3>
+        <div data-options="householdIds"></div>
+      </section>
+
+      <section class="filter-group" data-filter-group="selfIds">
+        <h3>Self-identification</h3>
+        <div data-options="selfIds"></div>
+      </section>
+
+      <section class="filter-group" data-filter-group="secondaryShul">
+        <h3>Secondary shul membership</h3>
+        <div data-options="secondaryShul"></div>
+      </section>
+    </aside>
+
+    <main>
+      <div class="warning" id="smallSampleWarning">Small sample — interpret with caution (n=0).</div>
+
+      <div class="load-error" id="loadError">
+        <h2>CSV could not be loaded automatically</h2>
+        <p>Keep this HTML file in the same folder as <strong>Skokie Valley Community Stakeholder Survey (Responses) - Form Responses 1.csv</strong>.</p>
+        <p>Some browsers block local CSV loading from a dragged-in HTML file. Select the CSV below to continue without a server.</p>
+        <input id="csvFallback" type="file" accept=".csv,text/csv">
+      </div>
+
+      <nav class="tabs" aria-label="Dashboard tabs">
+        <button class="tab-btn active" data-tab="overview" type="button">Overview</button>
+        <button class="tab-btn" data-tab="satisfaction" type="button">Satisfaction &amp; Engagement</button>
+        <button class="tab-btn" data-tab="priorities" type="button">Values &amp; Strategic Priorities</button>
+        <button class="tab-btn" data-tab="inclusion" type="button">Inclusion &amp; Belonging</button>
+        <button class="tab-btn" data-tab="feedback" type="button">Specific Feedback</button>
+        <button class="tab-btn" data-tab="raw" type="button">Raw Data</button>
+      </nav>
+
+      <section id="overview" class="tab-panel active">
+        <div class="metrics">
+          <div class="stat-card">
+            <p class="stat-label">Respondent count</p>
+            <div class="stat-value" id="metricCount">0</div>
+            <div class="stat-note">Filtered respondents</div>
+          </div>
+          <div class="stat-card">
+            <p class="stat-label">Avg welcoming score</p>
+            <div class="stat-value" id="metricWelcoming">—</div>
+            <div class="stat-note">1–5 scale</div>
+          </div>
+          <div class="stat-card">
+            <p class="stat-label">Avg integration experience</p>
+            <div class="stat-value" id="metricIntegration">—</div>
+            <div class="stat-note">1–5 scale</div>
+          </div>
+          <div class="stat-card">
+            <p class="stat-label">Current full members</p>
+            <div class="stat-value" id="metricFullMembers">—</div>
+            <div class="stat-note">Share of filtered set</div>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="chart-card"><h2 class="chart-title" id="membershipTitle">Membership type distribution</h2><div class="chart-wrap short"><canvas id="membershipChart"></canvas></div></div>
+          <div class="chart-card"><h2 class="chart-title" id="tenureTitle">Tenure distribution</h2><div class="chart-wrap short"><canvas id="tenureChart"></canvas></div></div>
+          <div class="chart-card"><h2 class="chart-title" id="ageTitle">Age distribution</h2><div class="chart-wrap short"><canvas id="ageChart"></canvas></div></div>
+          <div class="chart-card"><h2 class="chart-title" id="genderTitle">Gender split</h2><div class="chart-wrap short"><canvas id="genderChart"></canvas></div></div>
+          <div class="chart-card"><h2 class="chart-title" id="householdTitle">Household type</h2><div class="chart-wrap short"><canvas id="householdChart"></canvas></div></div>
+          <div class="chart-card"><h2 class="chart-title" id="familyTitle">Family stage distribution</h2><div class="chart-wrap short"><canvas id="familyChart"></canvas></div></div>
+        </div>
+      </section>
+
+      <section id="satisfaction" class="tab-panel">
+        <div class="grid-1">
+          <div class="chart-card">
+            <div class="chart-title-row">
+              <div>
+                <h2 class="chart-title" id="satisfactionTitle">Satisfaction Scores</h2>
+                <p class="chart-subtitle" id="satisfactionSubtitle">Average score and response count</p>
+              </div>
+              <label class="switch-row"><input id="satisfactionDistributionToggle" type="checkbox"> Show distribution</label>
+            </div>
+            <div class="chart-wrap tall"><canvas id="satisfactionChart"></canvas></div>
+          </div>
+
+          <div class="chart-card">
+            <div class="chart-title-row">
+              <div>
+                <h2 class="chart-title" id="engagementTitle">Engagement Frequency</h2>
+                <p class="chart-subtitle" id="engagementSubtitle">Average frequency and response count</p>
+              </div>
+              <label class="switch-row"><input id="engagementDistributionToggle" type="checkbox"> Show distribution</label>
+            </div>
+            <div class="chart-wrap tall"><canvas id="engagementChart"></canvas></div>
+          </div>
+
+          <div class="grid-2">
+            <div class="chart-card" id="youthCard">
+              <h2 class="chart-title" id="youthTitle">Youth Programming Satisfaction</h2>
+              <div class="chart-wrap"><canvas id="youthChart"></canvas></div>
+              <div class="empty-state" id="youthEmpty">No youth programming ratings in this filtered set.</div>
+            </div>
+            <div class="chart-card">
+              <h2 class="chart-title" id="womenTitle">Women’s Participation Preference</h2>
+              <div class="chart-wrap"><canvas id="womenChart"></canvas></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="priorities" class="tab-panel">
+        <div class="grid-1">
+          <div class="chart-card">
+            <h2 class="chart-title" id="valuesTitle">Community Values</h2>
+            <p class="chart-subtitle" id="valuesSubtitle">Filtered segment compared with the full response set when filters are active</p>
+            <div class="chart-wrap radar"><canvas id="valuesChart"></canvas></div>
+          </div>
+
+          <div class="chart-card">
+            <div class="chart-title-row">
+              <div>
+                <h2 class="chart-title" id="prioritiesTitle">Strategic Priorities</h2>
+                <p class="chart-subtitle" id="prioritiesSubtitle">Ranked by average importance score</p>
+              </div>
+              <label class="switch-row"><input id="compareToggle" type="checkbox"> Compare segments</label>
+            </div>
+            <div class="compare-controls" id="compareControls">
+              <strong>Family stages to compare</strong>
+              <div class="compare-options" id="compareOptions"></div>
+            </div>
+            <div class="chart-wrap tall"><canvas id="prioritiesChart"></canvas></div>
+            <div class="flags" id="priorityFlags"></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="inclusion" class="tab-panel">
+        <div class="grid-1">
+          <div class="chart-card">
+            <h2 class="chart-title" id="inclusionGroupsTitle">Groups Needing Better Inclusion</h2>
+            <div class="chart-wrap tall"><canvas id="inclusionGroupsChart"></canvas></div>
+          </div>
+          <div class="chart-card">
+            <h2 class="chart-title" id="drawTitle">What Drew People to SVAJ</h2>
+            <div class="chart-wrap tall"><canvas id="drawChart"></canvas></div>
+          </div>
+          <div class="chart-card">
+            <h2 class="chart-title" id="barriersTitle">Barriers to Deeper Engagement</h2>
+            <div class="chart-wrap"><canvas id="barriersChart"></canvas></div>
+          </div>
+          <div class="grid-2">
+            <div class="chart-card">
+              <h2 class="chart-title" id="welcomeDistTitle">Welcoming Score Distribution</h2>
+              <div class="chart-wrap short"><canvas id="welcomeDistChart"></canvas></div>
+            </div>
+            <div class="chart-card">
+              <h2 class="chart-title" id="integrationDistTitle">Integration Experience Distribution</h2>
+              <div class="chart-wrap short"><canvas id="integrationDistChart"></canvas></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="feedback" class="tab-panel">
+        <div class="toolbar">
+          <div class="toolbar-left">
+            <label class="field">Search <input id="feedbackSearch" type="search" placeholder="programming, meals, davening"></label>
+            <label class="field">Question <select id="feedbackQuestionFilter"></select></label>
+            <label class="field">Theme <select id="feedbackThemeFilter"></select></label>
+          </div>
+          <div class="toolbar-right">
+            <label class="field">Sort <select id="feedbackSort">
+              <option value="priority">Most specific first</option>
+              <option value="theme">Theme</option>
+              <option value="respondent">Respondent</option>
+            </select></label>
+          </div>
+        </div>
+
+        <div class="insight-stats">
+          <div class="mini-stat"><strong id="feedbackResponseCount">0</strong><span>Specific responses</span></div>
+          <div class="mini-stat"><strong id="feedbackRespondentCount">0</strong><span>Respondents represented</span></div>
+          <div class="mini-stat"><strong id="feedbackThemeCount">0</strong><span>Themes detected</span></div>
+          <div class="mini-stat"><strong id="feedbackAvgLength">0</strong><span>Avg words per response</span></div>
+        </div>
+
+        <div class="grid-2">
+          <div class="chart-card">
+            <h2 class="chart-title" id="feedbackThemesTitle">Feedback Themes</h2>
+            <div class="chart-wrap short"><canvas id="feedbackThemesChart"></canvas></div>
+          </div>
+          <div class="chart-card">
+            <h2 class="chart-title" id="feedbackQuestionsTitle">Feedback by Question</h2>
+            <div class="chart-wrap short"><canvas id="feedbackQuestionsChart"></canvas></div>
+          </div>
+        </div>
+
+        <div class="theme-strip" id="feedbackThemeStrip"></div>
+        <div class="feedback-grid" id="feedbackGrid"></div>
+        <div class="empty-state" id="feedbackEmpty">No specific written responses match the current filters.</div>
+      </section>
+
+      <section id="raw" class="tab-panel">
+        <div class="toolbar">
+          <div class="toolbar-left">
+            <label class="field">Search sheet <input id="rawSearch" type="search" placeholder="Search any cell"></label>
+            <label class="field"><input id="rawRespectFilters" type="checkbox"> Respect filters</label>
+          </div>
+          <div class="toolbar-right">
+            <span class="filter-count" id="rawCount">0 rows</span>
+          </div>
+        </div>
+        <div class="sheet-shell">
+          <table class="sheet-table" id="rawTable" aria-label="Raw CSV data"></table>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const CSV_FILE = "Skokie Valley Community Stakeholder Survey (Responses) - Form Responses 1.csv";
+    const CURRENT_YEAR = 2026;
+
+    const COL = {
+      membership: 1,
+      firstYear: 2,
+      birthYear: 3,
+      gender: 4,
+      household: 5,
+      hasChildren: 6,
+      householdIds: 7,
+      selfIds: 8,
+      secondaryShul: 10,
+      childAges: 11,
+      youthSatisfaction: 12,
+      barriers: 49,
+      womenParticipation: 50,
+      welcoming: 55,
+      inclusionGroups: 56,
+      drewToSvaj: 58,
+      integration: 59
+    };
+
+    const likertMap = {
+      "Extremely": 5,
+      "Very": 4,
+      "Moderately": 3,
+      "Slightly": 2,
+      "Not at all": 1,
+      "Extremely well": 5,
+      "Very well": 4,
+      "Moderately": 3,
+      "Slightly": 2,
+      "Not well at all": 1
+    };
+
+    const satisfactionMap = {
+      "Very Satisfied": 5,
+      "Satisfied": 4,
+      "Neutral": 3,
+      "Dissatisfied": 2,
+      "Very Dissatisfied": 1
+    };
+
+    const engagementMap = {
+      "Weekly": 5,
+      "A few times a month": 4,
+      "Monthly": 3,
+      "A few times a year": 2,
+      "Rarely/Never": 1
+    };
+
+    const youthMap = {
+      "4 - Very satisfied": 4,
+      "3 - Satisfied": 3,
+      "2 - Dissatisfied": 2,
+      "1 - Very dissatisfied": 1
+    };
+
+    const satisfactionItems = [
+      [39, "Shabbat and Yom Tov davening"],
+      [40, "Rabbinic team leadership and accessibility"],
+      [41, "Children’s and youth programming"],
+      [42, "Adult education and learning"],
+      [43, "Chesed and community support"],
+      [44, "Communication from shul leadership"],
+      [45, "Physical facility and space"],
+      [46, "Sense of community and belonging"],
+      [47, "Support during lifecycle events"],
+      [48, "Israel programming"]
+    ];
+
+    const engagementItems = [
+      [32, "Shabbat davening"],
+      [33, "Weekday davening"],
+      [34, "Shiurim or adult learning"],
+      [35, "Youth/teen programming"],
+      [36, "Chesed activities"],
+      [37, "Social events"],
+      [38, "Committee or volunteer work"]
+    ];
+
+    const valuesItems = [
+      [20, "Halachic commitment"],
+      [21, "Torah learning"],
+      [22, "Welcoming community"],
+      [23, "Inclusion"],
+      [24, "Meaningful davening"],
+      [25, "Youth/family engagement"],
+      [26, "Chesed/social responsibility"],
+      [27, "Intellectual openness"],
+      [28, "Connection to Israel"],
+      [29, "Intergenerational connection"],
+      [30, "Civic engagement"]
+    ];
+
+    const priorityItems = [
+      [64, "Enhancing Shabbat and davening experience"],
+      [65, "Growing and retaining membership"],
+      [66, "Expanding youth, tween, and teen programming"],
+      [67, "Strengthening family engagement and support"],
+      [68, "Strengthening adult education and Torah learning"],
+      [69, "Building a more welcoming and inclusive community"],
+      [70, "Supporting intergenerational connection"],
+      [71, "Building chesed infrastructure and social support"],
+      [72, "Improving volunteer engagement and leadership development"],
+      [73, "Formalizing programming and planning transparency"],
+      [74, "Strengthening communications and community awareness"],
+      [75, "Increasing financial sustainability and stewardship"],
+      [76, "Improving facilities, space usage, and accessibility"],
+      [77, "Deepening Israel connection and programming"],
+      [78, "Engaging broader Skokie/North Shore community"],
+      [79, "Supporting member wellness and mental health"],
+      [80, "Developing lay and volunteer leadership pipeline"]
+    ];
+
+    const feedbackQuestions = [
+      { col: 13, label: "Youth/family strengths", category: "Strength" },
+      { col: 14, label: "Youth/family improvements", category: "Improvement" },
+      { col: 19, label: "What makes SVAJ distinct", category: "Strength" },
+      { col: 31, label: "Mission statement changes", category: "Strategy" },
+      { col: 53, label: "Support current volunteers", category: "Volunteer" },
+      { col: 54, label: "Encourage more volunteering", category: "Volunteer" },
+      { col: 57, label: "Excluded or uncomfortable", category: "Inclusion" },
+      { col: 60, label: "Smoother transition", category: "Belonging" },
+      { col: 61, label: "Ideal future shul words", category: "Vision" },
+      { col: 62, label: "Biggest opportunity", category: "Opportunity" },
+      { col: 63, label: "Biggest risk/challenge", category: "Risk" },
+      { col: 81, label: "Additional strategic priority", category: "Strategy" },
+      { col: 82, label: "Anything else to share", category: "Strategy" }
+    ];
+
+    const feedbackThemes = [
+      { label: "Youth & family", color: "#1e3a5f", terms: ["youth", "teen", "tween", "child", "children", "kids", "family", "families", "parent", "parents", "babysit", "childcare", "teiku", "tot shabbat"] },
+      { label: "Davening & ritual", color: "#c9a84c", terms: ["daven", "minyan", "shabbat", "yom tov", "ritual", "tefillah", "kiddush", "gabbai", "gabbaim", "fast", "faster", "mechitza"] },
+      { label: "Learning & Torah", color: "#3f8f68", terms: ["torah", "learning", "shiur", "shiurim", "education", "class", "classes", "text", "intellectual"] },
+      { label: "Inclusion & belonging", color: "#7a5ea8", terms: ["welcome", "welcoming", "inclusive", "inclusion", "excluded", "overlooked", "uncomfortable", "cliquish", "connected", "belong", "single", "singles", "convert", "ger", "baal", "lgbtq"] },
+      { label: "Communication & planning", color: "#4f83b4", terms: ["communication", "communicate", "planning", "transparency", "calendar", "email", "announce", "awareness", "clear", "organized"] },
+      { label: "Volunteering & leadership", color: "#8e7330", terms: ["volunteer", "volunteering", "committee", "leadership", "board", "ask", "role", "roles", "lay"] },
+      { label: "Facilities & accessibility", color: "#667085", terms: ["facility", "facilities", "space", "building", "accessibility", "accessible", "parking", "room", "rooms"] },
+      { label: "Israel & civic life", color: "#2f6d7a", terms: ["israel", "zion", "zionist", "antisemitism", "anti-semitism", "environment", "social justice", "civic", "skokie", "north shore"] },
+      { label: "Finance & sustainability", color: "#b85b5b", terms: ["financial", "finance", "dues", "money", "cost", "lease", "sustainability", "afford", "economy", "macro"] },
+      { label: "Community & social", color: "#d18f43", terms: ["meal", "meals", "social", "friends", "friend", "community", "events", "relationship", "warmth", "invite", "invites"] }
+    ];
+
+    const familyStageOptions = ["No children", "Young children (0–5)", "School-age (6–12)", "Teens (13–18)"];
+    const familyStageAll = [...familyStageOptions, "Children (age unknown)"];
+    const tenureOptions = ["< 2 years", "2–5 years", "6–10 years", "11–20 years", "20+ years"];
+    const ageOptions = ["20s", "30s", "40s", "50s", "60s", "70s+"];
+    const householdOptions = ["Couple with children", "Couple without children", "Single adult without children", "Single adult with children", "Multi-generational"];
+    const householdIdOptions = [
+      { label: "Family with young children", match: ["Family with young children"] },
+      { label: "Person with a disability", match: ["Person with a disability or accessibility need", "Caregiver for someone with a disability or accessibility need"] },
+      { label: "LGBTQ+", match: ["LGBTQ+"] },
+      { label: "Divorced / Widowed / Single parent", match: ["Divorced", "Widowed", "Single parent"] }
+    ];
+    const selfIdOptions = [
+      { label: "Ba’al/Ba’alat teshuva", match: ["Ba'al/Ba'alat tshuva", "Ba’al/Ba’alat teshuva"] },
+      { label: "Convert (ger/gioret)", match: ["Ger/gioret (convert to Judaism)"] },
+      { label: "Family members who aren’t Jewish", match: ["Immediate or extended family who are not Jewish"] }
+    ];
+    const shulOptions = [
+      { label: "No secondary shul", match: ["No"] },
+      { label: "Member of Kol Sasson", match: ["Kol Sasson"] },
+      { label: "Member of Women’s Tfillah Group", match: ["Women's Tfillah Group", "Women’s Tfillah Group"] },
+      { label: "Another Orthodox shul", match: ["another Orthodox synagogue"] },
+      { label: "Non-Orthodox shul", match: ["non-Orthodox synagogue"] }
+    ];
+
+    const barrierStandardOptions = [
+      "Schedule conflicts",
+      "Programs don’t match my interests or life stage",
+      "I don’t feel socially connected",
+      "Childcare or family logistics",
+      "Physical accessibility barriers",
+      "Cost / financial barriers",
+      "I’m already engaged as much as I want to be"
+    ];
+
+    const filters = {
+      familyStage: new Set(),
+      tenureBucket: new Set(),
+      ageBucket: new Set(),
+      gender: "All",
+      householdType: new Set(),
+      householdIds: new Set(),
+      selfIds: new Set(),
+      secondaryShul: new Set()
+    };
+
+    let headers = [];
+    let rows = [];
+    let filteredRows = [];
+    let charts = {};
+    let currentTab = "overview";
+    let compareSegments = new Set(["No children", "Young children (0–5)", "School-age (6–12)", "Teens (13–18)"]);
+    let rawSearchTerm = "";
+    let feedbackSearchTerm = "";
+    let feedbackQuestionFilter = "All";
+    let feedbackThemeFilter = "All";
+
+    Chart.defaults.font.family = "Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif";
+    Chart.defaults.color = "#3c465a";
+    Chart.defaults.plugins.tooltip.backgroundColor = "#172033";
+    Chart.defaults.plugins.tooltip.padding = 10;
+    Chart.defaults.plugins.tooltip.cornerRadius = 6;
+
+    const differenceFlagPlugin = {
+      id: "differenceFlag",
+      afterDatasetsDraw(chart, args, pluginOptions) {
+        if (!pluginOptions || !pluginOptions.flags || !pluginOptions.flags.length) return;
+        const { ctx, chartArea, scales } = chart;
+        const yScale = scales.y;
+        const xScale = scales.x;
+        if (!yScale || !xScale) return;
+        ctx.save();
+        ctx.fillStyle = "#c9a84c";
+        ctx.strokeStyle = "#1e3a5f";
+        ctx.lineWidth = 1;
+        ctx.font = "bold 11px Inter, sans-serif";
+        pluginOptions.flags.forEach(index => {
+          const y = yScale.getPixelForValue(index);
+          const x = Math.min(chartArea.right - 14, xScale.getPixelForValue(5) - 8);
+          ctx.beginPath();
+          ctx.moveTo(x, y - 8);
+          ctx.lineTo(x + 12, y - 3);
+          ctx.lineTo(x, y + 2);
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
+          ctx.fillStyle = "#1e3a5f";
+          ctx.fillText("!", x + 3, y + 1);
+          ctx.fillStyle = "#c9a84c";
+        });
+        ctx.restore();
+      }
+    };
+
+    const valueLabelPlugin = {
+      id: "valueLabel",
+      afterDatasetsDraw(chart, args, pluginOptions) {
+        if (!pluginOptions || !pluginOptions.enabled) return;
+        const dataset = chart.data.datasets[0];
+        if (!dataset || !dataset.data) return;
+        const { ctx, chartArea } = chart;
+        const meta = chart.getDatasetMeta(0);
+        ctx.save();
+        ctx.fillStyle = "#172033";
+        ctx.font = "700 11px Inter, sans-serif";
+        ctx.textBaseline = "middle";
+        meta.data.forEach((bar, index) => {
+          const value = dataset.data[index];
+          if (value === null || value === undefined || !Number.isFinite(value)) return;
+          const count = dataset.counts ? ` (n=${dataset.counts[index]})` : "";
+          const text = `${Number(value).toFixed(1)}${count}`;
+          const x = Math.min(chartArea.right - ctx.measureText(text).width - 2, bar.x + 8);
+          ctx.fillText(text, x, bar.y);
+        });
+        ctx.restore();
+      }
+    };
+
+    Chart.register(differenceFlagPlugin, valueLabelPlugin);
+
+    function parseCSVText(csvText) {
+      const parsed = Papa.parse(csvText, { header: false, skipEmptyLines: "greedy" });
+      if (parsed.errors && parsed.errors.length) {
+        console.warn(parsed.errors);
+      }
+      headers = parsed.data[0] || [];
+      const body = parsed.data.slice(1).filter(row => row.some(cell => String(cell || "").trim() !== ""));
+      rows = body.map((row, index) => deriveRow(row, index));
+      document.getElementById("loadError").style.display = "none";
+      initializeControls();
+      applyFilters();
+    }
+
+    function loadCSV() {
+      Papa.parse(CSV_FILE, {
+        download: true,
+        skipEmptyLines: "greedy",
+        complete(results) {
+          headers = results.data[0] || [];
+          const body = results.data.slice(1).filter(row => row.some(cell => String(cell || "").trim() !== ""));
+          rows = body.map((row, index) => deriveRow(row, index));
+          initializeControls();
+          applyFilters();
+        },
+        error(error) {
+          showLoadError(error);
+        }
+      });
+    }
+
+    function showLoadError(error) {
+      console.warn("CSV load error", error);
+      document.getElementById("loadError").style.display = "block";
+      document.getElementById("csvFallback").addEventListener("change", event => {
+        const file = event.target.files && event.target.files[0];
+        if (!file) return;
+        Papa.parse(file, {
+          complete(results) {
+            const csv = Papa.unparse(results.data);
+            parseCSVText(csv);
+          },
+          error(err) {
+            document.getElementById("loadError").querySelector("p").textContent = "The selected CSV could not be parsed.";
+            console.warn(err);
+          }
+        });
+      }, { once: true });
+    }
+
+    function deriveRow(row, index) {
+      const firstYear = numberValue(row[COL.firstYear]);
+      const birthYear = numberValue(row[COL.birthYear]);
+      const tenure = firstYear ? CURRENT_YEAR - firstYear : null;
+      const age = birthYear ? CURRENT_YEAR - birthYear : null;
+      const householdIds = splitMulti(row[COL.householdIds]);
+      const selfIds = splitMulti(row[COL.selfIds]);
+      const secondaryShul = splitMulti(row[COL.secondaryShul]);
+      const childAges = parseChildAges(row[COL.childAges]);
+      const hasChildren = normalize(row[COL.hasChildren]) === "Yes";
+      return {
+        index,
+        raw: row,
+        membership: normalize(row[COL.membership]) || "Unspecified",
+        membershipGroup: membershipGroup(row[COL.membership]),
+        firstYear,
+        birthYear,
+        tenure,
+        tenureBucket: bucketTenure(tenure),
+        age,
+        ageBucket: bucketAge(age),
+        gender: normalize(row[COL.gender]) || "Unspecified",
+        householdType: normalize(row[COL.household]) || "Unspecified",
+        hasChildren,
+        childAges,
+        familyStage: deriveFamilyStage(hasChildren, childAges),
+        householdIds,
+        selfIds,
+        secondaryShul,
+        secondaryShulGroups: categorizeSecondaryShul(secondaryShul),
+        barriers: splitMulti(row[COL.barriers]),
+        inclusionGroups: splitMulti(row[COL.inclusionGroups]),
+        drewToSvaj: splitMulti(row[COL.drewToSvaj]),
+        welcomingScore: numberValue(row[COL.welcoming]),
+        integrationScore: numberValue(row[COL.integration]),
+        womenParticipation: normalize(row[COL.womenParticipation]),
+        youthSatisfaction: normalize(row[COL.youthSatisfaction])
+      };
+    }
+
+    function normalize(value) {
+      return String(value ?? "").trim();
+    }
+
+    function numberValue(value) {
+      const text = normalize(value);
+      if (!text || /^n\/?a$/i.test(text)) return null;
+      const n = Number.parseFloat(text);
+      return Number.isFinite(n) ? n : null;
+    }
+
+    function splitMulti(value) {
+      return normalize(value)
+        .split(",")
+        .map(part => part.trim())
+        .filter(Boolean);
+    }
+
+    function parseChildAges(value) {
+      const text = normalize(value);
+      if (!text || /^n\/?a$/i.test(text)) return [];
+      return Array.from(text.matchAll(/\b(?:1[0-8]|[0-9])\b/g))
+        .map(match => Number(match[0]))
+        .filter(age => age >= 0 && age <= 18);
+    }
+
+    function deriveFamilyStage(hasChildren, ages) {
+      if (!hasChildren) return "No children";
+      if (!ages.length) return "Children (age unknown)";
+      const youngest = Math.min(...ages);
+      if (youngest <= 5) return "Young children (0–5)";
+      if (youngest <= 12) return "School-age (6–12)";
+      return "Teens (13–18)";
+    }
+
+    function bucketTenure(tenure) {
+      if (tenure === null || tenure < 0) return "Unknown";
+      if (tenure < 2) return "< 2 years";
+      if (tenure <= 5) return "2–5 years";
+      if (tenure <= 10) return "6–10 years";
+      if (tenure <= 20) return "11–20 years";
+      return "20+ years";
+    }
+
+    function bucketAge(age) {
+      if (age === null || age < 0) return "Unknown";
+      if (age < 30) return "20s";
+      if (age < 40) return "30s";
+      if (age < 50) return "40s";
+      if (age < 60) return "50s";
+      if (age < 70) return "60s";
+      return "70s+";
+    }
+
+    function membershipGroup(value) {
+      const text = normalize(value);
+      if (/current full member/i.test(text)) return "Current full member";
+      if (/associate member/i.test(text)) return "Associate member";
+      if (/former/i.test(text)) return "Former member";
+      if (!text) return "Unspecified";
+      return text;
+    }
+
+    function categorizeSecondaryShul(parts) {
+      const text = parts.join(" | ");
+      const groups = new Set();
+      if (parts.some(part => /^No$/i.test(part))) groups.add("No secondary shul");
+      if (/Kol Sasson/i.test(text)) groups.add("Member of Kol Sasson");
+      if (/Women['’]s Tfillah Group/i.test(text)) groups.add("Member of Women’s Tfillah Group");
+      if (/another Orthodox synagogue/i.test(text)) groups.add("Another Orthodox shul");
+      if (/non-Orthodox synagogue/i.test(text)) groups.add("Non-Orthodox shul");
+      return groups;
+    }
+
+    function initializeControls() {
+      buildCheckboxGroup("familyStage", familyStageOptions, "checkbox");
+      buildCheckboxGroup("tenureBucket", tenureOptions, "checkbox", true);
+      buildCheckboxGroup("ageBucket", ageOptions, "checkbox");
+      buildGenderControls();
+      buildCheckboxGroup("householdType", householdOptions, "checkbox");
+      buildMappedCheckboxGroup("householdIds", householdIdOptions);
+      buildMappedCheckboxGroup("selfIds", selfIdOptions);
+      buildMappedCheckboxGroup("secondaryShul", shulOptions);
+      buildCompareOptions();
+      buildFeedbackControls();
+      bindGlobalControls();
+    }
+
+    function buildCheckboxGroup(key, options, type = "checkbox", segmented = false) {
+      const container = document.querySelector(`[data-options="${key}"]`);
+      container.innerHTML = "";
+      options.forEach(option => {
+        const id = `${key}-${slug(option)}`;
+        const label = document.createElement("label");
+        label.className = segmented ? "" : "option";
+        label.innerHTML = `
+          <input type="${type}" name="${key}" value="${escapeAttr(option)}" id="${id}">
+          <span class="option-text"><span>${option}</span><span class="count-pill" data-count-for="${key}:${escapeAttr(option)}">0</span></span>
+        `;
+        container.appendChild(label);
+      });
+      container.addEventListener("change", event => {
+        if (!event.target.matches("input")) return;
+        filters[key] = new Set(Array.from(container.querySelectorAll("input:checked")).map(input => input.value));
+        applyFilters();
+      });
+    }
+
+    function buildMappedCheckboxGroup(key, options) {
+      const container = document.querySelector(`[data-options="${key}"]`);
+      container.innerHTML = "";
+      options.forEach(option => {
+        const id = `${key}-${slug(option.label)}`;
+        const label = document.createElement("label");
+        label.className = "option";
+        label.innerHTML = `
+          <input type="checkbox" name="${key}" value="${escapeAttr(option.label)}" id="${id}">
+          <span class="option-text"><span>${option.label}</span><span class="count-pill" data-count-for="${key}:${escapeAttr(option.label)}">0</span></span>
+        `;
+        container.appendChild(label);
+      });
+      container.addEventListener("change", event => {
+        if (!event.target.matches("input")) return;
+        filters[key] = new Set(Array.from(container.querySelectorAll("input:checked")).map(input => input.value));
+        applyFilters();
+      });
+    }
+
+    function buildGenderControls() {
+      const container = document.querySelector('[data-options="gender"]');
+      container.innerHTML = "";
+      ["All", "Female", "Male"].forEach(option => {
+        const id = `gender-${slug(option)}`;
+        const label = document.createElement("label");
+        label.innerHTML = `
+          <input type="radio" name="gender" value="${option}" id="${id}" ${option === "All" ? "checked" : ""}>
+          <span>${option}</span>
+          <span class="count-pill" data-count-for="gender:${option}">0</span>
+        `;
+        container.appendChild(label);
+      });
+      container.addEventListener("change", event => {
+        if (!event.target.matches("input")) return;
+        filters.gender = event.target.value;
+        applyFilters();
+      });
+    }
+
+    function buildCompareOptions() {
+      const container = document.getElementById("compareOptions");
+      container.innerHTML = "";
+      familyStageAll.forEach(stage => {
+        const id = `compare-${slug(stage)}`;
+        const label = document.createElement("label");
+        label.innerHTML = `<input type="checkbox" value="${escapeAttr(stage)}" id="${id}" ${compareSegments.has(stage) ? "checked" : ""}> ${stage}`;
+        container.appendChild(label);
+      });
+      container.addEventListener("change", event => {
+        if (!event.target.matches("input")) return;
+        const checked = Array.from(container.querySelectorAll("input:checked"));
+        if (checked.length > 4) {
+          event.target.checked = false;
+          return;
+        }
+        compareSegments = new Set(checked.map(input => input.value));
+        renderPriorities(filteredRows);
+      });
+    }
+
+    function buildFeedbackControls() {
+      const questionSelect = document.getElementById("feedbackQuestionFilter");
+      questionSelect.innerHTML = `<option value="All">All questions</option>` +
+        feedbackQuestions.map(question => `<option value="${escapeAttr(question.label)}">${question.label}</option>`).join("");
+      const themeSelect = document.getElementById("feedbackThemeFilter");
+      themeSelect.innerHTML = `<option value="All">All themes</option>` +
+        feedbackThemes.map(theme => `<option value="${escapeAttr(theme.label)}">${theme.label}</option>`).join("") +
+        `<option value="Other">Other</option>`;
+    }
+
+    function bindGlobalControls() {
+      document.getElementById("resetFilters").addEventListener("click", resetFilters);
+      document.getElementById("filterToggle").addEventListener("click", () => {
+        const panel = document.getElementById("filtersPanel");
+        panel.classList.toggle("open");
+        document.getElementById("filterToggle").textContent = panel.classList.contains("open") ? "Hide filters" : "Show filters";
+      });
+      document.querySelectorAll(".tab-btn").forEach(button => {
+        button.addEventListener("click", () => {
+          currentTab = button.dataset.tab;
+          document.querySelectorAll(".tab-btn").forEach(btn => btn.classList.toggle("active", btn === button));
+          document.querySelectorAll(".tab-panel").forEach(panel => panel.classList.toggle("active", panel.id === currentTab));
+          applyFilters();
+        });
+      });
+      document.getElementById("satisfactionDistributionToggle").addEventListener("change", () => renderSatisfaction(filteredRows));
+      document.getElementById("engagementDistributionToggle").addEventListener("change", () => renderEngagement(filteredRows));
+      document.getElementById("compareToggle").addEventListener("change", event => {
+        document.getElementById("compareControls").classList.toggle("visible", event.target.checked);
+        renderPriorities(filteredRows);
+      });
+      document.getElementById("rawSearch").addEventListener("input", event => {
+        rawSearchTerm = event.target.value.trim().toLowerCase();
+        if (currentTab === "raw") renderRawData(filteredRows);
+      });
+      document.getElementById("rawRespectFilters").addEventListener("change", () => {
+        if (currentTab === "raw") renderRawData(filteredRows);
+      });
+      document.getElementById("feedbackSearch").addEventListener("input", event => {
+        feedbackSearchTerm = event.target.value.trim().toLowerCase();
+        if (currentTab === "feedback") renderFeedback(filteredRows);
+      });
+      document.getElementById("feedbackQuestionFilter").addEventListener("change", event => {
+        feedbackQuestionFilter = event.target.value;
+        renderFeedback(filteredRows);
+      });
+      document.getElementById("feedbackThemeFilter").addEventListener("change", event => {
+        feedbackThemeFilter = event.target.value;
+        renderFeedback(filteredRows);
+      });
+      document.getElementById("feedbackSort").addEventListener("change", () => renderFeedback(filteredRows));
+    }
+
+    function resetFilters() {
+      Object.assign(filters, {
+        familyStage: new Set(),
+        tenureBucket: new Set(),
+        ageBucket: new Set(),
+        gender: "All",
+        householdType: new Set(),
+        householdIds: new Set(),
+        selfIds: new Set(),
+        secondaryShul: new Set()
+      });
+      document.querySelectorAll("#filtersPanel input[type='checkbox']").forEach(input => input.checked = false);
+      document.querySelector('input[name="gender"][value="All"]').checked = true;
+      applyFilters();
+    }
+
+    function applyFilters() {
+      filteredRows = rows.filter(row => rowMatchesFilters(row, filters));
+      updateFilterCounts();
+      updateHeader();
+      renderCurrentTab(filteredRows);
+    }
+
+    function rowMatchesFilters(row, activeFilters, skipKey = null) {
+      if (skipKey !== "familyStage" && activeFilters.familyStage.size && !activeFilters.familyStage.has(row.familyStage)) return false;
+      if (skipKey !== "tenureBucket" && activeFilters.tenureBucket.size && !activeFilters.tenureBucket.has(row.tenureBucket)) return false;
+      if (skipKey !== "ageBucket" && activeFilters.ageBucket.size && !activeFilters.ageBucket.has(row.ageBucket)) return false;
+      if (skipKey !== "gender" && activeFilters.gender !== "All" && row.gender !== activeFilters.gender) return false;
+      if (skipKey !== "householdType" && activeFilters.householdType.size && !activeFilters.householdType.has(row.householdType)) return false;
+      if (skipKey !== "householdIds" && activeFilters.householdIds.size && !matchesMapped(row.householdIds, householdIdOptions, activeFilters.householdIds)) return false;
+      if (skipKey !== "selfIds" && activeFilters.selfIds.size && !matchesMapped(row.selfIds, selfIdOptions, activeFilters.selfIds)) return false;
+      if (skipKey !== "secondaryShul" && activeFilters.secondaryShul.size && !Array.from(activeFilters.secondaryShul).some(label => row.secondaryShulGroups.has(label))) return false;
+      return true;
+    }
+
+    function matchesMapped(values, options, selectedLabels) {
+      return Array.from(selectedLabels).some(label => {
+        const option = options.find(item => item.label === label);
+        if (!option) return false;
+        return values.some(value => option.match.some(pattern => value.toLowerCase().includes(pattern.toLowerCase())));
+      });
+    }
+
+    function updateFilterCounts() {
+      const definitions = {
+        familyStage: familyStageOptions,
+        tenureBucket: tenureOptions,
+        ageBucket: ageOptions,
+        gender: ["All", "Female", "Male"],
+        householdType: householdOptions,
+        householdIds: householdIdOptions.map(item => item.label),
+        selfIds: selfIdOptions.map(item => item.label),
+        secondaryShul: shulOptions.map(item => item.label)
+      };
+
+      Object.entries(definitions).forEach(([key, options]) => {
+        const baseRows = rows.filter(row => rowMatchesFilters(row, filters, key));
+        options.forEach(option => {
+          let count;
+          if (key === "gender") {
+            count = option === "All" ? baseRows.length : baseRows.filter(row => row.gender === option).length;
+          } else if (key === "householdIds") {
+            count = baseRows.filter(row => matchesMapped(row.householdIds, householdIdOptions, new Set([option]))).length;
+          } else if (key === "selfIds") {
+            count = baseRows.filter(row => matchesMapped(row.selfIds, selfIdOptions, new Set([option]))).length;
+          } else if (key === "secondaryShul") {
+            count = baseRows.filter(row => row.secondaryShulGroups.has(option)).length;
+          } else if (key === "householdType") {
+            count = baseRows.filter(row => row.householdType === option).length;
+          } else {
+            count = baseRows.filter(row => row[key] === option).length;
+          }
+          const countNode = document.querySelector(`[data-count-for="${cssEscape(`${key}:${option}`)}"]`);
+          if (countNode) countNode.textContent = count;
+        });
+      });
+    }
+
+    function updateHeader() {
+      const n = filteredRows.length;
+      const total = rows.length;
+      document.getElementById("respondentChip").textContent = `Showing ${n} of ${total} respondents`;
+      const activeCount = filters.familyStage.size + filters.tenureBucket.size + filters.ageBucket.size +
+        (filters.gender === "All" ? 0 : 1) + filters.householdType.size + filters.householdIds.size +
+        filters.selfIds.size + filters.secondaryShul.size;
+      document.getElementById("filterSummary").textContent = `${activeCount} active`;
+      const warning = document.getElementById("smallSampleWarning");
+      warning.style.display = n > 0 && n < 10 ? "block" : "none";
+      warning.textContent = `Small sample — interpret with caution (n=${n}).`;
+    }
+
+    function renderCurrentTab(data) {
+      if (currentTab === "overview") renderOverview(data);
+      if (currentTab === "satisfaction") {
+        renderSatisfaction(data);
+        renderEngagement(data);
+        renderYouthAndWomen(data);
+      }
+      if (currentTab === "priorities") {
+        renderValues(data);
+        renderPriorities(data);
+      }
+      if (currentTab === "inclusion") renderInclusion(data);
+      if (currentTab === "feedback") renderFeedback(data);
+      if (currentTab === "raw") renderRawData(data);
+    }
+
+    function renderOverview(data) {
+      const n = data.length;
+      document.getElementById("metricCount").textContent = n;
+      document.getElementById("metricWelcoming").textContent = formatAvg(avg(data, row => row.welcomingScore));
+      document.getElementById("metricIntegration").textContent = formatAvg(avg(data, row => row.integrationScore));
+      document.getElementById("metricFullMembers").textContent = n ? `${Math.round(data.filter(row => row.membershipGroup === "Current full member").length / n * 100)}%` : "—";
+
+      setTitle("membershipTitle", `Membership type distribution (n=${n})`);
+      renderCountBar("membershipChart", counts(data, row => row.membershipGroup), { indexAxis: "y", palette: navyPalette });
+      setTitle("tenureTitle", `Tenure distribution (n=${n})`);
+      renderCountBar("tenureChart", counts(data, row => row.tenureBucket, tenureOptions), { palette: goldPalette });
+      setTitle("ageTitle", `Age distribution (n=${n})`);
+      renderCountBar("ageChart", counts(data, row => row.ageBucket, ageOptions), { palette: navyPalette });
+      setTitle("genderTitle", `Gender split (n=${n})`);
+      renderCountBar("genderChart", counts(data, row => row.gender, ["Female", "Male", "Unspecified"]), { palette: goldPalette });
+      setTitle("householdTitle", `Household type (n=${n})`);
+      renderCountBar("householdChart", counts(data, row => row.householdType, householdOptions), { indexAxis: "y", palette: navyPalette });
+      setTitle("familyTitle", `Family stage distribution (n=${n})`);
+      renderCountBar("familyChart", counts(data, row => row.familyStage, familyStageAll), { indexAxis: "y", palette: goldPalette });
+    }
+
+    function renderSatisfaction(data) {
+      const distribution = document.getElementById("satisfactionDistributionToggle").checked;
+      setTitle("satisfactionTitle", `Satisfaction Scores (n=${data.length})`);
+      document.getElementById("satisfactionSubtitle").textContent = distribution ? "100% response distribution" : "Average score and response count";
+      if (distribution) {
+        renderDistributionStack("satisfactionChart", data, satisfactionItems, satisfactionMap, ["Very Satisfied", "Satisfied", "Neutral", "Dissatisfied", "Very Dissatisfied"]);
+      } else {
+        renderAverageBars("satisfactionChart", data, satisfactionItems, satisfactionMap);
+      }
+    }
+
+    function renderEngagement(data) {
+      const distribution = document.getElementById("engagementDistributionToggle").checked;
+      setTitle("engagementTitle", `Engagement Frequency (n=${data.length})`);
+      document.getElementById("engagementSubtitle").textContent = distribution ? "100% frequency distribution" : "Average frequency and response count";
+      if (distribution) {
+        renderDistributionStack("engagementChart", data, engagementItems, engagementMap, ["Weekly", "A few times a month", "Monthly", "A few times a year", "Rarely/Never"]);
+      } else {
+        renderAverageBars("engagementChart", data, engagementItems, engagementMap);
+      }
+    }
+
+    function renderYouthAndWomen(data) {
+      const youthCounts = countMappedValues(data, row => row.youthSatisfaction, Object.keys(youthMap));
+      const youthTotal = Object.values(youthCounts).reduce((sum, value) => sum + value, 0);
+      setTitle("youthTitle", `Youth Programming Satisfaction (n=${data.length}; rated=${youthTotal})`);
+      document.getElementById("youthCard").classList.toggle("hidden", youthTotal === 0);
+      document.getElementById("youthChart").classList.toggle("hidden", youthTotal === 0);
+      document.getElementById("youthEmpty").style.display = youthTotal === 0 ? "flex" : "none";
+      if (youthTotal > 0) {
+        renderDonut("youthChart", youthCounts, ["#3f8f68", "#8abf70", "#d7a83e", "#c04b49"]);
+      } else {
+        destroyChart("youthChart");
+      }
+
+      const womenCounts = counts(data, row => womenLabel(row.womenParticipation), [
+        "Current amount feels appropriate",
+        "Prefer expanded roles",
+        "Prefer less participation"
+      ]);
+      setTitle("womenTitle", `Women’s Participation Preference (n=${data.length}; answered=${sumCounts(womenCounts)})`);
+      renderDonut("womenChart", womenCounts, ["#1e3a5f", "#c9a84c", "#c04b49"]);
+    }
+
+    function renderValues(data) {
+      setTitle("valuesTitle", `Community Values (n=${data.length})`);
+      const labels = valuesItems.map(item => item[1]);
+      const filteredValues = valuesItems.map(([col]) => avg(data, row => scoreValue(row.raw[col], likertMap)));
+      const datasets = [{
+        label: hasActiveFilters() ? "Filtered segment" : "All respondents",
+        data: filteredValues,
+        borderColor: "#1e3a5f",
+        backgroundColor: "rgba(30, 58, 95, .18)",
+        pointBackgroundColor: "#1e3a5f",
+        borderWidth: 2
+      }];
+      if (hasActiveFilters()) {
+        datasets.push({
+          label: "All respondents",
+          data: valuesItems.map(([col]) => avg(rows, row => scoreValue(row.raw[col], likertMap))),
+          borderColor: "#c9a84c",
+          backgroundColor: "rgba(201, 168, 76, .12)",
+          pointBackgroundColor: "#c9a84c",
+          borderWidth: 2
+        });
+      }
+      createChart("valuesChart", {
+        type: "radar",
+        data: { labels, datasets },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            r: {
+              min: 0,
+              max: 5,
+              ticks: { stepSize: 1, backdropColor: "transparent" },
+              grid: { color: "rgba(105, 115, 134, .25)" },
+              angleLines: { color: "rgba(105, 115, 134, .25)" },
+              pointLabels: { color: "#26344c", font: { size: 11, weight: "700" } }
+            }
+          },
+          plugins: {
+            legend: { position: "bottom" },
+            tooltip: { callbacks: { label: ctx => `${ctx.dataset.label}: ${formatAvg(ctx.raw)}` } }
+          }
+        }
+      });
+    }
+
+    function renderPriorities(data) {
+      const compare = document.getElementById("compareToggle").checked;
+      setTitle("prioritiesTitle", `Strategic Priorities (n=${data.length})`);
+      if (compare) {
+        renderPriorityCompare(data);
+      } else {
+        document.getElementById("priorityFlags").classList.remove("visible");
+        const ranked = priorityItems.map(([col, label]) => {
+          const values = data.map(row => numberValue(row.raw[col])).filter(v => v !== null);
+          return { label, avg: mean(values), count: values.length };
+        }).sort((a, b) => (b.avg ?? 0) - (a.avg ?? 0));
+        createChart("prioritiesChart", {
+          type: "bar",
+          data: {
+            labels: ranked.map(item => item.label),
+            datasets: [{
+              label: "Average importance",
+              data: ranked.map(item => item.avg),
+              backgroundColor: ranked.map(item => priorityColor(item.avg)),
+              borderColor: ranked.map(item => darken(priorityColor(item.avg))),
+              borderWidth: 1,
+              counts: ranked.map(item => item.count)
+            }]
+          },
+          options: horizontalScoreOptions("Average importance", false)
+        });
+      }
+    }
+
+    function renderPriorityCompare(data) {
+      const selected = Array.from(compareSegments).slice(0, 4);
+      const baseRows = data;
+      const segmentRows = selected.map(stage => ({
+        stage,
+        rows: baseRows.filter(row => row.familyStage === stage)
+      }));
+      const labels = priorityItems.map(item => item[1]);
+      const segmentScores = segmentRows.map(segment => priorityItems.map(([col]) => avg(segment.rows, row => numberValue(row.raw[col]))));
+      const flags = [];
+      const flagText = [];
+      labels.forEach((label, index) => {
+        const values = segmentScores.map(scores => scores[index]).filter(value => value !== null && Number.isFinite(value));
+        if (values.length >= 2 && Math.max(...values) - Math.min(...values) > 0.5) {
+          flags.push(index);
+          flagText.push(`${label}: ${formatAvg(Math.min(...values))}–${formatAvg(Math.max(...values))}`);
+        }
+      });
+      const colors = ["#1e3a5f", "#c9a84c", "#3f8f68", "#c04b49"];
+      createChart("prioritiesChart", {
+        type: "bar",
+        data: {
+          labels,
+          datasets: segmentRows.map((segment, i) => ({
+            label: `${segment.stage} (n=${segment.rows.length})`,
+            data: segmentScores[i],
+            backgroundColor: colors[i],
+            borderColor: darken(colors[i]),
+            borderWidth: 1
+          }))
+        },
+        options: {
+          ...horizontalScoreOptions("Average importance", false),
+          plugins: {
+            ...horizontalScoreOptions("Average importance", false).plugins,
+            differenceFlag: { flags }
+          }
+        }
+      });
+      const flagsNode = document.getElementById("priorityFlags");
+      flagsNode.classList.toggle("visible", flagText.length > 0);
+      flagsNode.innerHTML = flagText.length
+        ? `<strong>Flagged differences greater than 0.5 points:</strong> ${flagText.slice(0, 8).join("; ")}${flagText.length > 8 ? "." : ""}`
+        : "";
+    }
+
+    function renderInclusion(data) {
+      setTitle("inclusionGroupsTitle", `Groups Needing Better Inclusion (n=${data.length})`);
+      const inclusionCounts = multiCounts(data, row => row.inclusionGroups)
+        .filter(item => !/^No — Skokie Valley is welcoming to all$/i.test(item.label))
+        .filter(item => item.count > 0)
+        .slice(0, 14);
+      renderRankedCountBar("inclusionGroupsChart", inclusionCounts);
+
+      setTitle("drawTitle", `What Drew People to SVAJ (n=${data.length})`);
+      renderRankedCountBar("drawChart", multiCounts(data, row => row.drewToSvaj).slice(0, 14));
+
+      setTitle("barriersTitle", `Barriers to Deeper Engagement (n=${data.length})`);
+      const barrierCounts = barrierStandardOptions.map(label => ({
+        label,
+        count: data.filter(row => row.barriers.some(item => item === label)).length
+      })).filter(item => item.count > 0).sort((a, b) => b.count - a.count);
+      renderRankedCountBar("barriersChart", barrierCounts);
+
+      setTitle("welcomeDistTitle", `Welcoming Score Distribution (n=${data.length})`);
+      renderCountBar("welcomeDistChart", scoreDistribution(data, row => row.welcomingScore), { palette: scorePalette });
+      setTitle("integrationDistTitle", `Integration Experience Distribution (n=${data.length})`);
+      renderCountBar("integrationDistChart", scoreDistribution(data, row => row.integrationScore), { palette: scorePalette });
+    }
+
+    function renderFeedback(data) {
+      const allFeedback = collectFeedback(data);
+      let visibleFeedback = allFeedback.filter(item => {
+        const searchHaystack = `${item.text} ${item.question} ${item.themes.join(" ")} ${item.row.familyStage} ${item.row.householdType}`.toLowerCase();
+        if (feedbackSearchTerm && !searchHaystack.includes(feedbackSearchTerm)) return false;
+        if (feedbackQuestionFilter !== "All" && item.question !== feedbackQuestionFilter) return false;
+        if (feedbackThemeFilter !== "All" && !item.themes.includes(feedbackThemeFilter)) return false;
+        return true;
+      });
+
+      const sortMode = document.getElementById("feedbackSort").value;
+      visibleFeedback.sort((a, b) => {
+        if (sortMode === "theme") return a.themes[0].localeCompare(b.themes[0]) || b.score - a.score;
+        if (sortMode === "respondent") return a.row.index - b.row.index || a.question.localeCompare(b.question);
+        return b.score - a.score || b.wordCount - a.wordCount;
+      });
+
+      const themeCounts = feedbackThemes.map(theme => ({
+        label: theme.label,
+        count: visibleFeedback.filter(item => item.themes.includes(theme.label)).length
+      })).filter(item => item.count > 0).sort((a, b) => b.count - a.count);
+      const questionCounts = counts(visibleFeedback, item => item.question).slice(0, 12);
+
+      setTitle("feedbackThemesTitle", `Feedback Themes (n=${data.length})`);
+      setTitle("feedbackQuestionsTitle", `Feedback by Question (n=${data.length})`);
+      renderRankedCountBar("feedbackThemesChart", themeCounts);
+      renderRankedCountBar("feedbackQuestionsChart", questionCounts);
+
+      const respondentCount = new Set(visibleFeedback.map(item => item.row.index)).size;
+      const avgWords = visibleFeedback.length ? Math.round(visibleFeedback.reduce((sum, item) => sum + item.wordCount, 0) / visibleFeedback.length) : 0;
+      document.getElementById("feedbackResponseCount").textContent = visibleFeedback.length;
+      document.getElementById("feedbackRespondentCount").textContent = respondentCount;
+      document.getElementById("feedbackThemeCount").textContent = themeCounts.length;
+      document.getElementById("feedbackAvgLength").textContent = avgWords;
+
+      document.getElementById("feedbackThemeStrip").innerHTML = themeCounts.slice(0, 10).map(item => {
+        const theme = feedbackThemes.find(entry => entry.label === item.label);
+        const color = theme ? theme.color : "#697386";
+        return `<span class="theme-pill" style="border-color:${color}; color:${color};">${escapeHtml(item.label)} · ${item.count}</span>`;
+      }).join("");
+
+      const cards = visibleFeedback.slice(0, 48);
+      document.getElementById("feedbackGrid").innerHTML = cards.map(item => feedbackCardHtml(item)).join("");
+      const empty = document.getElementById("feedbackEmpty");
+      empty.style.display = visibleFeedback.length ? "none" : "flex";
+      empty.textContent = allFeedback.length
+        ? "No specific written responses match the current feedback search."
+        : "No specific written responses match the current filters.";
+    }
+
+    function renderRawData(data) {
+      const respectFilters = document.getElementById("rawRespectFilters").checked;
+      const sourceRows = respectFilters ? data : rows;
+      const matchingRows = rawSearchTerm
+        ? sourceRows.filter(row => row.raw.some(cell => normalize(cell).toLowerCase().includes(rawSearchTerm)))
+        : sourceRows;
+      document.getElementById("rawCount").textContent = `${matchingRows.length} rows${respectFilters ? " after filters" : ""}`;
+
+      const columnCount = headers.length || (rows.length ? Math.max(...rows.map(row => row.raw.length)) : 0);
+      const letters = Array.from({ length: columnCount }, (_, index) => columnLetter(index + 1));
+      const headerCells = letters.map(letter => `<th>${letter}</th>`).join("");
+      const csvHeaderRow = `<tr class="header-row"><th class="row-num">1</th>${Array.from({ length: columnCount }, (_, col) => `<td title="${escapeAttr(headers[col] || "")}">${escapeHtml(headers[col] || "")}</td>`).join("")}</tr>`;
+      const bodyRows = matchingRows.map(row => {
+        const cells = Array.from({ length: columnCount }, (_, col) => {
+          const value = normalize(row.raw[col]);
+          return `<td title="${escapeAttr(value)}">${escapeHtml(value)}</td>`;
+        }).join("");
+        return `<tr><th class="row-num">${row.index + 2}</th>${cells}</tr>`;
+      }).join("");
+      document.getElementById("rawTable").innerHTML = `<thead><tr><th class="row-num"></th>${headerCells}</tr></thead><tbody>${csvHeaderRow}${bodyRows}</tbody>`;
+    }
+
+    function collectFeedback(data) {
+      const items = [];
+      data.forEach(row => {
+        feedbackQuestions.forEach(question => {
+          const text = normalize(row.raw[question.col]);
+          if (!isMeaningfulFeedback(text)) return;
+          const themes = detectThemes(text);
+          const wordCount = countWords(text);
+          items.push({
+            row,
+            question: question.label,
+            category: question.category,
+            text,
+            themes,
+            wordCount,
+            score: feedbackPriorityScore(text, question, themes, wordCount)
+          });
+        });
+      });
+      return items;
+    }
+
+    function feedbackCardHtml(item) {
+      const priorityClass = item.score >= 8 ? "priority-high" : item.score >= 5 ? "priority-medium" : "priority-low";
+      const respondent = `R${String(item.row.index + 1).padStart(3, "0")}`;
+      const tags = [
+        item.category,
+        item.row.familyStage,
+        item.row.tenureBucket,
+        ...item.themes.slice(0, 2)
+      ].filter(Boolean);
+      return `
+        <article class="feedback-card ${priorityClass}">
+          <div class="feedback-meta"><span>${respondent}</span><span>${item.wordCount} words</span></div>
+          <h3 class="feedback-question">${escapeHtml(item.question)}</h3>
+          <p class="feedback-text">${escapeHtml(item.text)}</p>
+          <div class="feedback-tags">${tags.map(tag => `<span class="feedback-tag">${escapeHtml(tag)}</span>`).join("")}</div>
+        </article>
+      `;
+    }
+
+    function isMeaningfulFeedback(text) {
+      const cleaned = text.trim();
+      if (!cleaned) return false;
+      if (/^(n\/?a|na|none|no|nope|null|nil|nothing|not sure|unsure|don't know|dont know|n\.a\.|df|sdf)$/i.test(cleaned)) return false;
+      if (cleaned.length < 8) return false;
+      return true;
+    }
+
+    function detectThemes(text) {
+      const lower = text.toLowerCase();
+      const matches = feedbackThemes
+        .filter(theme => theme.terms.some(term => lower.includes(term.toLowerCase())))
+        .map(theme => theme.label);
+      return matches.length ? matches : ["Other"];
+    }
+
+    function feedbackPriorityScore(text, question, themes, wordCount) {
+      const lower = text.toLowerCase();
+      let score = Math.min(5, Math.floor(wordCount / 12));
+      if (/(should|need|needs|would|could|improve|better|more|less|specific|recommend|suggest|wish|hope)/i.test(text)) score += 2;
+      if (/(risk|challenge|concern|problem|barrier|excluded|uncomfortable|cliquish|hard|difficult|lack|missing|prevent)/i.test(text)) score += 2;
+      if (question.category === "Risk" || question.category === "Improvement" || question.category === "Inclusion") score += 1;
+      if (themes.includes("Other")) score -= 1;
+      if (lower.includes("thank") || lower.includes("appreciate")) score += 1;
+      return Math.max(1, score);
+    }
+
+    function countWords(text) {
+      return (text.match(/\b[\w'’/-]+\b/g) || []).length;
+    }
+
+    function renderAverageBars(canvasId, data, items, scoreMap) {
+      const ranked = items.map(([col, label]) => {
+        const values = data.map(row => scoreValue(row.raw[col], scoreMap)).filter(v => v !== null);
+        return { label, avg: mean(values), count: values.length };
+      }).sort((a, b) => (b.avg ?? 0) - (a.avg ?? 0));
+      createChart(canvasId, {
+        type: "bar",
+        data: {
+          labels: ranked.map(item => item.label),
+          datasets: [{
+            label: "Average score",
+            data: ranked.map(item => item.avg),
+            backgroundColor: ranked.map(item => scoreColor(item.avg)),
+            borderColor: ranked.map(item => darken(scoreColor(item.avg))),
+            borderWidth: 1,
+            counts: ranked.map(item => item.count)
+          }]
+        },
+        options: horizontalScoreOptions("Average score", true)
+      });
+    }
+
+    function renderDistributionStack(canvasId, data, items, scoreMap, categories) {
+      const labels = items.map(item => item[1]);
+      const totals = items.map(([col]) => data.map(row => scoreValue(row.raw[col], scoreMap)).filter(v => v !== null).length);
+      const palette = ["#3f8f68", "#8abf70", "#d7a83e", "#dd8a58", "#c04b49"];
+      const datasets = categories.map((category, index) => ({
+        label: category,
+        data: items.map(([col], itemIndex) => {
+          const total = totals[itemIndex];
+          if (!total) return 0;
+          const count = data.filter(row => normalize(row.raw[col]) === category).length;
+          return Math.round(count / total * 1000) / 10;
+        }),
+        rawCounts: items.map(([col]) => data.filter(row => normalize(row.raw[col]) === category).length),
+        backgroundColor: palette[index],
+        borderColor: "white",
+        borderWidth: 1
+      }));
+
+      createChart(canvasId, {
+        type: "bar",
+        data: { labels, datasets },
+        options: {
+          indexAxis: "y",
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            x: { stacked: true, min: 0, max: 100, ticks: { callback: value => `${value}%` }, grid: { color: "rgba(105,115,134,.16)" } },
+            y: { stacked: true, ticks: { autoSkip: false, font: { size: 11, weight: "650" } }, grid: { display: false } }
+          },
+          plugins: {
+            legend: { position: "bottom" },
+            tooltip: {
+              callbacks: {
+                label(ctx) {
+                  return `${ctx.dataset.label}: ${ctx.raw}% (${ctx.dataset.rawCounts[ctx.dataIndex]} responses)`;
+                }
+              }
+            }
+          }
+        }
+      });
+    }
+
+    function renderCountBar(canvasId, countRows, options = {}) {
+      const rowsForChart = Array.isArray(countRows) ? countRows : Object.entries(countRows).map(([label, count]) => ({ label, count }));
+      const palette = options.palette || navyPalette;
+      createChart(canvasId, {
+        type: "bar",
+        data: {
+          labels: rowsForChart.map(item => item.label),
+          datasets: [{
+            label: "Respondents",
+            data: rowsForChart.map(item => item.count),
+            backgroundColor: rowsForChart.map((_, index) => palette(index)),
+            borderColor: rowsForChart.map((_, index) => darken(palette(index))),
+            borderWidth: 1
+          }]
+        },
+        options: {
+          indexAxis: options.indexAxis || "x",
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            x: { beginAtZero: true, ticks: { precision: 0, autoSkip: false, maxRotation: 35, minRotation: 0 }, grid: { display: options.indexAxis === "y", color: "rgba(105,115,134,.13)" } },
+            y: { beginAtZero: true, ticks: { precision: 0, autoSkip: false, font: { size: 11, weight: "650" } }, grid: { color: "rgba(105,115,134,.13)" } }
+          },
+          plugins: {
+            legend: { display: false },
+            tooltip: { callbacks: { label: ctx => `${ctx.raw} respondents` } }
+          }
+        }
+      });
+    }
+
+    function renderRankedCountBar(canvasId, countRows) {
+      const sorted = [...countRows].sort((a, b) => b.count - a.count);
+      createChart(canvasId, {
+        type: "bar",
+        data: {
+          labels: sorted.map(item => item.label),
+          datasets: [{
+            label: "Mentions",
+            data: sorted.map(item => item.count),
+            backgroundColor: sorted.map((_, index) => navyPalette(index)),
+            borderColor: sorted.map((_, index) => darken(navyPalette(index))),
+            borderWidth: 1
+          }]
+        },
+        options: {
+          indexAxis: "y",
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            x: { beginAtZero: true, ticks: { precision: 0 }, grid: { color: "rgba(105,115,134,.14)" } },
+            y: { ticks: { autoSkip: false, font: { size: 11, weight: "650" } }, grid: { display: false } }
+          },
+          plugins: {
+            legend: { display: false },
+            tooltip: { callbacks: { label: ctx => `${ctx.raw} mentions` } }
+          }
+        }
+      });
+    }
+
+    function renderDonut(canvasId, countObject, colors) {
+      const entries = Object.entries(countObject).filter(([, count]) => count > 0);
+      createChart(canvasId, {
+        type: "doughnut",
+        data: {
+          labels: entries.map(([label]) => label),
+          datasets: [{
+            data: entries.map(([, count]) => count),
+            backgroundColor: colors,
+            borderColor: "white",
+            borderWidth: 2
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          cutout: "58%",
+          plugins: {
+            legend: { position: "bottom" },
+            tooltip: {
+              callbacks: {
+                label(ctx) {
+                  const total = ctx.dataset.data.reduce((sum, value) => sum + value, 0);
+                  const pct = total ? Math.round(ctx.raw / total * 100) : 0;
+                  return `${ctx.label}: ${ctx.raw} (${pct}%)`;
+                }
+              }
+            }
+          }
+        }
+      });
+    }
+
+    function createChart(canvasId, config) {
+      destroyChart(canvasId);
+      const ctx = document.getElementById(canvasId).getContext("2d");
+      charts[canvasId] = new Chart(ctx, config);
+    }
+
+    function destroyChart(canvasId) {
+      if (charts[canvasId]) {
+        charts[canvasId].destroy();
+        delete charts[canvasId];
+      }
+    }
+
+    function horizontalScoreOptions(axisLabel, showCounts) {
+      return {
+        indexAxis: "y",
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          x: {
+            min: 0,
+            max: 5,
+            title: { display: true, text: axisLabel, color: "#697386", font: { weight: "750" } },
+            ticks: { stepSize: 1 },
+            grid: { color: "rgba(105,115,134,.16)" }
+          },
+          y: {
+            ticks: { autoSkip: false, font: { size: 11, weight: "650" } },
+            grid: { display: false }
+          }
+        },
+          plugins: {
+            legend: { display: false },
+            valueLabel: { enabled: true },
+            tooltip: {
+              callbacks: {
+                label(ctx) {
+                const score = formatAvg(ctx.raw);
+                if (!showCounts || !ctx.dataset.counts) return `${ctx.dataset.label}: ${score}`;
+                return `${ctx.dataset.label}: ${score} (${ctx.dataset.counts[ctx.dataIndex]} responses)`;
+              }
+            }
+          }
+        }
+      };
+    }
+
+    function counts(data, accessor, orderedLabels = null) {
+      const map = new Map();
+      data.forEach(row => {
+        const label = accessor(row) || "Unspecified";
+        map.set(label, (map.get(label) || 0) + 1);
+      });
+      if (orderedLabels) {
+        const rowsOut = orderedLabels.map(label => ({ label, count: map.get(label) || 0 }));
+        Array.from(map.entries()).forEach(([label, count]) => {
+          if (!orderedLabels.includes(label)) rowsOut.push({ label, count });
+        });
+        return rowsOut.filter(item => item.count > 0 || orderedLabels.includes(item.label));
+      }
+      return Array.from(map.entries()).map(([label, count]) => ({ label, count })).sort((a, b) => b.count - a.count);
+    }
+
+    function multiCounts(data, accessor) {
+      const map = new Map();
+      data.forEach(row => {
+        accessor(row).forEach(label => {
+          map.set(label, (map.get(label) || 0) + 1);
+        });
+      });
+      return Array.from(map.entries()).map(([label, count]) => ({ label, count })).sort((a, b) => b.count - a.count);
+    }
+
+    function countMappedValues(data, accessor, orderedLabels) {
+      return orderedLabels.reduce((obj, label) => {
+        obj[label.replace(/^\d - /, "")] = data.filter(row => accessor(row) === label).length;
+        return obj;
+      }, {});
+    }
+
+    function scoreDistribution(data, accessor) {
+      return [1, 2, 3, 4, 5].map(score => ({ label: String(score), count: data.filter(row => accessor(row) === score).length }));
+    }
+
+    function scoreValue(value, map) {
+      const text = normalize(value);
+      if (!text || /^n\/?a$/i.test(text)) return null;
+      if (map[text] !== undefined) return map[text];
+      const n = Number.parseFloat(text);
+      return Number.isFinite(n) ? n : null;
+    }
+
+    function avg(data, accessor) {
+      const values = data.map(accessor).filter(value => value !== null && Number.isFinite(value));
+      return mean(values);
+    }
+
+    function mean(values) {
+      if (!values.length) return null;
+      return values.reduce((sum, value) => sum + value, 0) / values.length;
+    }
+
+    function formatAvg(value) {
+      return value === null || value === undefined || !Number.isFinite(value) ? "—" : value.toFixed(1);
+    }
+
+    function sumCounts(countRows) {
+      if (Array.isArray(countRows)) return countRows.reduce((sum, item) => sum + item.count, 0);
+      return Object.values(countRows).reduce((sum, value) => sum + value, 0);
+    }
+
+    function womenLabel(value) {
+      if (/expanded roles/i.test(value)) return "Prefer expanded roles";
+      if (/less participation/i.test(value)) return "Prefer less participation";
+      if (/current amount/i.test(value)) return "Current amount feels appropriate";
+      return value || "Unspecified";
+    }
+
+    function hasActiveFilters() {
+      return filters.familyStage.size || filters.tenureBucket.size || filters.ageBucket.size ||
+        filters.gender !== "All" || filters.householdType.size || filters.householdIds.size ||
+        filters.selfIds.size || filters.secondaryShul.size;
+    }
+
+    function setTitle(id, text) {
+      document.getElementById(id).textContent = text;
+    }
+
+    function scoreColor(score) {
+      if (score === null) return "#d8dee8";
+      const t = Math.max(0, Math.min(1, (score - 1) / 4));
+      const red = [192, 75, 73];
+      const yellow = [215, 168, 62];
+      const green = [63, 143, 104];
+      const start = t < .5 ? red : yellow;
+      const end = t < .5 ? yellow : green;
+      const local = t < .5 ? t * 2 : (t - .5) * 2;
+      return rgbToHex(start.map((value, i) => Math.round(value + (end[i] - value) * local)));
+    }
+
+    function priorityColor(score) {
+      if (score === null) return "#d8dee8";
+      if (score < 3) return "#c04b49";
+      if (score <= 3.5) return "#d7a83e";
+      return "#3f8f68";
+    }
+
+    function navyPalette(index) {
+      return ["#1e3a5f", "#274d7d", "#376799", "#4f83b4", "#7da4c5", "#9bb9d2"][index % 6];
+    }
+
+    function goldPalette(index) {
+      return ["#c9a84c", "#d7bc6d", "#b8973f", "#8e7330", "#e2ce8d", "#f0dfad"][index % 6];
+    }
+
+    function scorePalette(index) {
+      return ["#c04b49", "#dd8a58", "#d7a83e", "#8abf70", "#3f8f68"][index % 5];
+    }
+
+    function darken(hex) {
+      const rgb = hex.replace("#", "").match(/.{1,2}/g).map(part => Number.parseInt(part, 16));
+      return rgbToHex(rgb.map(value => Math.max(0, Math.round(value * .82))));
+    }
+
+    function rgbToHex(rgb) {
+      return `#${rgb.map(value => value.toString(16).padStart(2, "0")).join("")}`;
+    }
+
+    function slug(value) {
+      return String(value).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+    }
+
+    function columnLetter(index) {
+      let label = "";
+      while (index > 0) {
+        const mod = (index - 1) % 26;
+        label = String.fromCharCode(65 + mod) + label;
+        index = Math.floor((index - mod) / 26);
+      }
+      return label;
+    }
+
+    function escapeHtml(value) {
+      return String(value).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+    }
+
+    function escapeAttr(value) {
+      return String(value).replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    }
+
+    function cssEscape(value) {
+      if (window.CSS && CSS.escape) return CSS.escape(value);
+      return String(value).replace(/"/g, '\\"');
+    }
+
+    loadCSV();
+  </script>
+</body>
+</html>
