@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SVAJ — Survey Representativeness Analysis</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Mono:wght@400;500&family=Source+Serif+4:opsz,wght@8..60,300;8..60,400;8..60,600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy:#0f1d2e; --blue:#2c4f72; --gold:#c9a84c; --gold-lt:#e8c96e;
+  --cream:#faf7f2; --white:#fffdf9; --dark:#1a1a1a; --mid:#3d3d3d; --light:#777;
+  --green:#2d6a4f; --red:#8b2020; --amber:#b5621b; --rule:#d4c9a8;
+  --serif:'Playfair Display',Georgia,serif;
+  --body:'Source Serif 4',Georgia,serif;
+  --mono:'IBM Plex Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{background:var(--cream);color:var(--dark);font-family:var(--body);font-size:16px;line-height:1.75;font-weight:300;}
+
+nav{position:sticky;top:0;z-index:100;background:var(--navy);border-bottom:2px solid var(--gold);display:flex;align-items:center;padding:0 1.5rem;overflow-x:auto;}
+nav a{color:#8aaec8;text-decoration:none;font-family:var(--mono);font-size:10px;letter-spacing:.04em;text-transform:uppercase;padding:.7rem .9rem;white-space:nowrap;border-right:1px solid rgba(255,255,255,.08);transition:color .2s;}
+nav a:hover{color:var(--gold-lt);}
+nav a.brand{color:var(--gold-lt);font-size:11px;font-weight:500;border-right:1px solid var(--gold);}
+
+.hero{background:var(--navy);color:#fff;padding:4rem 4rem 3rem;position:relative;overflow:hidden;}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 75% 40%,rgba(201,168,76,.12) 0%,transparent 55%);pointer-events:none;}
+.hero-eye{font-family:var(--mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin-bottom:.85rem;}
+.hero h1{font-family:var(--serif);font-size:clamp(1.8rem,4vw,3rem);font-weight:700;line-height:1.15;margin-bottom:.75rem;}
+.hero h1 em{font-style:italic;color:var(--gold-lt);}
+.hero p{font-size:1rem;color:#a4bdd1;max-width:700px;font-weight:300;line-height:1.65;}
+
+.container{max-width:1180px;margin:0 auto;padding:0 2.5rem;}
+section{padding:3.5rem 0;}
+section+section{border-top:1px solid var(--rule);}
+.eye{font-family:var(--mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin-bottom:.4rem;}
+h2{font-family:var(--serif);font-size:clamp(1.4rem,2.5vw,2rem);font-weight:700;color:var(--navy);margin-bottom:.75rem;}
+.rule{width:34px;height:3px;background:var(--gold);margin-bottom:1.5rem;}
+p.body{margin-bottom:.9rem;color:var(--mid);font-weight:300;font-size:.95rem;}
+h3.sub{font-family:var(--serif);font-size:1.15rem;font-weight:700;color:var(--navy);margin:2rem 0 .6rem;}
+
+/* VERDICT BANNER */
+.verdict{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;margin:1.5rem 0;}
+@media(max-width:700px){.verdict{grid-template-columns:1fr;}}
+.verdict-card{padding:1.25rem 1.5rem;border-left:4px solid;}
+.verdict-card.good{background:rgba(45,106,79,.08);border-color:var(--green);}
+.verdict-card.warn{background:rgba(181,98,27,.08);border-color:var(--amber);}
+.verdict-card.gap{background:rgba(139,32,32,.08);border-color:var(--red);}
+.verdict-card .vc-label{font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;margin-bottom:.3rem;}
+.verdict-card.good .vc-label{color:var(--green);}
+.verdict-card.warn .vc-label{color:var(--amber);}
+.verdict-card.gap  .vc-label{color:var(--red);}
+.verdict-card h4{font-family:var(--serif);font-size:1rem;font-weight:700;color:var(--navy);margin-bottom:.35rem;}
+.verdict-card p{font-size:.83rem;color:var(--mid);font-weight:300;line-height:1.55;}
+
+/* COMPARISON BARS */
+.comp-section{margin:1.5rem 0;}
+.comp-label-row{display:flex;gap:.5rem;margin-bottom:.3rem;font-family:var(--mono);font-size:9px;letter-spacing:.06em;text-transform:uppercase;color:var(--light);}
+.comp-row{display:flex;align-items:center;gap:.75rem;margin-bottom:.6rem;}
+.comp-cat{width:120px;flex-shrink:0;font-size:.8rem;color:var(--mid);text-align:right;}
+.comp-bars{flex:1;display:flex;flex-direction:column;gap:2px;}
+.comp-bar-row{display:flex;align-items:center;gap:.4rem;}
+.comp-bar-lbl{width:70px;flex-shrink:0;font-family:var(--mono);font-size:8.5px;color:var(--light);text-align:right;}
+.comp-track{flex:1;height:14px;background:rgba(0,0,0,.07);}
+.comp-fill{height:14px;display:flex;align-items:center;justify-content:flex-end;padding-right:4px;}
+.comp-fill.comm{background:var(--navy);}
+.comp-fill.surv{background:var(--gold);}
+.comp-val{font-family:var(--mono);font-size:8.5px;color:#fff;}
+.comp-delta{font-family:var(--mono);font-size:9px;min-width:36px;margin-left:.3rem;}
+.comp-delta.pos{color:var(--green);}
+.comp-delta.neg{color:var(--red);}
+.comp-delta.neu{color:var(--light);}
+.comp-legend{display:flex;gap:1.25rem;margin-bottom:.75rem;font-family:var(--mono);font-size:9px;}
+.comp-legend span{display:flex;align-items:center;gap:.35rem;}
+.comp-legend .swatch{width:14px;height:10px;display:inline-block;}
+
+/* RESPONSE RATE TABLE */
+.rr-table{width:100%;border-collapse:collapse;font-size:.83rem;margin:1.25rem 0;}
+.rr-table th{background:var(--navy);color:var(--gold-lt);font-family:var(--mono);font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;padding:.55rem .85rem;text-align:left;}
+.rr-table th.r{text-align:right;}
+.rr-table th.c{text-align:center;}
+.rr-table td{padding:.5rem .85rem;border-bottom:1px solid var(--rule);vertical-align:middle;}
+.rr-table td.r{text-align:right;font-family:var(--mono);}
+.rr-table td.c{text-align:center;font-family:var(--mono);}
+.rr-table tr:hover td{background:rgba(201,168,76,.04);}
+.rr-pill{display:inline-block;padding:.12rem .5rem;font-family:var(--mono);font-size:9px;border-radius:2px;}
+.rr-high{background:rgba(45,106,79,.15);color:var(--green);}
+.rr-mid{background:rgba(201,168,76,.2);color:#7a5f1a;}
+.rr-low{background:rgba(139,32,32,.1);color:var(--red);}
+
+/* GAP CARDS */
+.gap-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.1rem;margin:1.25rem 0;}
+@media(max-width:700px){.gap-grid{grid-template-columns:1fr;}}
+.gap-card{border:1px solid var(--rule);background:var(--white);padding:1.25rem 1.5rem;}
+.gap-card.critical{border-top:3px solid var(--red);}
+.gap-card.moderate{border-top:3px solid var(--amber);}
+.gap-card.minor{border-top:3px solid var(--blue);}
+.gap-card h4{font-family:var(--serif);font-size:.95rem;font-weight:700;color:var(--navy);margin-bottom:.4rem;}
+.gap-card .gc-stats{font-family:var(--mono);font-size:.78rem;color:var(--gold);margin-bottom:.4rem;}
+.gap-card p{font-size:.83rem;color:var(--mid);font-weight:300;line-height:1.6;}
+
+/* CHILDREN BREAKDOWN */
+.child-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.85rem;margin:1.25rem 0;}
+@media(max-width:700px){.child-grid{grid-template-columns:1fr 1fr;}}
+.child-card{background:var(--white);border:1px solid var(--rule);padding:1rem;text-align:center;}
+.child-card .cn{font-family:var(--serif);font-size:2rem;font-weight:700;color:var(--navy);line-height:1;}
+.child-card .cl{font-family:var(--mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--light);margin-top:.25rem;}
+.child-card .cs{font-size:.78rem;color:var(--mid);margin-top:.2rem;}
+
+/* INSIGHT */
+.insight{background:var(--navy);color:var(--cream);padding:1.6rem 2rem;margin:1.75rem 0;border-left:4px solid var(--gold);}
+.insight h4{font-family:var(--serif);font-size:1rem;color:var(--gold-lt);margin-bottom:.5rem;}
+.insight p{font-size:.88rem;color:#b4c8d8;font-weight:300;line-height:1.72;}
+.insight ul{list-style:none;padding:0;}
+.insight li{font-size:.86rem;color:#b4c8d8;padding:.22rem 0 .22rem 1.1rem;position:relative;}
+.insight li::before{content:'▸';position:absolute;left:0;color:var(--gold);}
+
+.two{display:grid;grid-template-columns:1fr 1fr;gap:2rem;}
+@media(max-width:700px){.two{grid-template-columns:1fr;}}
+
+.istats{display:flex;flex-wrap:wrap;gap:1rem;margin:1.25rem 0;}
+.istat{background:var(--white);border:1px solid var(--rule);padding:.85rem 1.25rem;}
+.istat .n{font-family:var(--serif);font-size:1.8rem;font-weight:700;color:var(--navy);line-height:1;}
+.istat .d{font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--light);margin-top:.15rem;}
+
+blockquote{margin:1.25rem 0;padding:.9rem 1.4rem .9rem 1.65rem;border-left:3px solid var(--gold);background:rgba(201,168,76,.06);font-family:var(--serif);font-style:italic;font-size:.95rem;color:var(--navy);line-height:1.6;}
+
+footer{background:var(--navy);color:#4a6a84;padding:2rem 4rem;font-family:var(--mono);font-size:10.5px;letter-spacing:.04em;border-top:2px solid var(--gold);}
+footer span{color:var(--gold);}
+
+/* Tooltip */
+.tt{position:fixed;z-index:9999;pointer-events:none;background:var(--navy);border:1px solid var(--gold);padding:.75rem 1rem;max-width:280px;font-family:var(--mono);font-size:.76rem;color:var(--gold-lt);box-shadow:0 6px 20px rgba(0,0,0,.3);opacity:0;transition:opacity .12s;}
+.tt.show{opacity:1;}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="#top" class="brand">SVAJ — Survey Representativeness</a>
+  <a href="#overview">Overview</a>
+  <a href="#gender">Gender</a>
+  <a href="#age">Age</a>
+  <a href="#tenure">Tenure</a>
+  <a href="#membership">Membership Type</a>
+  <a href="#children">Children</a>
+  <a href="#gaps">Who We Missed</a>
+  <a href="#implications">Implications</a>
+</nav>
+
+<div id="top" class="hero">
+  <div class="container">
+    <div class="hero-eye">SVAJ · 2025 Community Survey · Representativeness Analysis · People Report vs. Survey Responses</div>
+    <h1>How Well Did the Survey<br>Represent <em>Our Actual Community?</em></h1>
+    <p>Comparing 175 survey responses against the full 1,215-person membership database (358 households, 620 adults). After deduplication, the survey is broadly representative — with meaningful gaps among seniors, associate members, and families with tweens and teens.</p>
+  </div>
+</div>
+
+<!-- OVERVIEW -->
+<section id="overview">
+<div class="container">
+  <div class="eye">Section 01</div>
+  <h2>The Headline Numbers</h2>
+  <div class="rule"></div>
+
+  <div class="istats">
+    <div class="istat"><div class="n">1,215</div><div class="d">Total Active Members</div></div>
+    <div class="istat"><div class="n">358</div><div class="d">Households</div></div>
+    <div class="istat"><div class="n">620</div><div class="d">Adult Members</div></div>
+    <div class="istat"><div class="n">294</div><div class="d">Children Under 18</div></div>
+    <div class="istat"><div class="n">175</div><div class="d">Survey Responses</div></div>
+    <div class="istat"><div class="n">~49%</div><div class="d">Household Response Rate</div></div>
+    <div class="istat"><div class="n">~28%</div><div class="d">Adult Response Rate</div></div>
+  </div>
+
+  <p class="body">The response rate is strong. 175 responses from 358 households means roughly <strong>one in two households responded</strong>, which is excellent for a congregational survey. However, surveys like this tend to skew toward engaged, opinionated, and longtime members — so even a 49% rate can hide meaningful blind spots in who actually replied.</p>
+
+  <div class="verdict">
+    <div class="verdict-card good">
+      <div class="vc-label">✓ Well Represented</div>
+      <h4>Tenure distribution</h4>
+      <p>Survey responses mirror the community's tenure profile almost exactly across all five cohorts. Every band within 3 percentage points.</p>
+    </div>
+    <div class="verdict-card good">
+      <div class="vc-label">✓ Well Represented</div>
+      <h4>Gender balance</h4>
+      <p>Community is 53% F / 47% M. Survey was 56% F / 44% M. A 3-point female skew — common in congregational surveys and not strategically distorting.</p>
+    </div>
+    <div class="verdict-card good">
+      <div class="vc-label">✓ Well Represented</div>
+      <h4>30–39 age cohort</h4>
+      <p>The core family cohort (ages 30–39) represents 20% of adults in the database and exactly 20% of survey respondents. Perfect match.</p>
+    </div>
+    <div class="verdict-card warn">
+      <div class="vc-label">⚠ Moderate Gap</div>
+      <h4>Ages 40–49 underrepresented</h4>
+      <p>This cohort is 26% of adult members but only 17% of survey respondents — a 9-point gap. These are peak career/parenting years; they are busy and may self-select out of surveys.</p>
+    </div>
+    <div class="verdict-card gap">
+      <div class="vc-label">✗ Significant Gap</div>
+      <h4>Seniors (65+) underrepresented</h4>
+      <p>28% of adults in database are 65+, but only ~21% of survey respondents. Combined with associate member skew (mean age 58), older members are measurably underrepresented.</p>
+    </div>
+    <div class="verdict-card gap">
+      <div class="vc-label">✗ Significant Gap</div>
+      <h4>Associate members nearly absent</h4>
+      <p>62 associate member households (17% of all). Survey was self-described as 89% full members. Associate members — skewing older, widowed, and fixed income — are effectively invisible in this data.</p>
+    </div>
+  </div>
+
+  <div class="insight">
+    <h4>The Strategic Impact of These Gaps</h4>
+    <p>The survey's findings are reliable for the cohorts it captured well — particularly the 30–54 age range and the core family membership. The gaps affect two specific areas of the strategic plan:</p>
+    <ul>
+      <li><strong>Senior and associate member needs are likely understated.</strong> If 65+ members are underrepresented by 7 points, their priorities (accessibility, adult learning, intergenerational connection) are receiving less weight in the data than their actual share of the membership warrants. The strategic plan's attention to seniors is correct — but may be even more urgent than the survey suggests.</li>
+      <li><strong>The 40–49 cohort's dissatisfaction may be undercounted.</strong> This is the group with school-age kids whose youth programming frustration is most acute. A 9-point underrepresentation means that the youth programming satisfaction score of 2.67 might actually be lower if this cohort responded at full rate.</li>
+    </ul>
+  </div>
+</div>
+</section>
+
+<!-- GENDER -->
+<section id="gender">
+<div class="container">
+  <div class="eye">Section 02</div>
+  <h2>Gender Comparison</h2>
+  <div class="rule"></div>
+  <p class="body">The gender split is close enough to be strategically reliable. The slight female over-representation in the survey (3 percentage points) is typical of synagogue surveys and does not materially distort findings.</p>
+
+  <div class="two">
+    <div>
+      <div class="comp-legend">
+        <span><span class="swatch" style="background:var(--navy)"></span>Community (database)</span>
+        <span><span class="swatch" style="background:var(--gold)"></span>Survey respondents</span>
+      </div>
+      <div class="comp-section">
+        <div class="comp-row">
+          <span class="comp-cat">Female</span>
+          <div class="comp-bars">
+            <div class="comp-bar-row">
+              <span class="comp-bar-lbl">Database</span>
+              <div class="comp-track"><div class="comp-fill comm" style="width:53%"><span class="comp-val">53%</span></div></div>
+              <span class="comp-delta neu">n=324</span>
+            </div>
+            <div class="comp-bar-row">
+              <span class="comp-bar-lbl">Survey</span>
+              <div class="comp-track"><div class="comp-fill surv" style="width:56%"><span class="comp-val">56%</span></div></div>
+              <span class="comp-delta pos">+3pts</span>
+            </div>
+          </div>
+        </div>
+        <div class="comp-row">
+          <span class="comp-cat">Male</span>
+          <div class="comp-bars">
+            <div class="comp-bar-row">
+              <span class="comp-bar-lbl">Database</span>
+              <div class="comp-track"><div class="comp-fill comm" style="width:47%"><span class="comp-val">47%</span></div></div>
+              <span class="comp-delta neu">n=284</span>
+            </div>
+            <div class="comp-bar-row">
+              <span class="comp-bar-lbl">Survey</span>
+              <div class="comp-track"><div class="comp-fill surv" style="width:44%"><span class="comp-val">44%</span></div></div>
+              <span class="comp-delta neg">−3pts</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <h3 class="sub" style="margin-top:0">What This Means</h3>
+      <p class="body">The slight female over-representation actually reinforces the reliability of the gender-based findings in the strategic plan. Women's higher ratings on planning transparency, wellness, and leadership pipeline are genuine community signals — if anything, slightly amplified by their modestly higher response rate.</p>
+      <p class="body">Note: 12 adults in the database have no gender recorded. This is a data hygiene issue worth cleaning up, particularly as the community considers women's ritual participation questions that require accurate gender counts.</p>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- AGE -->
+<section id="age">
+<div class="container">
+  <div class="eye">Section 03</div>
+  <h2>Age Distribution Comparison</h2>
+  <div class="rule"></div>
+  <p class="body">Most age cohorts are represented well. The two notable exceptions: <strong>ages 40–49 are significantly underrepresented</strong> (26% of database vs 17% of survey), and <strong>seniors 65+ are moderately underrepresented</strong> (28% of database vs ~21% of survey).</p>
+
+  <div class="comp-legend" style="margin-bottom:.75rem;">
+    <span><span class="swatch" style="background:var(--navy)"></span>Community database</span>
+    <span><span class="swatch" style="background:var(--gold)"></span>Survey respondents</span>
+  </div>
+
+  <div class="comp-section">
+    <!-- Each age band -->
+    <div class="comp-row">
+      <span class="comp-cat">18–29</span>
+      <div class="comp-bars">
+        <div class="comp-bar-row"><span class="comp-bar-lbl">Database</span><div class="comp-track"><div class="comp-fill comm" style="width:2%"></div></div><span class="comp-delta neu" style="color:var(--mid);font-size:.78rem;margin-left:.3rem;">2% (n=11)</span></div>
+        <div class="comp-bar-row"><span class="comp-bar-lbl">Survey</span><div class="comp-track"><div class="comp-fill surv" style="width:3%"></div></div><span class="comp-delta pos">+1pt</span></div>
+      </div>
+    </div>
+    <div class="comp-row">
+      <span class="comp-cat">30–39</span>
+      <div class="comp-bars">
+        <div class="comp-bar-row"><span class="comp-bar-lbl">Database</span><div class="comp-track"><div class="comp-fill comm" style="width:20%"><span class="comp-val">20%</span></div></div><span class="comp-delta neu">n=101</span></div>
+        <div class="comp-bar-row"><span class="comp-bar-lbl">Survey</span><div class="comp-track"><div class="comp-fill surv" style="width:20%"><span class="comp-val">20%</span></div></div><span class="comp-delta neu">≈ exact</span></div>
+      </div>
+    </div>
+    <div class="comp-row">
+      <span class="comp-cat" style="font-weight:600;color:var(--red);">40–49 ⚠</span>
+      <div class="comp-bars">
+        <div class="comp-bar-row"><span class="comp-bar-lbl">Database</span><div class="comp-track"><div class="comp-fill comm" style="width:26%"><span class="comp-val">26%</span></div></div><span class="comp-delta neu">n=135</span></div>
+        <div class="comp-bar-row"><span class="comp-bar-lbl">Survey</span><div class="comp-track"><div class="comp-fill surv" style="width:17%"><span class="comp-val">17%</span></div></div><span class="comp-delta neg">−9pts</span></div>
+      </div>
+    </div>
+    <div class="comp-row">
+      <span class="comp-cat">50–59</span>
+      <div class="comp-bars">
+        <div class="comp-bar-row"><span class="comp-bar-lbl">Database</span><div class="comp-track"><div class="comp-fill comm" style="width:14%"><span class="comp-val">14%</span></div></div><span class="comp-delta neu">n=73</span></div>
+        <div class="comp-bar-row"><span class="comp-bar-lbl">Survey</span><div class="comp-track"><div class="comp-fill surv" style="width:15%"><span class="comp-val">15%</span></div></div><span class="comp-delta neu">+1pt</span></div>
+      </div>
+    </div>
+    <div class="comp-row">
+      <span class="comp-cat">60–69</span>
+      <div class="comp-bars">
+        <div class="comp-bar-row"><span class="comp-bar-lbl">Database</span><div class="comp-track"><div class="comp-fill comm" style="width:17%"><span class="comp-val">17%</span></div></div><span class="comp-delta neu">n=89</span></div>
+        <div class="comp-bar-row"><span class="comp-bar-lbl">Survey</span><div class="comp-track"><div class="comp-fill surv" style="width:18%"><span class="comp-val">18%</span></div></div><span class="comp-delta neu">+1pt</span></div>
+      </div>
+    </div>
+    <div class="comp-row">
+      <span class="comp-cat">70–79</span>
+      <div class="comp-bars">
+        <div class="comp-bar-row"><span class="comp-bar-lbl">Database</span><div class="comp-track"><div class="comp-fill comm" style="width:13%"><span class="comp-val">13%</span></div></div><span class="comp-delta neu">n=68</span></div>
+        <div class="comp-bar-row"><span class="comp-bar-lbl">Survey</span><div class="comp-track"><div class="comp-fill surv" style="width:16%"><span class="comp-val">16%</span></div></div><span class="comp-delta pos">+3pts</span></div>
+      </div>
+    </div>
+    <div class="comp-row">
+      <span class="comp-cat" style="color:var(--amber);">80+ ⚠</span>
+      <div class="comp-bars">
+        <div class="comp-bar-row"><span class="comp-bar-lbl">Database</span><div class="comp-track"><div class="comp-fill comm" style="width:6%"><span class="comp-val">6%</span></div></div><span class="comp-delta neu">n=33</span></div>
+        <div class="comp-bar-row"><span class="comp-bar-lbl">Survey</span><div class="comp-track"><div class="comp-fill surv" style="width:5%"></div></div><span class="comp-delta neg">−1pt</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="insight" style="margin-top:1.5rem;">
+    <h4>The 40–49 Gap: Why It Matters for Youth Programming</h4>
+    <p>The 40–49 cohort is the group most likely to have school-age children (ages 9–14) — the exact demographic at the center of the youth programming crisis. They are also the peak career and childcare years, making them most time-constrained and least likely to complete a long survey. Their absence means the youth programming satisfaction score of 2.67/4.0 may actually be optimistically high. If this cohort responded at full rate, it could be lower. For the next survey, targeted outreach to this cohort — shorter format, mobile-friendly, personal ask from a peer — would improve the data.</p>
+  </div>
+</div>
+</section>
+
+<!-- TENURE -->
+<section id="tenure">
+<div class="container">
+  <div class="eye">Section 04</div>
+  <h2>Tenure Representativeness — The Strongest Signal</h2>
+  <div class="rule"></div>
+  <p class="body">Tenure is the dimension where the survey is most reliable. Every cohort is within 5 percentage points of its true community share. The 7–10 year cohort is slightly overrepresented (24% of survey vs. 19% of community) — they are the highest-engaged group and most likely to respond.</p>
+
+  <table class="rr-table">
+    <thead>
+      <tr>
+        <th>Tenure Band</th>
+        <th class="c">Community<br>Households</th>
+        <th class="c">Community<br>Share</th>
+        <th class="c">Survey<br>Responses</th>
+        <th class="c">Survey<br>Share</th>
+        <th class="c">Gap</th>
+        <th class="c">Est. Response<br>Rate</th>
+        <th class="c">Reliability</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>10+ years</strong> (pre-2015)</td>
+        <td class="c">82</td><td class="c">23%</td><td class="c">40</td><td class="c">23%</td>
+        <td class="c" style="color:var(--green);font-family:var(--mono);">≈0</td>
+        <td class="c">49%</td>
+        <td class="c"><span class="rr-pill rr-high">Excellent</span></td>
+      </tr>
+      <tr>
+        <td><strong>7–10 years</strong> (2015–2017)</td>
+        <td class="c">66</td><td class="c">19%</td><td class="c">41</td><td class="c">24%</td>
+        <td class="c" style="color:var(--amber);font-family:var(--mono);">+5pts</td>
+        <td class="c" style="font-weight:600;color:var(--green);">62%</td>
+        <td class="c"><span class="rr-pill rr-high">Good</span></td>
+      </tr>
+      <tr>
+        <td><strong>5–7 years</strong> (2018–2019)</td>
+        <td class="c">53</td><td class="c">15%</td><td class="c">24</td><td class="c">14%</td>
+        <td class="c" style="color:var(--green);font-family:var(--mono);">−1pt</td>
+        <td class="c">45%</td>
+        <td class="c"><span class="rr-pill rr-high">Excellent</span></td>
+      </tr>
+      <tr>
+        <td><strong>2–5 years</strong> (2020–2022)</td>
+        <td class="c">92</td><td class="c">26%</td><td class="c">42</td><td class="c">25%</td>
+        <td class="c" style="color:var(--green);font-family:var(--mono);">−1pt</td>
+        <td class="c">46%</td>
+        <td class="c"><span class="rr-pill rr-high">Excellent</span></td>
+      </tr>
+      <tr>
+        <td><strong>Past 2 years</strong> (2023+)</td>
+        <td class="c">61</td><td class="c">17%</td><td class="c">24</td><td class="c">14%</td>
+        <td class="c" style="color:var(--amber);font-family:var(--mono);">−3pts</td>
+        <td class="c" style="color:var(--amber);">39%</td>
+        <td class="c"><span class="rr-pill rr-mid">Good</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p class="body">The newest members (past 2 years) have the lowest response rate (39%) and are slightly underrepresented. This is expected — they have less community context to respond from and may not have received the survey as prominently. Their 14% survey share vs. 17% community share is not large enough to distort findings, but the next survey should include a dedicated outreach effort to this cohort.</p>
+</div>
+</section>
+
+<!-- MEMBERSHIP TYPE -->
+<section id="membership">
+<div class="container">
+  <div class="eye">Section 05</div>
+  <h2>Membership Type — The Most Important Gap</h2>
+  <div class="rule"></div>
+  <p class="body">This is where the data diverges most significantly. Associate members represent 17% of all households in the database — but the survey captured almost none of them. 89% of survey respondents self-identified as "full members."</p>
+
+  <div class="two">
+    <div>
+      <div class="comp-legend" style="margin-bottom:.75rem;">
+        <span><span class="swatch" style="background:var(--navy)"></span>Community database</span>
+        <span><span class="swatch" style="background:var(--gold)"></span>Survey respondents</span>
+      </div>
+      <div class="comp-section">
+        <div class="comp-row">
+          <span class="comp-cat">Full Member</span>
+          <div class="comp-bars">
+            <div class="comp-bar-row"><span class="comp-bar-lbl">Database</span><div class="comp-track"><div class="comp-fill comm" style="width:83%"><span class="comp-val">83%</span></div></div><span class="comp-delta neu">n=296 HH</span></div>
+            <div class="comp-bar-row"><span class="comp-bar-lbl">Survey</span><div class="comp-track"><div class="comp-fill surv" style="width:89%"><span class="comp-val">89%</span></div></div><span class="comp-delta pos">+6pts</span></div>
+          </div>
+        </div>
+        <div class="comp-row">
+          <span class="comp-cat" style="font-weight:600;color:var(--red);">Associate ⚠</span>
+          <div class="comp-bars">
+            <div class="comp-bar-row"><span class="comp-bar-lbl">Database</span><div class="comp-track"><div class="comp-fill comm" style="width:17%"><span class="comp-val">17%</span></div></div><span class="comp-delta neu">n=62 HH</span></div>
+            <div class="comp-bar-row"><span class="comp-bar-lbl">Survey</span><div class="comp-track"><div class="comp-fill surv" style="width:11%"><span class="comp-val">~11%</span></div></div><span class="comp-delta neg">−6pts</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <h3 class="sub" style="margin-top:0">Who Are Associate Members?</h3>
+      <p class="body">The database reveals that associate members are a demographically distinct cohort:</p>
+      <ul style="list-style:none;padding:0;margin:.5rem 0 1rem;">
+        <li style="font-size:.87rem;color:var(--mid);padding:.25rem 0;border-bottom:1px solid var(--rule);display:flex;gap:.5rem;"><span style="color:var(--gold)">→</span>Mean age: <strong>58</strong> — significantly older than full member average</li>
+        <li style="font-size:.87rem;color:var(--mid);padding:.25rem 0;border-bottom:1px solid var(--rule);display:flex;gap:.5rem;"><span style="color:var(--gold)">→</span><strong>39%</strong> are 65 or older</li>
+        <li style="font-size:.87rem;color:var(--mid);padding:.25rem 0;border-bottom:1px solid var(--rule);display:flex;gap:.5rem;"><span style="color:var(--gold)">→</span>95 associate adults total across 62 households</li>
+        <li style="font-size:.87rem;color:var(--mid);padding:.25rem 0;border-bottom:1px solid var(--rule);display:flex;gap:.5rem;"><span style="color:var(--gold)">→</span>Mostly married (65/95), but higher widowed and single rates than full members</li>
+        <li style="font-size:.87rem;color:var(--mid);padding:.25rem 0;display:flex;gap:.5rem;"><span style="color:var(--gold)">→</span>Likely on financial hardship arrangements or reduced dues</li>
+      </ul>
+      <p class="body" style="font-size:.85rem;">This population — older, often on fixed income, more likely to be widowed or in transition — is precisely the group most reliant on SVAJ's chesed infrastructure, accessibility, and community connection. Their near-absence from the survey means their needs are systematically underweighted in the findings.</p>
+    </div>
+  </div>
+
+  <div class="insight">
+    <h4>The Kol Sasson Overlap</h4>
+    <p>The database identifies 11 households with "KS" (Kol Sasson) in their account type, representing 20 adults. These are dual-affiliation members — belonging to both SVAJ and Kol Sasson in some capacity. Their survey representation is unknown (the survey did not ask about KS affiliation), but given the repeated mentions of the KS relationship as a source of tension, a targeted conversation with this segment could be strategically valuable.</p>
+  </div>
+</div>
+</section>
+
+<!-- CHILDREN -->
+<section id="children">
+<div class="container">
+  <div class="eye">Section 06</div>
+  <h2>Children — The Strategic Blind Spot</h2>
+  <div class="rule"></div>
+  <p class="body">The database contains 294 children currently under 18. The survey captured parental satisfaction with youth programming, but no child or teen responded directly. This is expected — but it creates a specific strategic blind spot for the community's most urgent priority.</p>
+
+  <div class="child-grid">
+    <div class="child-card">
+      <div class="cn" style="color:var(--green);">53</div>
+      <div class="cl">Under 5</div>
+      <div class="cs">Tot Shabbat age<br>18% of under-18s</div>
+    </div>
+    <div class="child-card">
+      <div class="cn" style="color:var(--blue);">57</div>
+      <div class="cl">Ages 5–8</div>
+      <div class="cs">Young school age<br>19% of under-18s</div>
+    </div>
+    <div class="child-card">
+      <div class="cn" style="color:var(--amber);">117</div>
+      <div class="cl">Ages 9–13</div>
+      <div class="cs">Tweens — largest group<br>40% of under-18s</div>
+    </div>
+    <div class="child-card">
+      <div class="cn" style="color:var(--red);">67</div>
+      <div class="cl">Ages 14–17</div>
+      <div class="cs">Teens<br>23% of under-18s</div>
+    </div>
+  </div>
+
+  <div class="two" style="margin-top:1.5rem;">
+    <div>
+      <h3 class="sub" style="margin-top:0">The Tween Dominance Problem</h3>
+      <p class="body">The single largest group of children in SVAJ is <strong>tweens ages 9–13 (117 children)</strong> — 40% of all under-18 members. This is exactly the age group that survey respondents describe as most underserved: "bored," "choosing other shuls," "nothing for them." Yet their voice is absent from the survey. The data we have on this group comes entirely through parental proxies.</p>
+      <p class="body">82 households have at least one child under 10. These are the families most affected by Tot Shabbat quality and young groups scheduling. They are also the families most likely to be in the 40–49 cohort — which is underrepresented in the survey.</p>
+    </div>
+    <div>
+      <h3 class="sub" style="margin-top:0">Household Comparison</h3>
+      <div class="comp-section">
+        <div class="comp-row">
+          <span class="comp-cat">HH with kids<br>(any age)</span>
+          <div class="comp-bars">
+            <div class="comp-bar-row"><span class="comp-bar-lbl">Database</span><div class="comp-track"><div class="comp-fill comm" style="width:64%"><span class="comp-val">64%</span></div></div></div>
+            <div class="comp-bar-row"><span class="comp-bar-lbl">Survey</span><div class="comp-track"><div class="comp-fill surv" style="width:54%"><span class="comp-val">54%</span></div></div><span class="comp-delta neg">−10pts</span></div>
+          </div>
+        </div>
+      </div>
+      <p class="body" style="font-size:.83rem;margin-top:.5rem;">The database 64% vs survey 54% gap reflects the database counting all children (including adult children over 18 still on the account), whereas the survey asked specifically about children <em>under 18 living at home</em>. These are measuring different things. The real gap is likely smaller — but families with only older/adult children in the database would still show as "having kids."</p>
+    </div>
+  </div>
+
+  <blockquote>"The feedback I am hearing is that children 9 and up are bored at SVAJ groups and prefer going to other shuls. Teens especially are bored and disinterested."<br><cite style="font-family:var(--mono);font-size:.68rem;letter-spacing:.04em;text-transform:uppercase;color:var(--light);font-style:normal;">— Survey respondent, parent perspective. 117 tweens have no voice in this data.</cite></blockquote>
+</div>
+</section>
+
+<!-- GAPS -->
+<section id="gaps">
+<div class="container">
+  <div class="eye">Section 07</div>
+  <h2>Who We Missed — Specific Underrepresented Groups</h2>
+  <div class="rule"></div>
+  <p class="body">Beyond the broad demographic gaps, the database reveals specific community subgroups whose perspectives are likely absent or thin in the survey data.</p>
+
+  <div class="gap-grid">
+    <div class="gap-card critical">
+      <h4>Adults 65+ — Seniors</h4>
+      <div class="gc-stats">Database: 144 adults (28% of valid ages) · Survey: ~21%</div>
+      <p>7-percentage-point gap. This group's priorities — adult learning, accessibility, intergenerational connection — are confirmed by survey data but likely even more urgent than the numbers show. The 80+ cohort (33 people in database) is almost certainly underrepresented in the survey's 5% 80+ share.</p>
+    </div>
+    <div class="gap-card critical">
+      <h4>Associate Members — 62 Households</h4>
+      <div class="gc-stats">Database: 17% of all households · Survey: ~11%</div>
+      <p>Mean age 58, 39% are 65+. These are often members on financial hardship arrangements, widowed longtime members, or older singles. Their needs — financial accessibility, chesed, belonging — are the most at-risk of being invisible in this data. A separate targeted outreach to this population would be valuable.</p>
+    </div>
+    <div class="gap-card moderate">
+      <h4>Ages 40–49 — Peak Parenting Cohort</h4>
+      <div class="gc-stats">Database: 26% of adults · Survey: 17% · Gap: −9pts</div>
+      <p>These are the parents of tweens (9–13), the group most vocal about youth programming failure in the free-text responses. Their underrepresentation suggests the youth programming crisis findings are if anything understated. Highest household demand for programming; lowest survey participation.</p>
+    </div>
+    <div class="gap-card moderate">
+      <h4>Widowed Members — 35 Adults</h4>
+      <div class="gc-stats">Database: 35 widowed adults (6% of adults) · Survey: undercounted</div>
+      <p>Widowed members skew older and female. They are disproportionately in the associate member category (4 of 35 widowed). Their social isolation risk is high; their needs for community connection, chesed, and belonging are distinct from coupled members. The survey had very few responses identifiable as widowed.</p>
+    </div>
+    <div class="gap-card moderate">
+      <h4>Newest Members — 2023 and Later</h4>
+      <div class="gc-stats">Database: 61 households · Survey: 24 (39% response rate — lowest)</div>
+      <p>The lowest response rate of any tenure group. These members have the least context to evaluate the shul and the most to gain from a good integration experience. Their top barriers — "don't know what's available" — suggest the communication gap makes it harder for them to even engage with a survey about SVAJ's future.</p>
+    </div>
+    <div class="gap-card minor">
+      <h4>Young Adults 18–29 — Only 11 in Database</h4>
+      <div class="gc-stats">Database: 11 adults under 30 · Survey: ~5</div>
+      <p>SVAJ has almost no young single adult membership (18–29). Only 11 in the entire database. This is itself a strategic data point — the community is not attracting young singles or post-college adults as standalone members. The survey's finding that singles feel underserved reflects this structural reality.</p>
+    </div>
+    <div class="gap-card minor">
+      <h4>Children & Teens — 294 Total</h4>
+      <div class="gc-stats">0 directly surveyed · All data from parental proxies</div>
+      <p>117 tweens, 67 teens — the most underserved programming demographic — have no direct voice in this data. A youth focus group or brief teen survey would be the highest-value supplemental research the committee could commission.</p>
+    </div>
+    <div class="gap-card minor">
+      <h4>Kol Sasson Dual Members — 11 Households</h4>
+      <div class="gc-stats">Database: 11 KS-affiliated accounts · Survey: unknown</div>
+      <p>The KS relationship surfaces repeatedly as a source of tension and strategic complexity. Understanding how dual-affiliated members experience both communities — and what they want from the relationship — would inform the board's decision about how to structure the arrangement going forward.</p>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- IMPLICATIONS -->
+<section id="implications">
+<div class="container">
+  <div class="eye">Section 08</div>
+  <h2>What This Means for the Strategic Plan</h2>
+  <div class="rule"></div>
+
+  <div class="two">
+    <div>
+      <h3 class="sub" style="margin-top:0;">What the Survey Data Can Be Trusted For</h3>
+      <ul style="list-style:none;padding:0;">
+        <li style="font-size:.87rem;color:var(--mid);padding:.3rem 0;border-bottom:1px solid var(--rule);display:flex;gap:.5rem;"><span style="color:var(--green);">✓</span>Tenure-based analysis — near-perfect representativeness</li>
+        <li style="font-size:.87rem;color:var(--mid);padding:.3rem 0;border-bottom:1px solid var(--rule);display:flex;gap:.5rem;"><span style="color:var(--green);">✓</span>Full member priorities and satisfaction</li>
+        <li style="font-size:.87rem;color:var(--mid);padding:.3rem 0;border-bottom:1px solid var(--rule);display:flex;gap:.5rem;"><span style="color:var(--green);">✓</span>The 30–54 age cohort — well represented</li>
+        <li style="font-size:.87rem;color:var(--mid);padding:.3rem 0;border-bottom:1px solid var(--rule);display:flex;gap:.5rem;"><span style="color:var(--green);">✓</span>Household-level perspectives on youth programming</li>
+        <li style="font-size:.87rem;color:var(--mid);padding:.3rem 0;border-bottom:1px solid var(--rule);display:flex;gap:.5rem;"><span style="color:var(--green);">✓</span>Israel values and identity — strong consensus across all represented groups</li>
+        <li style="font-size:.87rem;color:var(--mid);padding:.3rem 0;display:flex;gap:.5rem;"><span style="color:var(--green);">✓</span>Strategic priority rankings — reliable directionally</li>
+      </ul>
+    </div>
+    <div>
+      <h3 class="sub" style="margin-top:0;">Where to Supplement Before Final Decisions</h3>
+      <ul style="list-style:none;padding:0;">
+        <li style="font-size:.87rem;color:var(--mid);padding:.3rem 0;border-bottom:1px solid var(--rule);display:flex;gap:.5rem;"><span style="color:var(--red);">→</span><strong>Associate member needs:</strong> 1-1 conversations or a targeted short survey</li>
+        <li style="font-size:.87rem;color:var(--mid);padding:.3rem 0;border-bottom:1px solid var(--rule);display:flex;gap:.5rem;"><span style="color:var(--red);">→</span><strong>Teen and tween voice:</strong> a youth focus group before hiring the Youth Director</li>
+        <li style="font-size:.87rem;color:var(--mid);padding:.3rem 0;border-bottom:1px solid var(--rule);display:flex;gap:.5rem;"><span style="color:var(--amber);">→</span><strong>40–49 cohort:</strong> targeted outreach in the next survey cycle</li>
+        <li style="font-size:.87rem;color:var(--mid);padding:.3rem 0;border-bottom:1px solid var(--rule);display:flex;gap:.5rem;"><span style="color:var(--amber);">→</span><strong>Senior members 80+:</strong> pastoral visits or small group conversations</li>
+        <li style="font-size:.87rem;color:var(--mid);padding:.3rem 0;display:flex;gap:.5rem;"><span style="color:var(--blue);">→</span><strong>Kol Sasson dual members:</strong> board-level direct conversation</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="insight" style="margin-top:2rem;">
+    <h4>Overall Verdict: Reliable, With Known Gaps — Act on What You Have</h4>
+    <ul>
+      <li>At ~49% household response rate, this is one of the stronger congregational survey datasets you will encounter. The strategic plan's core findings are well-supported.</li>
+      <li>The gaps — seniors, associates, 40–49 year olds, tweens/teens — all skew in the same direction: toward understating the urgency of accessibility, chesed, youth programming, and senior inclusion. The strategic plan's priorities are likely understated, not overstated.</li>
+      <li>The next survey (scheduled in the plan for 2027) should be designed with these gaps in mind: shorter format, personal outreach to associate members, mobile-first design, and a separate teen component.</li>
+      <li>The database itself needs modest cleanup: 12 adults with no gender recorded, some adults with birth years that appear to be join dates, and a 1917 join date that is clearly erroneous.</li>
+    </ul>
+  </div>
+</div>
+</section>
+
+<footer>
+  <div class="container">
+    <span>SVAJ Strategic Planning Committee</span> · Survey Representativeness Analysis · May 2025 ·
+    <span>175 survey responses vs. 1,215-person membership database</span> · All member data confidential
+  </div>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SVAJ 2025 — What We Heard: Executive Summary</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Mono:wght@400;500&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#0f1d2e;--blue:#2c4f72;--gold:#c9a84c;--gold-lt:#e8c96e;
+  --cream:#faf7f2;--white:#fffdf9;--dark:#1a1a1a;--mid:#3d3d3d;--light:#6b6b6b;
+  --green:#2d6a4f;--red:#8b2020;--amber:#b5621b;--rule:#d4c9a8;
+  --serif:'Playfair Display',Georgia,serif;
+  --body:'Source Serif 4',Georgia,serif;
+  --mono:'IBM Plex Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{background:var(--cream);color:var(--dark);font-family:var(--body);font-size:16px;line-height:1.75;font-weight:300;}
+
+nav{position:sticky;top:0;z-index:100;background:var(--navy);border-bottom:2px solid var(--gold);display:flex;align-items:center;padding:0 2rem;overflow-x:auto;}
+nav a{color:#8aaec8;text-decoration:none;font-family:var(--mono);font-size:10.5px;letter-spacing:.04em;text-transform:uppercase;padding:.7rem 1rem;white-space:nowrap;border-right:1px solid rgba(255,255,255,.08);transition:color .2s;}
+nav a:hover{color:var(--gold-lt);}
+nav a.brand{color:var(--gold-lt);font-size:11.5px;font-weight:500;border-right:1px solid var(--gold);}
+
+.hero{background:var(--navy);color:#fff;padding:4.5rem 4rem 3.5rem;position:relative;overflow:hidden;}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 75% 40%,rgba(201,168,76,.14) 0%,transparent 55%);pointer-events:none;}
+.hero-eye{font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:1rem;}
+.hero h1{font-family:var(--serif);font-size:clamp(1.9rem,4vw,3.4rem);font-weight:700;line-height:1.15;margin-bottom:.85rem;}
+.hero h1 em{font-style:italic;color:var(--gold-lt);}
+.hero-sub{font-size:1.05rem;color:#a4bdd1;max-width:680px;font-weight:300;margin-bottom:2.5rem;line-height:1.65;}
+.hero-stats{display:flex;flex-wrap:wrap;gap:2rem;padding-top:2rem;border-top:1px solid rgba(201,168,76,.25);}
+.hs .n{font-family:var(--serif);font-size:2rem;font-weight:700;color:var(--gold-lt);line-height:1;}
+.hs .l{font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:#6d94b0;margin-top:.2rem;}
+
+.container{max-width:1100px;margin:0 auto;padding:0 2.5rem;}
+section{padding:4rem 0;}
+section+section{border-top:1px solid var(--rule);}
+.eye{font-family:var(--mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin-bottom:.4rem;}
+h2{font-family:var(--serif);font-size:clamp(1.5rem,2.5vw,2.2rem);font-weight:700;color:var(--navy);margin-bottom:.75rem;}
+.rule{width:36px;height:3px;background:var(--gold);margin-bottom:1.75rem;}
+p.body{margin-bottom:.9rem;color:var(--mid);font-weight:300;font-size:.96rem;}
+
+/* THE BIG THESIS */
+.thesis{background:var(--navy);color:var(--cream);padding:2.5rem 3rem;margin:2rem 0;border-left:5px solid var(--gold);}
+.thesis .tl{font-family:var(--mono);font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin-bottom:.65rem;}
+.thesis p{font-family:var(--serif);font-size:1.15rem;color:#e6ddd0;line-height:1.65;}
+.thesis strong{color:var(--gold-lt);}
+
+/* FINDING CARDS */
+.finds{display:flex;flex-direction:column;gap:1.5rem;margin-top:1.5rem;}
+.find{display:grid;grid-template-columns:80px 1fr;border:1px solid var(--rule);background:var(--white);}
+.find-num{background:var(--navy);color:var(--gold-lt);font-family:var(--serif);font-size:1.8rem;font-weight:700;display:flex;align-items:center;justify-content:center;padding:1.25rem .5rem;}
+.find-body{padding:1.25rem 1.5rem;}
+.find-body h4{font-family:var(--serif);font-size:1.05rem;font-weight:700;color:var(--navy);margin-bottom:.45rem;}
+.find-body p{font-size:.88rem;color:var(--mid);font-weight:300;line-height:1.65;}
+.find-body .stat{font-family:var(--mono);font-size:.78rem;color:var(--gold);margin-top:.4rem;font-weight:500;}
+
+/* SEGMENT SUMMARY */
+.segs{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1.25rem;margin-top:1.5rem;}
+@media(max-width:750px){.segs{grid-template-columns:1fr;}}
+.seg{border:1px solid var(--rule);background:var(--white);padding:1.4rem;}
+.seg-tag{font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;margin-bottom:.5rem;font-weight:500;}
+.seg h4{font-family:var(--serif);font-size:1rem;font-weight:700;color:var(--navy);margin-bottom:.5rem;}
+.seg ul{list-style:none;padding:0;}
+.seg li{font-size:.83rem;color:var(--mid);padding:.22rem 0;border-bottom:1px solid rgba(0,0,0,.05);display:flex;gap:.4rem;}
+.seg li::before{content:'→';color:var(--gold);flex-shrink:0;font-size:.8rem;}
+
+/* ACTION TABLE */
+.action-table{width:100%;border-collapse:collapse;font-size:.88rem;margin-top:1.5rem;}
+.action-table th{background:var(--navy);color:var(--gold-lt);font-family:var(--mono);font-size:9.5px;letter-spacing:.07em;text-transform:uppercase;padding:.6rem .9rem;text-align:left;}
+.action-table td{padding:.6rem .9rem;border-bottom:1px solid var(--rule);vertical-align:top;color:var(--mid);}
+.action-table tr:hover td{background:rgba(201,168,76,.04);}
+.action-table td:first-child{font-weight:600;color:var(--navy);white-space:nowrap;}
+.badge{display:inline-block;padding:.1rem .5rem;font-family:var(--mono);font-size:9px;letter-spacing:.04em;border-radius:2px;}
+.bg{background:rgba(45,106,79,.15);color:var(--green);}
+.ba{background:rgba(181,98,27,.15);color:var(--amber);}
+.bb{background:rgba(44,79,114,.12);color:var(--blue);}
+.br2{background:rgba(139,32,32,.1);color:var(--red);}
+
+/* SCORE BARS (mini) */
+.score-row{display:flex;align-items:center;gap:.65rem;margin-bottom:.4rem;}
+.score-lbl{font-size:.8rem;color:var(--mid);width:240px;flex-shrink:0;text-align:right;}
+.score-track{flex:1;height:18px;background:rgba(0,0,0,.07);}
+.score-fill{height:18px;display:flex;align-items:center;justify-content:flex-end;padding-right:5px;}
+.score-val{font-family:var(--mono);font-size:9px;color:#fff;}
+.score-ext{font-family:var(--mono);font-size:9px;color:var(--light);margin-left:.35rem;}
+
+blockquote{margin:1.5rem 0;padding:1rem 1.5rem 1rem 1.75rem;border-left:3px solid var(--gold);background:rgba(201,168,76,.06);font-family:var(--serif);font-style:italic;font-size:1rem;color:var(--navy);line-height:1.6;}
+blockquote cite{display:block;margin-top:.35rem;font-style:normal;font-family:var(--mono);font-size:.68rem;letter-spacing:.05em;text-transform:uppercase;color:var(--light);}
+
+.two{display:grid;grid-template-columns:1fr 1fr;gap:2rem;}
+@media(max-width:700px){.two{grid-template-columns:1fr;}}
+
+.tension-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:1.5rem;}
+@media(max-width:700px){.tension-grid{grid-template-columns:1fr;}}
+.tension{border:1px solid var(--rule);background:var(--white);padding:1.1rem 1.25rem;}
+.tension h5{font-family:var(--body);font-size:.9rem;font-weight:600;color:var(--navy);margin-bottom:.3rem;}
+.tension p{font-size:.8rem;color:var(--mid);font-weight:300;line-height:1.55;}
+
+footer{background:var(--navy);color:#4a6a84;padding:2rem 4rem;font-family:var(--mono);font-size:10.5px;letter-spacing:.04em;border-top:2px solid var(--gold);}
+footer span{color:var(--gold);}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="#top" class="brand">SVAJ 2025 — What We Heard</a>
+  <a href="#thesis">Core Argument</a>
+  <a href="#findings">8 Findings</a>
+  <a href="#segments">Segments</a>
+  <a href="#scores">Satisfaction</a>
+  <a href="#actions">Actions</a>
+  <a href="#tensions">Tensions</a>
+  <a href="../SVAJ_Complete_Strategic_Analysis.html">→ Full Analysis</a>
+</nav>
+
+<div id="top" class="hero">
+  <div class="container">
+    <div class="hero-eye">Skokie Valley Agudath Jacob · Strategic Planning Committee · Community Survey 2025 · Executive Summary</div>
+    <h1>What We Heard —<br>and <em>What It Means</em></h1>
+    <p class="hero-sub">175 community members responded. Across 84 questions, a clear picture emerged: SVAJ is a beloved institution at an inflection point. The choices made in the next two to three years will determine whether its growth becomes its strength or its undoing.</p>
+    <div class="hero-stats">
+      <div class="hs"><div class="n">175</div><div class="l">Responses</div></div>
+      <div class="hs"><div class="n">89%</div><div class="l">Full Members</div></div>
+      <div class="hs"><div class="n">4.17/5</div><div class="l">Feel Welcomed</div></div>
+      <div class="hs"><div class="n">2.67/4</div><div class="l">Youth Prog. Sat.</div></div>
+      <div class="hs"><div class="n">#1</div><div class="l">Financial Health</div></div>
+      <div class="hs"><div class="n">#2</div><div class="l">Youth Programming</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- CORE ARGUMENT -->
+<section id="thesis">
+<div class="container">
+  <div class="eye">The Central Argument</div>
+  <h2>One Strategy, Two Cohorts</h2>
+  <div class="rule"></div>
+
+  <div class="thesis">
+    <div class="tl">What the Survey Tells Us to Do</div>
+    <p>Make <strong>young families with children the primary beneficiaries of programmatic investment</strong> — because they are the generation who will grow SVAJ, raise the next generation of community members, and determine whether this shul thrives in 20 years. At the same time, <strong>reposition the legacy and senior membership not as passive service recipients, but as the volunteer, donor, and mentorship engine</strong> that makes investing in young families possible. The survey reveals exactly where these two cohorts need each other: seniors have the time young families don't have, and young families bring the energy and children that give seniors' continued involvement meaning. This is not a tradeoff. It is one strategy.</p>
+  </div>
+
+  <p class="body">The survey didn't surface this framing — the data <em>demanded</em> it. Young families (under 45 with kids) cite childcare logistics as their #1 engagement barrier (51%). Senior members volunteer at low rates (2.13/5) despite having capacity, and rate "intergenerational connection" as a top-3 priority. The match is sitting unmade. A strategic plan that puts it on paper and assigns someone to execute it is the beginning of the flywheel.</p>
+</div>
+</section>
+
+<!-- THE 8 FINDINGS -->
+<section id="findings">
+<div class="container">
+  <div class="eye">What We Found</div>
+  <h2>8 Things the Survey Made Clear</h2>
+  <div class="rule"></div>
+  <div class="finds">
+
+    <div class="find">
+      <div class="find-num">01</div>
+      <div class="find-body">
+        <h4>Youth programming is the most urgent operational problem — and it has three separate failure modes</h4>
+        <p>Children's and youth programming scored 2.67/4.0 — the lowest of any domain, by a wide margin. But it's not one problem: parents of toddlers face timing mismatches (nap-time programs, post-bedtime events); parents of school-age kids (7–12) report unstructured groups with no curriculum and unsupervised children; parents of teens report nothing at all — their kids are actively choosing other shuls. Fix requires a dedicated full-time Youth Director — not a clergy person with a side portfolio.</p>
+        <div class="stat">2.67/4 satisfaction · Every demographic agrees · Competitors are already stepping up</div>
+      </div>
+    </div>
+
+    <div class="find">
+      <div class="find-num">02</div>
+      <div class="find-body">
+        <h4>Rav Ari is the institution — and that is a structural vulnerability</h4>
+        <p>107 of 175 respondents (61%) cited the rabbi and clergy as their primary reason for joining — 2.5× the next factor. Multiple respondents explicitly name what happens if he leaves. The community has not yet demonstrated it can sustain its culture independent of any one individual. The work of institutionalizing his approach must begin now, not when it's urgent.</p>
+        <div class="stat">107 mentions · Most cited factor by 2.5× · Several respondents name succession risk explicitly</div>
+      </div>
+    </div>
+
+    <div class="find">
+      <div class="find-num">03</div>
+      <div class="find-body">
+        <h4>Financial sustainability is #1 — and the precondition for everything else</h4>
+        <p>The community rated financial sustainability as the top strategic priority (3.92/5; 71% rated it Essential or Very Important). The physical facility scored 3.09/4.0 — second-lowest satisfaction. The front entrance stairs appear as a complaint in over a dozen responses. Without a capital campaign and professional fundraising capacity, the Youth Director hire, the facility upgrade, and every other priority remain aspirational.</p>
+        <div class="stat">3.92/5 — #1 of 17 priorities · 71% rated Essential/Very Important · Facility scores 3.09/4</div>
+      </div>
+    </div>
+
+    <div class="find">
+      <div class="find-num">04</div>
+      <div class="find-body">
+        <h4>The community is growing faster than its sense of belonging can keep up</h4>
+        <p>17–19% of new members, young families, and people without children all independently cite "don't feel socially connected" as an engagement barrier. Multiple respondents describe the Kiddush as "overwhelming." Cliques are forming. The warmth that drew people in is not guaranteed to scale. Structural intimacy — grade cohorts, onboarding programs, assigned connectors for new members — must be built deliberately.</p>
+        <div class="stat">17–19% report social connection gap across all segments · "Too big to feel small" named repeatedly as top risk</div>
+      </div>
+    </div>
+
+    <div class="find">
+      <div class="find-num">05</div>
+      <div class="find-body">
+        <h4>Israel belongs in the mission statement — the community is already there</h4>
+        <p>Connection to Israel rates 4.42/5 in values centrality — tied with davening and halachic commitment. The single most common mission statement change request, across all age groups and observance levels, is adding explicit Israel and Zionist language. The absence of Israel from the current statement is noticed and named as a gap by dozens of respondents. This is a near-consensus ask that requires careful language, not avoidance.</p>
+        <div class="stat">4.42/5 values centrality · Most-cited mission amendment · Consensus across seniors (3.73), young adults (3.61)</div>
+      </div>
+    </div>
+
+    <div class="find">
+      <div class="find-num">06</div>
+      <div class="find-body">
+        <h4>Adult learning is deeply wanted by the half of the congregation that doesn't have young kids at home</h4>
+        <p>Seniors rate adult learning as their #1 strategic priority (4.14/5). Members without kids at home rate it at 4.14 vs. 3.26 for households with children — the sharpest demographic split in the dataset alongside youth programming. Yet only 3% of respondents attend shiurim weekly, and 32% rarely or never engage. The offering isn't reaching the cohort that wants it most.</p>
+        <div class="stat">4.14/5 for seniors and no-kids households · Only 3% attend weekly · 32% rarely/never engage</div>
+      </div>
+    </div>
+
+    <div class="find">
+      <div class="find-num">07</div>
+      <div class="find-body">
+        <h4>Women are carrying the operational load and flagging where it's breaking</h4>
+        <p>Women rate nearly every strategic priority higher than men. The largest gender gaps: intergenerational connection (+0.59), planning/programming transparency (+0.39), member wellness (+0.37), chesed (+0.29), and leadership pipeline (+0.26). The planning transparency gap is diagnostic: women manage family schedules and are most affected by last-minute announcements and inconsistent programming times. Communication systems should be designed for them.</p>
+        <div class="stat">Women rate 15/17 priorities higher · Planning transparency gap +0.39 · 37% want expanded women's ritual roles</div>
+      </div>
+    </div>
+
+    <div class="find">
+      <div class="find-num">08</div>
+      <div class="find-body">
+        <h4>Seniors, singles, and families navigating challenges feel overlooked — and they're right</h4>
+        <p>Older adults and seniors are the most commonly cited group that SVAJ could do better at including. The community's family-forward culture creates a parallel problem for those outside that structure: divorced members, widowed members, adults without children. Physical accessibility (stairs, elevator, acoustics) is a concrete and recurring complaint from the senior cohort specifically. The community that builds for its legacy members while investing in its youngest ones is the one that endures.</p>
+        <div class="stat">Seniors = #1 most-cited underserved group · Facility accessibility = universal complaint · Singles gap acknowledged by multiple respondents</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+</section>
+
+<!-- SEGMENTS -->
+<section id="segments">
+<div class="container">
+  <div class="eye">The Three Segments</div>
+  <h2>Who Needs What — and What We Should Ask of Them</h2>
+  <div class="rule"></div>
+
+  <div class="segs">
+    <div class="seg" style="border-top:3px solid var(--green);">
+      <div class="seg-tag" style="color:var(--green);">🌱 Young Families · n≈63</div>
+      <h4>Under 45, kids at home</h4>
+      <ul>
+        <li>Full-time Youth Director, immediately</li>
+        <li>Structured, age-segmented Shabbat groups</li>
+        <li>Teen spiritual track (minyan, Q&amp;A, chavurah)</li>
+        <li>Programs timed for young children</li>
+        <li>Grade cohort social events</li>
+        <li>Childcare during adult programming</li>
+      </ul>
+      <p style="font-size:.78rem;color:var(--light);margin-top:.75rem;font-style:italic;">What they can give back: long-term membership, future leaders, dues revenue, energy</p>
+    </div>
+
+    <div class="seg" style="border-top:3px solid var(--amber);">
+      <div class="seg-tag" style="color:var(--amber);">🏛️ Legacy &amp; Senior Members · n≈67+</div>
+      <h4>Age 55+, long-tenure</h4>
+      <ul>
+        <li>Serious adult learning — their #1 ask</li>
+        <li>Israel programming and Zionist identity</li>
+        <li>Physical accessibility (stairs, elevator)</li>
+        <li>Honored, meaningful volunteer roles</li>
+        <li>Intergenerational programming</li>
+        <li>Recognition as founders, not footnotes</li>
+      </ul>
+      <p style="font-size:.78rem;color:var(--light);margin-top:.75rem;font-style:italic;">What we should ask of them: madrichim, Shabbat hosts, new family mentors, major donors</p>
+    </div>
+
+    <div class="seg" style="border-top:3px solid var(--blue);">
+      <div class="seg-tag" style="color:var(--blue);">🏗️ Middle Cohort · n≈54</div>
+      <h4>Ages 40–54, Rav Ari era joiners</h4>
+      <ul>
+        <li>Teen programming — their kids are leaving</li>
+        <li>Financial investment in the building</li>
+        <li>Formal leadership opportunities</li>
+        <li>Less chaos, more planning transparency</li>
+        <li>Better sense of community belonging</li>
+      </ul>
+      <p style="font-size:.78rem;color:var(--light);margin-top:.75rem;font-style:italic;">Most available volunteers (2.43/5). Most anxious about under-investment. Next generation of board leadership.</p>
+    </div>
+  </div>
+
+  <blockquote>
+    "Not sure where I would fit in. I was very active when I first joined and miss that involvement."
+    <cite>— Senior member, expressing desire to contribute, currently underutilized</cite>
+  </blockquote>
+  <blockquote>
+    "If I am going to commit to a committee or opportunity I want to be able to fully commit and with small kids it is too difficult to get more involved."
+    <cite>— Young family member, explaining why she can't volunteer more</cite>
+  </blockquote>
+  <p class="body" style="font-style:italic;color:var(--light);">These two quotes are from the same survey. They describe a matching problem, not a resource problem.</p>
+</div>
+</section>
+
+<!-- SATISFACTION SCORES -->
+<section id="scores">
+<div class="container">
+  <div class="eye">The Numbers</div>
+  <h2>Where We're Strong, Where We're Not</h2>
+  <div class="rule"></div>
+  <p class="body">Satisfaction measured on a 4-point scale across 10 domains. The rabbinic team is an outlier strength. Youth programming is an outlier gap.</p>
+
+  <div class="two" style="gap:3rem;">
+    <div>
+      <div style="font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--light);margin-bottom:.75rem;">Domain Satisfaction (4.0 = Very Satisfied)</div>
+      <div class="score-row"><span class="score-lbl">Rabbinic team</span><div class="score-track"><div class="score-fill" style="width:94%;background:var(--green)"><span class="score-val">3.75</span></div></div></div>
+      <div class="score-row"><span class="score-lbl">Lifecycle event support</span><div class="score-track"><div class="score-fill" style="width:91%;background:var(--green)"><span class="score-val">3.64</span></div></div></div>
+      <div class="score-row"><span class="score-lbl">Chesed &amp; community support</span><div class="score-track"><div class="score-fill" style="width:88%;background:var(--blue)"><span class="score-val">3.50</span></div></div></div>
+      <div class="score-row"><span class="score-lbl">Community &amp; belonging</span><div class="score-track"><div class="score-fill" style="width:87%;background:var(--blue)"><span class="score-val">3.48</span></div></div></div>
+      <div class="score-row"><span class="score-lbl">Communications</span><div class="score-track"><div class="score-fill" style="width:86%;background:var(--blue)"><span class="score-val">3.45</span></div></div></div>
+      <div class="score-row"><span class="score-lbl">Shabbat davening</span><div class="score-track"><div class="score-fill" style="width:86%;background:var(--blue)"><span class="score-val">3.43</span></div></div></div>
+      <div class="score-row"><span class="score-lbl">Israel programming</span><div class="score-track"><div class="score-fill" style="width:81%;background:var(--blue)"><span class="score-val">3.24</span></div></div></div>
+      <div class="score-row"><span class="score-lbl">Adult education</span><div class="score-track"><div class="score-fill" style="width:79%;background:var(--amber)"><span class="score-val">3.15</span></div></div></div>
+      <div class="score-row"><span class="score-lbl">Physical facility</span><div class="score-track"><div class="score-fill" style="width:77%;background:var(--amber)"><span class="score-val">3.09</span></div></div></div>
+      <div class="score-row"><span class="score-lbl" style="font-weight:600;color:var(--red);">Youth &amp; family programming ⚠</span><div class="score-track"><div class="score-fill" style="width:67%;background:var(--red)"><span class="score-val">2.67</span></div></div></div>
+    </div>
+    <div>
+      <div style="font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--light);margin-bottom:.75rem;">Youth Prog. Satisfaction Breakdown (n=91)</div>
+      <div class="score-row"><span class="score-lbl">Very Satisfied</span><div class="score-track"><div class="score-fill" style="width:22%;background:var(--green)"><span class="score-val">22%</span></div></div></div>
+      <div class="score-row"><span class="score-lbl">Satisfied</span><div class="score-track"><div class="score-fill" style="width:44%;background:var(--blue)"><span class="score-val">44%</span></div></div></div>
+      <div class="score-row"><span class="score-lbl">Dissatisfied</span><div class="score-track"><div class="score-fill" style="width:27%;background:var(--amber)"><span class="score-val">27%</span></div></div></div>
+      <div class="score-row"><span class="score-lbl">Very Dissatisfied</span><div class="score-track"><div class="score-fill" style="width:7%;background:var(--red)"><span class="score-val">7%</span></div></div></div>
+
+      <div style="font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--light);margin-bottom:.75rem;margin-top:2rem;">Welcoming Score</div>
+      <div class="score-row"><span class="score-lbl">Extremely welcoming (5)</span><div class="score-track"><div class="score-fill" style="width:44%;background:var(--green)"><span class="score-val">44%</span></div></div><span class="score-ext">n=77</span></div>
+      <div class="score-row"><span class="score-lbl">Very welcoming (4)</span><div class="score-track"><div class="score-fill" style="width:36%;background:var(--blue)"><span class="score-val">36%</span></div></div><span class="score-ext">n=63</span></div>
+      <div class="score-row"><span class="score-lbl">Moderate or below</span><div class="score-track"><div class="score-fill" style="width:18%;background:var(--amber)"><span class="score-val">18%</span></div></div></div>
+      <p style="font-family:var(--mono);font-size:9.5px;color:var(--light);margin-top:.75rem;">Mean 4.17/5 · 80% rate 4 or 5</p>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ACTIONS -->
+<section id="actions">
+<div class="container">
+  <div class="eye">What To Do About It</div>
+  <h2>The 12 Most Important Actions</h2>
+  <div class="rule"></div>
+  <p class="body">Sequenced by urgency. Year 1 actions are non-negotiable — delay makes the problem worse and costs member loyalty. Year 2 builds the structural bridge. Year 3 deepens and expands.</p>
+
+  <table class="action-table">
+    <thead>
+      <tr>
+        <th>When</th>
+        <th>Action</th>
+        <th>Who It Serves</th>
+        <th>Why It's on This List</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="badge br2">Year 1</span></td>
+        <td><strong>Hire a full-time, dedicated Youth Director</strong></td>
+        <td>Young families, all kids</td>
+        <td>Single most-requested action in the survey. Not clergy-adjacent. Budget it first.</td>
+      </tr>
+      <tr>
+        <td><span class="badge br2">Year 1</span></td>
+        <td><strong>Overhaul Shabbat groups</strong> — age-segmented, with curriculum and safety protocols</td>
+        <td>Ages 3–17 and their parents</td>
+        <td>Most dissatisfied domain. Fixes the "babysitting" and "balagan" perception immediately.</td>
+      </tr>
+      <tr>
+        <td><span class="badge br2">Year 1</span></td>
+        <td><strong>Launch capital campaign</strong> — feasibility study, major donor identification, development capacity</td>
+        <td>Entire community</td>
+        <td>#1 strategic priority. Without financial foundation, everything else is aspirational.</td>
+      </tr>
+      <tr>
+        <td><span class="badge br2">Year 1</span></td>
+        <td><strong>Front entrance accessibility project</strong> — scoping, design, fund-raising narrative</td>
+        <td>Seniors, disabled, all members</td>
+        <td>12+ independent complaints. Legal risk. High visibility win to lead the capital story.</td>
+      </tr>
+      <tr>
+        <td><span class="badge br2">Year 1</span></td>
+        <td><strong>Senior volunteer program</strong> — match available seniors to Shabbat group supervision and new family hosting</td>
+        <td>Seniors + young families</td>
+        <td>Solves the volunteer mismatch directly. Gives seniors the intergenerational role they're asking for.</td>
+      </tr>
+      <tr>
+        <td><span class="badge br2">Year 1</span></td>
+        <td><strong>New member integration program</strong> — assigned connectors, 90-day check-in, cohort welcome events</td>
+        <td>New members (2020+)</td>
+        <td>19% of new members feel socially disconnected. First-year experience determines long-term retention.</td>
+      </tr>
+      <tr>
+        <td><span class="badge ba">Year 2</span></td>
+        <td><strong>Teen programming track</strong> — spiritual Q&amp;A, teen-led davening, hashkafa discussions</td>
+        <td>Teens, families w/ 12–18 yr olds</td>
+        <td>Teens are already choosing other shuls. Without this, SVAJ loses the next generation.</td>
+      </tr>
+      <tr>
+        <td><span class="badge ba">Year 2</span></td>
+        <td><strong>Grade cohort social calendar</strong> — organized grade-by-grade family events</td>
+        <td>School-age families</td>
+        <td>Builds peer community within the larger shul. Institutionalizes the warmth people came for.</td>
+      </tr>
+      <tr>
+        <td><span class="badge ba">Year 2</span></td>
+        <td><strong>Adult learning redesign</strong> — weeknight chevrutah, women's track, Israel-focused series</td>
+        <td>Seniors, empty nesters, women</td>
+        <td>Current offerings don't reach under-40s or new members. Design for the non-learner.</td>
+      </tr>
+      <tr>
+        <td><span class="badge ba">Year 2</span></td>
+        <td><strong>Israel identity statement</strong> — add to mission statement, annual Israel programming calendar</td>
+        <td>Entire community</td>
+        <td>Near-consensus ask. Overdue. Failure to act signals ambiguity the community doesn't feel.</td>
+      </tr>
+      <tr>
+        <td><span class="badge bb">Year 3</span></td>
+        <td><strong>Female clergy hire</strong> (Maharat/Rabbanit) — assess feasibility and budget</td>
+        <td>Women, the community as a whole</td>
+        <td>37% want expanded women's roles. SVAJ's identity as a place women can "breathe" needs institutional expression.</td>
+      </tr>
+      <tr>
+        <td><span class="badge bb">Year 3</span></td>
+        <td><strong>Clergy continuity planning</strong> — board-level conversation about institutional resilience</td>
+        <td>The institution</td>
+        <td>No graceful way to raise this — which is exactly why it must be raised. Start now.</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+</section>
+
+<!-- TENSIONS -->
+<section id="tensions">
+<div class="container">
+  <div class="eye">What to Watch</div>
+  <h2>Six Tensions That Must Be Actively Managed</h2>
+  <div class="rule"></div>
+  <p class="body">These are not problems to solve — they are inherent to what SVAJ is. The goal is to name them, manage them openly, and prevent any one of them from becoming a crisis through drift or avoidance.</p>
+
+  <div class="tension-grid">
+    <div class="tension">
+      <h5>Growth vs. Intimacy</h5>
+      <p>The warmth that drew people in is what scale puts most at risk. Must be designed for, not assumed.</p>
+    </div>
+    <div class="tension">
+      <h5>Youth Investment vs. Adult Depth</h5>
+      <p>Young families and older members want fundamentally different things. Both are right. Sequenced investment, not a single budget line.</p>
+    </div>
+    <div class="tension">
+      <h5>Inclusion vs. Halachic Identity</h5>
+      <p>Both "too left" and "too right" complaints coexist. SVAJ's big tent is an asset — until the rope snaps. The center must be stated, not just implied.</p>
+    </div>
+    <div class="tension">
+      <h5>Clergy Dependency vs. Resilience</h5>
+      <p>Rav Ari's culture must be institutionalized before succession is urgent. That work takes years and must start now.</p>
+    </div>
+    <div class="tension">
+      <h5>Volunteer Capacity vs. Young Family Bandwidth</h5>
+      <p>Young families want to give more but can't. Senior members have capacity but aren't channeled. The matching is the work.</p>
+    </div>
+    <div class="tension">
+      <h5>Financial Ambition vs. Current Capacity</h5>
+      <p>The community's stated priorities require more investment than current dues structure provides. Without intentional fundraising, every priority is in competition with every other.</p>
+    </div>
+  </div>
+
+  <div style="background:var(--navy);color:var(--cream);padding:2.25rem 2.75rem;margin-top:2.5rem;border-left:5px solid var(--gold);">
+    <div style="font-family:var(--mono);font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin-bottom:.65rem;">Closing</div>
+    <p style="font-family:var(--serif);font-size:1.1rem;color:#e6ddd0;line-height:1.65;">"Right now, Skokie is looking to SVAJ as the voice of our Jewish community. <strong style="color:var(--gold-lt);">It's ours to lose.</strong>" The community knows what it needs. The goodwill, the talent, the growth momentum — all of it is there. What remains is the institutional will to invest intentionally, to ask the older generation to actively support the younger one, and to build the infrastructure that will make this community's culture outlast any single leader or era.</p>
+  </div>
+</div>
+</section>
+
+<footer>
+  <div class="container">
+    <span>Skokie Valley Agudath Jacob</span> · Strategic Planning Committee · Community Survey Executive Summary · May 2025 ·
+    <span>175 respondents · All responses anonymous</span>
+  </div>
+</footer>
+
+</body>
+</html>

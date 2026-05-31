@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SVAJ — How Members Feel by How Long They've Been Here</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Mono:wght@400;500&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy:#0f1d2e; --blue:#2c4f72; --gold:#c9a84c; --gold-lt:#e8c96e;
+  --cream:#faf7f2; --white:#fffdf9; --dark:#1a1a1a; --mid:#3d3d3d; --light:#6b6b6b;
+  --green:#2d6a4f; --red:#8b2020; --amber:#b5621b; --rule:#d4c9a8;
+  --c-a:#5a3e7a; /* 10+ legacy - purple */
+  --c-b:#1a3350; /* 7-10 - deep blue */
+  --c-c:#2c4f72; /* 5-7 - mid blue */
+  --c-d:#c9a84c; /* 2-5 - gold */
+  --c-e:#2d6a4f; /* <2 - green */
+  --serif:'Playfair Display',Georgia,serif;
+  --body:'Source Serif 4',Georgia,serif;
+  --mono:'IBM Plex Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{background:var(--cream);color:var(--dark);font-family:var(--body);font-size:16px;line-height:1.75;font-weight:300;}
+
+nav{position:sticky;top:0;z-index:100;background:var(--navy);border-bottom:2px solid var(--gold);display:flex;align-items:center;padding:0 1.5rem;overflow-x:auto;}
+nav a{color:#8aaec8;text-decoration:none;font-family:var(--mono);font-size:10px;letter-spacing:.04em;text-transform:uppercase;padding:.7rem .9rem;white-space:nowrap;border-right:1px solid rgba(255,255,255,.08);transition:color .2s;}
+nav a:hover{color:var(--gold-lt);}
+nav a.brand{color:var(--gold-lt);font-size:11px;font-weight:500;border-right:1px solid var(--gold);}
+
+.hero{background:var(--navy);color:#fff;padding:4.5rem 4rem 3.5rem;position:relative;overflow:hidden;}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 78% 40%,rgba(201,168,76,.13) 0%,transparent 55%);pointer-events:none;}
+.hero-eye{font-family:var(--mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin-bottom:1rem;}
+.hero h1{font-family:var(--serif);font-size:clamp(1.9rem,4vw,3.2rem);font-weight:700;line-height:1.15;margin-bottom:.85rem;}
+.hero h1 em{font-style:italic;color:var(--gold-lt);}
+.hero-sub{font-size:1rem;color:#a4bdd1;max-width:700px;font-weight:300;line-height:1.65;}
+
+.container{max-width:1180px;margin:0 auto;padding:0 2.5rem;}
+section{padding:4rem 0;}
+section+section{border-top:1px solid var(--rule);}
+.eye{font-family:var(--mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin-bottom:.4rem;}
+h2{font-family:var(--serif);font-size:clamp(1.5rem,2.5vw,2.1rem);font-weight:700;color:var(--navy);margin-bottom:.75rem;}
+.rule{width:36px;height:3px;background:var(--gold);margin-bottom:1.75rem;}
+p.body{margin-bottom:.9rem;color:var(--mid);font-weight:300;font-size:.96rem;}
+h3.sub{font-family:var(--serif);font-size:1.2rem;font-weight:700;color:var(--navy);margin:2.5rem 0 .85rem;}
+
+/* BAND LEGEND */
+.band-legend{display:flex;flex-wrap:wrap;gap:.75rem;margin:1.5rem 0 2.5rem;}
+.bl-item{display:flex;align-items:center;gap:.55rem;padding:.45rem .9rem;border:1px solid var(--rule);background:var(--white);}
+.bl-dot{width:14px;height:14px;border-radius:50%;flex-shrink:0;}
+.bl-label{font-family:var(--mono);font-size:10px;letter-spacing:.05em;text-transform:uppercase;color:var(--mid);}
+.bl-n{font-family:var(--mono);font-size:9px;color:var(--light);margin-left:.2rem;}
+
+/* SNAPSHOT CARDS */
+.snap-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:1.25rem;margin:1.5rem 0;}
+@media(max-width:900px){.snap-grid{grid-template-columns:repeat(2,1fr);}}
+.snap{border:1px solid var(--rule);background:var(--white);overflow:hidden;}
+.snap-header{padding:.85rem 1rem;color:#fff;display:flex;flex-direction:column;gap:.2rem;}
+.snap-header .snap-era{font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;opacity:.8;}
+.snap-header .snap-years{font-family:var(--serif);font-size:1rem;font-weight:700;}
+.snap-header .snap-n{font-family:var(--mono);font-size:9px;opacity:.7;}
+.snap-body{padding:1rem;}
+.snap-stat{display:flex;justify-content:space-between;align-items:baseline;padding:.22rem 0;border-bottom:1px solid rgba(0,0,0,.06);}
+.snap-stat:last-child{border-bottom:none;}
+.snap-stat-lbl{font-size:.75rem;color:var(--mid);}
+.snap-stat-val{font-family:var(--mono);font-size:.8rem;font-weight:500;color:var(--navy);}
+.snap-stat-val.hi{color:var(--green);}
+.snap-stat-val.lo{color:var(--red);}
+
+/* MULTI-LINE CHART (SVG) */
+.chart-wrap{margin:1.5rem 0;overflow-x:auto;}
+.chart-hint{font-family:var(--mono);font-size:9.5px;color:var(--gold);letter-spacing:.05em;margin-bottom:.5rem;opacity:.85;}
+
+/* HEATMAP TABLE */
+.hm-wrap{overflow-x:auto;margin:1.5rem 0;}
+table.hm{border-collapse:collapse;font-size:.79rem;min-width:760px;width:100%;}
+table.hm th{background:var(--navy);color:var(--gold-lt);font-family:var(--mono);font-size:9px;letter-spacing:.05em;text-transform:uppercase;padding:.55rem .7rem;text-align:center;white-space:nowrap;}
+table.hm th.lh{text-align:left;min-width:200px;}
+table.hm td{padding:.48rem .7rem;border-bottom:1px solid var(--rule);text-align:center;font-family:var(--mono);font-size:.79rem;cursor:default;transition:background .1s;}
+table.hm td.lh{text-align:left;font-family:var(--body);font-size:.82rem;color:var(--mid);}
+table.hm td.lh strong{color:var(--navy);font-weight:600;}
+table.hm tr:hover td{background:rgba(201,168,76,.05);}
+.c5{background:#1b4332;color:#fff;} .c4h{background:#2d6a4f;color:#fff;}
+.c4{background:#52b788;color:#1a1a1a;} .c35{background:#d8f3dc;color:#1a1a1a;}
+.c3{background:#f5f5f0;color:#3d3d3d;} .c25{background:#ffe8c8;color:#3d3d3d;}
+.c2{background:#e9a46c;color:#1a1a1a;} .c1{background:#8b2020;color:#fff;}
+
+/* TOOLTIP */
+.tt{position:fixed;z-index:9999;pointer-events:none;background:var(--navy);border:1px solid var(--gold);padding:.85rem 1.1rem;max-width:340px;min-width:220px;box-shadow:0 8px 28px rgba(0,0,0,.35);opacity:0;transition:opacity .12s;}
+.tt.show{opacity:1;}
+.tt-title{font-family:var(--serif);font-size:.9rem;font-weight:700;color:var(--gold-lt);margin-bottom:.5rem;line-height:1.3;}
+.tt-row{display:flex;justify-content:space-between;padding:.16rem 0;border-bottom:1px solid rgba(255,255,255,.07);}
+.tt-row:last-child{border-bottom:none;}
+.tt-lbl{font-size:.73rem;color:#9ab5c8;font-family:var(--body);}
+.tt-val{font-family:var(--mono);font-size:.76rem;color:#fff;}
+.tt-note{font-family:var(--mono);font-size:.67rem;color:#6d94b0;margin-top:.4rem;}
+.tt-divider{height:1px;background:rgba(201,168,76,.22);margin:.4rem 0;}
+
+/* NARRATIVE TIMELINE */
+.timeline{position:relative;padding-left:2.5rem;margin:1.5rem 0;}
+.timeline::before{content:'';position:absolute;left:.65rem;top:0;bottom:0;width:2px;background:linear-gradient(to bottom,var(--c-a),var(--c-b),var(--c-c),var(--c-d),var(--c-e));}
+.tl-entry{position:relative;margin-bottom:2.5rem;}
+.tl-entry:last-child{margin-bottom:0;}
+.tl-dot{position:absolute;left:-1.9rem;top:.3rem;width:12px;height:12px;border-radius:50%;border:2px solid var(--white);}
+.tl-era{font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;margin-bottom:.3rem;}
+.tl-entry h4{font-family:var(--serif);font-size:1.05rem;font-weight:700;color:var(--navy);margin-bottom:.4rem;}
+.tl-entry p{font-size:.88rem;color:var(--mid);font-weight:300;line-height:1.65;margin-bottom:.5rem;}
+.tl-stats{display:flex;flex-wrap:wrap;gap:.5rem;margin:.5rem 0;}
+.tl-stat{font-family:var(--mono);font-size:9px;padding:.2rem .6rem;border-radius:2px;}
+
+blockquote{margin:1.25rem 0;padding:.9rem 1.4rem .9rem 1.65rem;border-left:3px solid var(--gold);background:rgba(201,168,76,.06);font-family:var(--serif);font-style:italic;font-size:.95rem;color:var(--navy);line-height:1.6;}
+blockquote cite{display:block;margin-top:.3rem;font-style:normal;font-family:var(--mono);font-size:.67rem;letter-spacing:.05em;text-transform:uppercase;color:var(--light);}
+
+.two{display:grid;grid-template-columns:1fr 1fr;gap:2rem;}
+@media(max-width:700px){.two{grid-template-columns:1fr;}}
+.insight{background:var(--navy);color:var(--cream);padding:1.6rem 2rem;margin:1.75rem 0;border-left:4px solid var(--gold);}
+.insight h4{font-family:var(--serif);font-size:1rem;color:var(--gold-lt);margin-bottom:.5rem;}
+.insight p{font-size:.88rem;color:#b4c8d8;font-weight:300;line-height:1.7;}
+.insight ul{list-style:none;padding:0;}
+.insight li{font-size:.86rem;color:#b4c8d8;padding:.22rem 0 .22rem 1.1rem;position:relative;}
+.insight li::before{content:'▸';position:absolute;left:0;color:var(--gold);}
+
+/* BARRIER GROUPED BARS */
+.barrier-chart{margin:1.5rem 0;}
+.barrier-row{display:flex;align-items:center;gap:.6rem;margin-bottom:.55rem;cursor:pointer;padding:.15rem .25rem;border-radius:2px;transition:background .15s;}
+.barrier-row:hover{background:rgba(201,168,76,.07);}
+.barrier-lbl{width:260px;flex-shrink:0;font-size:.79rem;color:var(--mid);text-align:right;}
+.barrier-segments{flex:1;display:flex;flex-direction:column;gap:2px;}
+.barrier-seg-row{display:flex;align-items:center;gap:.4rem;}
+.barrier-seg-lbl{width:70px;flex-shrink:0;font-family:var(--mono);font-size:8px;color:var(--light);text-align:right;}
+.barrier-track{flex:1;height:10px;background:rgba(0,0,0,.07);}
+.barrier-fill{height:10px;display:flex;align-items:center;justify-content:flex-end;padding-right:3px;}
+.barrier-val{font-family:var(--mono);font-size:8px;color:#fff;}
+
+footer{background:var(--navy);color:#4a6a84;padding:2rem 4rem;font-family:var(--mono);font-size:10.5px;letter-spacing:.04em;border-top:2px solid var(--gold);}
+footer span{color:var(--gold);}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="#top" class="brand">SVAJ — By Tenure</a>
+  <a href="#overview">Overview</a>
+  <a href="#narrative">Who They Are</a>
+  <a href="#satisfaction">Satisfaction</a>
+  <a href="#priorities">Priorities</a>
+  <a href="#barriers">Barriers</a>
+  <a href="#israel">Israel</a>
+  <a href="#women">Women</a>
+  <a href="#implications">Implications</a>
+</nav>
+
+<div id="top" class="hero">
+  <div class="container">
+    <div class="hero-eye">SVAJ Community Survey 2025 · Membership Tenure Analysis</div>
+    <h1>How Members Feel<br>Depends on <em>When They Arrived</em></h1>
+    <p class="hero-sub">Breaking 175 survey respondents into five tenure cohorts reveals that SVAJ is experienced very differently depending on how long you've been here — and that the newest members have the most urgent and distinct set of asks. The oldest members carry the institution's memory and anxiety. The middle cohorts are quietly the most critical.</p>
+  </div>
+</div>
+
+<!-- BAND OVERVIEW -->
+<section id="overview">
+<div class="container">
+  <div class="eye">The Five Cohorts</div>
+  <h2>Who's in Each Group</h2>
+  <div class="rule"></div>
+
+  <div class="band-legend">
+    <div class="bl-item"><div class="bl-dot" style="background:var(--c-a)"></div><span class="bl-label">10+ Years</span><span class="bl-n">pre-2015 · n=40</span></div>
+    <div class="bl-item"><div class="bl-dot" style="background:var(--c-b)"></div><span class="bl-label">7–10 Years</span><span class="bl-n">2015–2017 · n=41</span></div>
+    <div class="bl-item"><div class="bl-dot" style="background:var(--c-c)"></div><span class="bl-label">5–7 Years</span><span class="bl-n">2018–2019 · n=24</span></div>
+    <div class="bl-item"><div class="bl-dot" style="background:var(--c-d)"></div><span class="bl-label">2–5 Years</span><span class="bl-n">2020–2022 · n=42</span></div>
+    <div class="bl-item"><div class="bl-dot" style="background:var(--c-e)"></div><span class="bl-label">Past 2 Years</span><span class="bl-n">2023+ · n=24</span></div>
+  </div>
+
+  <div class="snap-grid">
+    <!-- 10+ -->
+    <div class="snap">
+      <div class="snap-header" style="background:var(--c-a)">
+        <span class="snap-era">Legacy</span>
+        <span class="snap-years">10+ Years</span>
+        <span class="snap-n">Joined pre-2015 · n=40</span>
+      </div>
+      <div class="snap-body">
+        <div class="snap-stat"><span class="snap-stat-lbl">Composite sat.</span><span class="snap-stat-val hi">3.49</span></div>
+        <div class="snap-stat"><span class="snap-stat-lbl">Welcoming score</span><span class="snap-stat-val hi">4.20</span></div>
+        <div class="snap-stat"><span class="snap-stat-lbl">Integration</span><span class="snap-stat-val hi">4.22</span></div>
+        <div class="snap-stat"><span class="snap-stat-lbl">Shabbat freq.</span><span class="snap-stat-val">4.20</span></div>
+        <div class="snap-stat"><span class="snap-stat-lbl">Mission alignment</span><span class="snap-stat-val">3.87</span></div>
+        <div class="snap-stat"><span class="snap-stat-lbl">Youth prog. sat.</span><span class="snap-stat-val lo">2.36</span></div>
+        <div class="snap-stat"><span class="snap-stat-lbl">Top draw</span><span class="snap-stat-val" style="font-size:.68rem">Hashkafa</span></div>
+      </div>
+    </div>
+    <!-- 7-10 -->
+    <div class="snap">
+      <div class="snap-header" style="background:var(--c-b)">
+        <span class="snap-era">Rav Ari Era</span>
+        <span class="snap-years">7–10 Years</span>
+        <span class="snap-n">Joined 2015–2017 · n=41</span>
+      </div>
+      <div class="snap-body">
+        <div class="snap-stat"><span class="snap-stat-lbl">Composite sat.</span><span class="snap-stat-val lo">3.28</span></div>
+        <div class="snap-stat"><span class="snap-stat-lbl">Welcoming score</span><span class="snap-stat-val">4.20</span></div>
+        <div class="snap-stat"><span class="snap-stat-lbl">Integration</span><span class="snap-stat-val">4.08</span></div>
+        <div class="snap-stat"><span class="snap-stat-lbl">Shabbat freq.</span><span class="snap-stat-val hi">4.24</span></div>
+        <div class="snap-stat"><span class="snap-stat-lbl">Mission alignment</span><span class="snap-stat-val hi">4.07</span></div>
+        <div class="snap-stat"><span class="snap-stat-lbl">Youth prog. sat.</span><span class="snap-stat-val lo">2.45</span></div>
+        <div class="snap-stat"><span class="snap-stat-lbl">Top draw</span><span class="snap-stat-val" style="font-size:.68rem">Rabbi (32)</span></div>
+      </div>
+    </div>
+    <!-- 5-7 -->
+    <div class="snap">
+      <div class="snap-header" style="background:var(--c-c)">
+        <span class="snap-era">Growth Wave</span>
+        <span class="snap-years">5–7 Years</span>
+        <span class="snap-n">Joined 2018–2019 · n=24</span>
+      </div>
+      <div class="snap-body">
+        <div class="snap-stat"><span class="snap-stat-lbl">Composite sat.</span><span class="snap-stat-val hi">3.46</span></div>
+        <div class="snap-stat"><span class="snap-stat-lbl">Welcoming score</span><span class="snap-stat-val">4.12</span></div>
+        <div class="snap-stat"><span class="snap-stat-lbl">Integration</span><span class="snap-stat-val lo">3.88</span></div>
+        <div class="snap-stat"><span class="snap-stat-lbl">Shabbat freq.</span><span class="snap-stat-val">3.87</span></div>
+        <div class="snap-stat"><span class="snap-stat-lbl">Mission alignment</span><span class="snap-stat-val hi">4.25</span></div>
+        <div class="snap-stat"><span class="snap-stat-lbl">Youth prog. sat.</span><span class="snap-stat-val">2.87</span></div>
+        <div class="snap-stat"><span class="snap-stat-lbl">Top draw</span><span class="snap-stat-val" style="font-size:.68rem">Rabbi</span></div>
+      </div>
+    </div>
+    <!-- 2-5 -->
+    <div class="snap">
+      <div class="snap-header" style="background:var(--c-d)">
+        <span class="snap-era">Pandemic Era</span>
+        <span class="snap-years">2–5 Years</span>
+        <span class="snap-n">Joined 2020–2022 · n=42</span>
+      </div>
+      <div class="snap-body">
+        <div class="snap-stat"><span class="snap-stat-lbl">Composite sat.</span><span class="snap-stat-val">3.37</span></div>
+        <div class="snap-stat"><span class="snap-stat-lbl">Welcoming score</span><span class="snap-stat-val">4.14</span></div>
+        <div class="snap-stat"><span class="snap-stat-lbl">Integration</span><span class="snap-stat-val lo">3.86</span></div>
+        <div class="snap-stat"><span class="snap-stat-lbl">Shabbat freq.</span><span class="snap-stat-val lo">3.67</span></div>
+        <div class="snap-stat"><span class="snap-stat-lbl">Mission alignment</span><span class="snap-stat-val">3.88</span></div>
+        <div class="snap-stat"><span class="snap-stat-lbl">Youth prog. sat.</span><span class="snap-stat-val">2.83</span></div>
+        <div class="snap-stat"><span class="snap-stat-lbl">Top draw</span><span class="snap-stat-val" style="font-size:.68rem">Rabbi (29)</span></div>
+      </div>
+    </div>
+    <!-- <2 -->
+    <div class="snap">
+      <div class="snap-header" style="background:var(--c-e)">
+        <span class="snap-era">Newest Members</span>
+        <span class="snap-years">Past 2 Years</span>
+        <span class="snap-n">Joined 2023+ · n=24</span>
+      </div>
+      <div class="snap-body">
+        <div class="snap-stat"><span class="snap-stat-lbl">Composite sat.</span><span class="snap-stat-val">3.35</span></div>
+        <div class="snap-stat"><span class="snap-stat-lbl">Welcoming score</span><span class="snap-stat-val hi">4.21</span></div>
+        <div class="snap-stat"><span class="snap-stat-lbl">Integration</span><span class="snap-stat-val lo">3.92</span></div>
+        <div class="snap-stat"><span class="snap-stat-lbl">Shabbat freq.</span><span class="snap-stat-val hi">4.30</span></div>
+        <div class="snap-stat"><span class="snap-stat-lbl">Mission alignment</span><span class="snap-stat-val">4.08</span></div>
+        <div class="snap-stat"><span class="snap-stat-lbl">Youth prog. sat.</span><span class="snap-stat-val hi">2.91</span></div>
+        <div class="snap-stat"><span class="snap-stat-lbl">Top draw</span><span class="snap-stat-val" style="font-size:.68rem">Rabbi + Friends</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="insight">
+    <h4>The Single Most Important Headline</h4>
+    <p>The 7–10 year cohort (2015–2017, the early Rav Ari joiners) has the <strong>lowest composite satisfaction of any group (3.28)</strong> — lower than brand-new members, lower than legacy members. They've been here long enough to have strong opinions and high expectations, but not long enough to feel the ownership legacy members feel. They also have the sharpest youth programming complaints (2.45/4) and are the most financially anxious (4.13/5 priority). This is the cohort that will either become SVAJ's next generation of leaders — or quietly drift away.</p>
+  </div>
+</div>
+</section>
+
+<!-- NARRATIVE TIMELINE -->
+<section id="narrative">
+<div class="container">
+  <div class="eye">Who They Are & What They Say</div>
+  <h2>A Portrait of Each Cohort</h2>
+  <div class="rule"></div>
+  <p class="body">Each cohort arrived during a distinct chapter of SVAJ's story. That shapes not just what they want, but how they frame problems, what they're afraid of, and what they believe SVAJ is.</p>
+
+  <div class="timeline">
+
+    <div class="tl-entry">
+      <div class="tl-dot" style="background:var(--c-a)"></div>
+      <div class="tl-era" style="color:var(--c-a)">10+ Years · Joined pre-2015 · n=40</div>
+      <h4>The Founders and Keepers</h4>
+      <p>Many were here before Rav Ari. They chose SVAJ for its hashkafic alignment (the top draw — more than the rabbi, unlike every other cohort). They carry the most institutional memory, have the deepest sense of ownership, and score the highest on composite satisfaction (3.49) and integration (4.22). But they're also the group most worried about what SVAJ is becoming — specifically anxious about the Kol Sasson relationship, space crowding, and the loss of the "vatikim" generation that defined the community's texture.</p>
+      <div class="tl-stats">
+        <span class="tl-stat" style="background:rgba(90,62,122,.12);color:#5a3e7a;">Top draw: Hashkafa (16) &gt; Rabbi (15)</span>
+        <span class="tl-stat" style="background:rgba(45,106,79,.12);color:var(--green);">Highest integration: 4.22</span>
+        <span class="tl-stat" style="background:rgba(139,32,32,.1);color:var(--red);">Youth sat: 2.36 — worst of any group</span>
+        <span class="tl-stat" style="background:rgba(0,0,0,.06);color:var(--mid);">Top barrier: Already engaged / programs don't fit</span>
+      </div>
+      <blockquote>"Sadly in the last 10 years the connection we had to legacy members is not the same. This was a very special multi-generational space. Now we are missing the 'vatikim.'"<cite>— 10+ year member</cite></blockquote>
+      <blockquote>"To make use of its own space for its own community — not other minyans/shuls — to foster our OWN growth."<cite>— 10+ year member, on biggest opportunity</cite></blockquote>
+    </div>
+
+    <div class="tl-entry">
+      <div class="tl-dot" style="background:var(--c-b)"></div>
+      <div class="tl-era" style="color:var(--c-b)">7–10 Years · Joined 2015–2017 · n=41</div>
+      <h4>The Rav Ari Joiners — Most Critical, Most Invested</h4>
+      <p>They came overwhelmingly because of the rabbi (32 mentions — the highest raw number of any cohort). They have the highest Shabbat attendance (4.24/5), highest mission statement alignment (4.07), and — paradoxically — the lowest composite satisfaction of any group (3.28). They've seen SVAJ at its best and are most acutely aware of the gap between aspiration and delivery. They are the most financially anxious (4.13/5) and have the most to say about youth programming, the building, and institutional direction. They are the strategic planning committee's most important audience.</p>
+      <div class="tl-stats">
+        <span class="tl-stat" style="background:rgba(139,32,32,.1);color:var(--red);">Lowest composite sat: 3.28</span>
+        <span class="tl-stat" style="background:rgba(26,51,80,.12);color:var(--blue);">Highest financial priority: 4.13</span>
+        <span class="tl-stat" style="background:rgba(45,106,79,.12);color:var(--green);">Highest Shabbat freq: 4.24</span>
+        <span class="tl-stat" style="background:rgba(139,32,32,.1);color:var(--red);">Youth sat: 2.45</span>
+      </div>
+      <blockquote>"Trying to be too many things to too many different people."<cite>— 7–10 year member, on biggest risk</cite></blockquote>
+      <blockquote>"Sustaining growth and commitment to values."<cite>— 7–10 year member, on biggest opportunity</cite></blockquote>
+    </div>
+
+    <div class="tl-entry">
+      <div class="tl-dot" style="background:var(--c-c)"></div>
+      <div class="tl-era" style="color:var(--c-c)">5–7 Years · Joined 2018–2019 · n=24</div>
+      <h4>The Pre-Pandemic Settlers — Quietly Peripheral</h4>
+      <p>A smaller cohort that arrived just before the pandemic reshuffled community life. They have the highest mission statement alignment (4.25/5) — they feel most ideologically at home — but one of the lower integration scores (3.88). Their free-text responses are the most candid: they sense "different factions" at SVAJ, note that people "on the periphery" feel the cure is to leave. They have the lowest Shabbat attendance (3.87) of any group, suggesting they're connected but not fully embedded. They are SVAJ's quiet middle — neither anchors nor newcomers.</p>
+      <div class="tl-stats">
+        <span class="tl-stat" style="background:rgba(45,106,79,.12);color:var(--green);">Highest mission alignment: 4.25</span>
+        <span class="tl-stat" style="background:rgba(139,32,32,.1);color:var(--red);">Lowest Shabbat freq: 3.87</span>
+        <span class="tl-stat" style="background:rgba(0,0,0,.06);color:var(--mid);">Integration: 3.88 — low</span>
+        <span class="tl-stat" style="background:rgba(0,0,0,.06);color:var(--mid);">Top barrier: Schedule + childcare tied</span>
+      </div>
+      <blockquote>"There seem to be different factions at Skokie Valley that want different things... I feel on the periphery of the community, and the only cure for that in the past has been to leave."<cite>— 5–7 year member</cite></blockquote>
+    </div>
+
+    <div class="tl-entry">
+      <div class="tl-dot" style="background:var(--c-d)"></div>
+      <div class="tl-era" style="color:var(--c-d)">2–5 Years · Joined 2020–2022 · n=42</div>
+      <h4>The Pandemic-Era Wave — Family-Forward and Anxious About Scale</h4>
+      <p>The largest single cohort. They arrived during COVID and post-COVID when SVAJ was already growing rapidly. They have the lowest Shabbat attendance of any group (3.67) — possibly reflecting pandemic habits that haven't fully re-normalized — but highest family engagement priority (3.84) and youth programming priority (4.11). They are the "too big to feel small" cohort: their top risk responses are about cliques, losing community feel, and financial under-investment. The Israel priority is notably high for this group (3.59) — they appear to want SVAJ to be explicitly Zionist.</p>
+      <div class="tl-stats">
+        <span class="tl-stat" style="background:rgba(201,168,76,.15);color:#8a6b20;">Largest cohort: n=42</span>
+        <span class="tl-stat" style="background:rgba(139,32,32,.1);color:var(--red);">Lowest Shabbat freq: 3.67</span>
+        <span class="tl-stat" style="background:rgba(45,106,79,.12);color:var(--green);">Youth priority: 4.11</span>
+        <span class="tl-stat" style="background:rgba(0,0,0,.06);color:var(--mid);">Integration: 3.86 — low</span>
+      </div>
+      <blockquote>"Skokie Valley has become too big and popular at the cost of losing its sense of community, connection and purpose."<cite>— 2–5 year member</cite></blockquote>
+      <blockquote>"Shift the focus and funding to better support families with kids that will be the future of Skokie Valley."<cite>— 2–5 year member</cite></blockquote>
+    </div>
+
+    <div class="tl-entry">
+      <div class="tl-dot" style="background:var(--c-e)"></div>
+      <div class="tl-era" style="color:var(--c-e)">Past 2 Years · Joined 2023+ · n=24</div>
+      <h4>The Newest Members — The Most Demanding and the Most Hopeful</h4>
+      <p>They have the highest Shabbat attendance (4.30 — more than any other cohort, including legacy members) and rate Israel programming priority highest of all (3.82). They also rate the welcoming score highest (4.21) — confirming SVAJ's on-ramp is working. But they have the highest rate of not knowing what's available (5 out of 24 cite it as a barrier), and their top family engagement priority (4.14) and planning transparency priority (4.14) signal that they arrived expecting more structure than they found. Critically, word-of-mouth from friends is now tied with the rabbi as the top draw — a sign of a maturing community reputation.</p>
+      <div class="tl-stats">
+        <span class="tl-stat" style="background:rgba(45,106,79,.12);color:var(--green);">Highest Shabbat freq: 4.30</span>
+        <span class="tl-stat" style="background:rgba(45,106,79,.12);color:var(--green);">Highest Israel priority: 3.82</span>
+        <span class="tl-stat" style="background:rgba(139,32,32,.1);color:var(--red);">Highest "don't know what's available": 21%</span>
+        <span class="tl-stat" style="background:rgba(0,0,0,.06);color:var(--mid);">Top draw: Rabbi AND Friends (tied at 14)</span>
+      </div>
+      <blockquote>"Spirit of inclusion and commitment to Israel are palpable in all the events."<cite>— Past 2 year member, on what makes SVAJ distinct</cite></blockquote>
+      <blockquote>"I think the biggest risk is losing connection with the young adults — they are the least engaged demographic at both religious and community events."<cite>— Past 2 year member</cite></blockquote>
+    </div>
+
+  </div>
+</div>
+</section>
+
+<!-- SATISFACTION HEATMAP -->
+<section id="satisfaction">
+<div class="container">
+  <div class="eye">The Numbers</div>
+  <h2>Satisfaction by Domain and Tenure</h2>
+  <div class="rule"></div>
+  <p class="body">Scores on a 4-point scale (1=Very Dissatisfied → 4=Very Satisfied). Hover any cell for context. The 7–10 year cohort is consistently the most critical across almost every domain.</p>
+
+  <div class="hm-wrap">
+  <table class="hm" id="sat-table">
+    <thead>
+      <tr>
+        <th class="lh">Domain</th>
+        <th style="background:var(--c-a);">10+ Yrs</th>
+        <th style="background:var(--c-b);">7–10 Yrs</th>
+        <th style="background:var(--c-c);">5–7 Yrs</th>
+        <th style="background:var(--c-d);color:#1a1a1a;">2–5 Yrs</th>
+        <th style="background:var(--c-e);">&lt;2 Yrs</th>
+        <th>Trend</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr data-domain="Rabbinic team" data-note="Consistently strong across all tenures. Newest members rate it slightly below legacy — possibly haven't had as many touchpoints yet.">
+        <td class="lh"><strong>Rabbinic team</strong></td>
+        <td class="c4">3.74</td><td class="c4h">3.88</td><td class="c4">3.79</td><td class="c4">3.66</td><td class="c4">3.78</td>
+        <td style="font-family:var(--mono);font-size:9px;color:var(--light);">Stable ↔</td>
+      </tr>
+      <tr data-domain="Lifecycle event support" data-note="Legacy members score this highest (3.82) — they've had the most touchpoints over time. Newest members lowest (3.50) — fewer lifecycle moments so far.">
+        <td class="lh">Lifecycle event support</td>
+        <td class="c4h">3.82</td><td class="c35">3.59</td><td class="c35">3.61</td><td class="c35">3.67</td><td class="c4">3.50</td>
+        <td style="font-family:var(--mono);font-size:9px;color:var(--light);">Legacy leads ↑</td>
+      </tr>
+      <tr data-domain="Chesed & community support" data-note="Newest members rate this noticeably lower (3.30) — they haven't yet experienced the chesed network personally, or it hasn't reached them.">
+        <td class="lh">Chesed &amp; community support</td>
+        <td class="c4">3.66</td><td class="c4">3.44</td><td class="c35">3.61</td><td class="c4">3.47</td><td class="c35">3.30</td>
+        <td style="font-family:var(--mono);font-size:9px;color:var(--red);">↓ over time</td>
+      </tr>
+      <tr data-domain="Sense of community & belonging" data-note="2-5 year members (pandemic era) actually rate this highest (3.62) — possibly a cohort effect from bonding during COVID. 7-10 year members rate it lowest (3.40).">
+        <td class="lh">Community &amp; belonging</td>
+        <td class="c4">3.56</td><td class="c35">3.40</td><td class="c4">3.42</td><td class="c4">3.62</td><td class="c35">3.39</td>
+        <td style="font-family:var(--mono);font-size:9px;color:var(--amber);">Uneven ⚡</td>
+      </tr>
+      <tr data-domain="Communications" data-note="Sharpest drop among newest members (3.26). The 'don't know what's available' barrier is highest for the past-2-year cohort. Communications is the operational failure newest members feel most.">
+        <td class="lh">Communications</td>
+        <td class="c4">3.58</td><td class="c35">3.37</td><td class="c4h">3.75</td><td class="c35">3.38</td><td class="c3">3.26</td>
+        <td style="font-family:var(--mono);font-size:9px;color:var(--red);">Newest lowest ↓</td>
+      </tr>
+      <tr data-domain="Shabbat davening" data-note="Newest members rate davening highest (3.67) — fresh eyes. 7-10 year members rate it lowest (3.35) — they've had time to develop opinions and expectations.">
+        <td class="lh">Shabbat davening</td>
+        <td class="c4">3.47</td><td class="c35">3.35</td><td class="c4">3.50</td><td class="c3">3.30</td><td class="c4">3.67</td>
+        <td style="font-family:var(--mono);font-size:9px;color:var(--amber);">U-shaped ∪</td>
+      </tr>
+      <tr data-domain="Israel programming" data-note="7-10 year members are most dissatisfied with Israel programming (2.91) despite rating it a high strategic priority (3.69). Demand exists; delivery is falling short for this cohort specifically.">
+        <td class="lh">Israel programming</td>
+        <td class="c35">3.34</td><td class="c25">2.91</td><td class="c3">3.22</td><td class="c35">3.44</td><td class="c35">3.30</td>
+        <td style="font-family:var(--mono);font-size:9px;color:var(--red);">7–10yr gap ⚠</td>
+      </tr>
+      <tr data-domain="Adult education" data-note="Strong decline from legacy (3.41) to 2-5 year members (3.00) — the youngest cohorts want it but current offerings aren't resonating. Newest members slightly recover (3.12).">
+        <td class="lh">Adult education</td>
+        <td class="c35">3.41</td><td class="c3">3.06</td><td class="c3">3.27</td><td class="c3">3.00</td><td class="c3">3.12</td>
+        <td style="font-family:var(--mono);font-size:9px;color:var(--red);">Declining ↓</td>
+      </tr>
+      <tr data-domain="Physical facility" data-note="Nobody is happy with the facility. The 7-10 year cohort is most dissatisfied (2.97) — they've been here long enough to see what the building needs and feel the gap most acutely.">
+        <td class="lh">Physical facility</td>
+        <td class="c3">3.15</td><td class="c25">2.97</td><td class="c3">3.29</td><td class="c3">3.05</td><td class="c3">3.04</td>
+        <td style="font-family:var(--mono);font-size:9px;color:var(--red);">Universal low ↓</td>
+      </tr>
+      <tr data-domain="Youth & family programming" data-note="The oldest members are most dissatisfied (2.36) — they've watched the programming problem accumulate the longest. Newest members are least dissatisfied (2.91) — they may not yet have experienced the full failure.">
+        <td class="lh" style="font-weight:600;color:var(--red);">Youth programming ⚠</td>
+        <td class="c1">2.36</td><td class="c2">2.45</td><td class="c25">2.87</td><td class="c25">2.83</td><td class="c25">2.91</td>
+        <td style="font-family:var(--mono);font-size:9px;color:var(--red);">Tenure = exposure ↑</td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+  <p style="font-family:var(--mono);font-size:9px;color:var(--light);margin-top:.4rem;">Hover any row for interpretation. Scale 1–4. Color: green=high, red=low.</p>
+</div>
+</section>
+
+<!-- STRATEGIC PRIORITIES HEATMAP -->
+<section id="priorities">
+<div class="container">
+  <div class="eye">What Each Cohort Wants Built</div>
+  <h2>Strategic Priorities by Tenure</h2>
+  <div class="rule"></div>
+  <p class="body">Scores on a 1–5 scale. The gradient across cohorts reveals whether a priority is consensus-driven or tenure-driven. Hover any row.</p>
+
+  <div class="hm-wrap">
+  <table class="hm" id="strat-table">
+    <thead>
+      <tr>
+        <th class="lh">Priority</th>
+        <th style="background:var(--c-a);">10+ Yrs</th>
+        <th style="background:var(--c-b);">7–10 Yrs</th>
+        <th style="background:var(--c-c);">5–7 Yrs</th>
+        <th style="background:var(--c-d);color:#1a1a1a;">2–5 Yrs</th>
+        <th style="background:var(--c-e);">&lt;2 Yrs</th>
+        <th>Driver</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr data-domain="Financial sustainability" data-note="7-10 year members rate this highest of any group (4.13) — they've watched growth happen without matching investment and feel the gap most sharply.">
+        <td class="lh"><strong>Financial sustainability</strong></td>
+        <td class="c4h">3.84</td><td class="c5">4.13</td><td class="c4h">3.87</td><td class="c4h">3.82</td><td class="c4h">3.95</td>
+        <td style="font-family:var(--mono);font-size:9px;color:var(--light);">7–10yr highest</td>
+      </tr>
+      <tr data-domain="Youth programming" data-note="Clear generational pattern: 2-5 year (4.11) and <2 year (4.05) members rate this as urgent, while legacy members rate it lower (3.65). The newest arrivals have the youngest children.">
+        <td class="lh"><strong>Youth/tween/teen programming</strong></td>
+        <td class="c4">3.65</td><td class="c4">3.67</td><td class="c4">3.61</td><td class="c5">4.11</td><td class="c5">4.05</td>
+        <td style="font-family:var(--mono);font-size:9px;color:var(--light);">Newest loudest</td>
+      </tr>
+      <tr data-domain="Physical facilities" data-note="7-10 year members rate this highest (3.87) — consistent with their facility satisfaction being lowest (2.97). They feel the building problem most acutely.">
+        <td class="lh">Physical facilities</td>
+        <td class="c4h">3.75</td><td class="c4h">3.87</td><td class="c35">3.61</td><td class="c4">3.69</td><td class="c4h">3.90</td>
+        <td style="font-family:var(--mono);font-size:9px;color:var(--light);">Consensus high</td>
+      </tr>
+      <tr data-domain="Leadership pipeline" data-note="Newest members rate this highest (4.10) — they want pathways to get involved and lead. Legacy members rate it lowest (3.44) — they're already in leadership.">
+        <td class="lh">Leadership pipeline</td>
+        <td class="c35">3.44</td><td class="c4h">3.72</td><td class="c4h">3.96</td><td class="c4">3.67</td><td class="c5">4.10</td>
+        <td style="font-family:var(--mono);font-size:9px;color:var(--light);">Newest → involved</td>
+      </tr>
+      <tr data-domain="Family engagement" data-note="Newest members rate this highest (4.14) — most have young families and haven't yet built their community. Legacy members lower (3.58) — they're already embedded.">
+        <td class="lh">Family engagement</td>
+        <td class="c35">3.58</td><td class="c35">3.56</td><td class="c35">3.65</td><td class="c4h">3.84</td><td class="c5">4.14</td>
+        <td style="font-family:var(--mono);font-size:9px;color:var(--light);">Newest loudest</td>
+      </tr>
+      <tr data-domain="Adult education" data-note="5-7 year members rate this highest (3.87) — the cohort that has settled in enough to want depth but isn't yet absorbed in parenting logistics. Also high for 7-10 year members (3.72).">
+        <td class="lh">Adult education</td>
+        <td class="c35">3.62</td><td class="c4h">3.72</td><td class="c4h">3.87</td><td class="c35">3.53</td><td class="c35">3.64</td>
+        <td style="font-family:var(--mono);font-size:9px;color:var(--light);">Middle cohorts</td>
+      </tr>
+      <tr data-domain="Welcoming community" data-note="Newest members rate this highest (3.86) — they just joined and want to ensure the welcome that brought them in continues. 7-10 year members lowest (3.28) — they feel it's been achieved and want to move on.">
+        <td class="lh">Welcoming community</td>
+        <td class="c35">3.61</td><td class="c3">3.28</td><td class="c4h">3.78</td><td class="c35">3.62</td><td class="c4h">3.86</td>
+        <td style="font-family:var(--mono);font-size:9px;color:var(--light);">U-shaped</td>
+      </tr>
+      <tr data-domain="Israel connection" data-note="Clear upward trend: newest members rate Israel highest (3.82), legacy lowest (3.33). The community is becoming MORE Zionist over time, not less. Newest joiners are choosing SVAJ partly for its Israel identity.">
+        <td class="lh">Israel connection</td>
+        <td class="c35">3.33</td><td class="c4">3.69</td><td class="c3">3.13</td><td class="c35">3.59</td><td class="c4h">3.82</td>
+        <td style="font-family:var(--mono);font-size:9px;color:var(--green);">↑ with recency</td>
+      </tr>
+      <tr data-domain="Planning transparency" data-note="Newest members rate this highest (4.14) — they don't know what's available and are feeling the opacity most acutely. This is an on-boarding and communications problem first.">
+        <td class="lh">Planning transparency</td>
+        <td class="c35">3.53</td><td class="c35">3.54</td><td class="c3">3.09</td><td class="c35">3.41</td><td class="c5">4.14</td>
+        <td style="font-family:var(--mono);font-size:9px;color:var(--light);">Newest loudest</td>
+      </tr>
+      <tr data-domain="Shabbat & davening" data-note="Legacy members rate davening enhancement highest (3.82) — they have the deepest davening investment. Newest members rate it lower (3.32) — davening already meets their expectations.">
+        <td class="lh">Shabbat &amp; davening</td>
+        <td class="c4h">3.82</td><td class="c4h">3.78</td><td class="c3">3.30</td><td class="c35">3.48</td><td class="c3">3.32</td>
+        <td style="font-family:var(--mono);font-size:9px;color:var(--light);">Legacy priority</td>
+      </tr>
+      <tr data-domain="Volunteer engagement" data-note="Newest members rate this highest (4.05) — they want structured pathways to get involved. Legacy members rate it lower — they're already in the system.">
+        <td class="lh">Volunteer engagement</td>
+        <td class="c35">3.52</td><td class="c35">3.44</td><td class="c4h">3.83</td><td class="c35">3.49</td><td class="c5">4.05</td>
+        <td style="font-family:var(--mono);font-size:9px;color:var(--light);">Newest want in</td>
+      </tr>
+      <tr data-domain="Intergenerational connection" data-note="Stark contrast: legacy members rate it 3.50, newest members 3.32. Neither extreme group values it most — it's a legacy-driven ask that hasn't yet been framed as relevant to newcomers.">
+        <td class="lh">Intergenerational connection</td>
+        <td class="c35">3.50</td><td class="c3">3.33</td><td class="c35">3.43</td><td class="c3">3.21</td><td class="c3">3.32</td>
+        <td style="font-family:var(--mono);font-size:9px;color:var(--light);">Legacy only</td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+</div>
+</section>
+
+<!-- BARRIERS -->
+<section id="barriers">
+<div class="container">
+  <div class="eye">What Gets in the Way</div>
+  <h2>Engagement Barriers by Tenure</h2>
+  <div class="rule"></div>
+  <p class="body">Top barriers shift clearly as tenure increases — from logistics and not knowing what's available (newest) to "already engaged enough" and programs not fitting (legacy). This maps directly to where each cohort is in their SVAJ journey.</p>
+
+  <div class="two">
+    <div>
+      <h3 class="sub" style="margin-top:0">The Barrier Evolution</h3>
+      <table style="border-collapse:collapse;width:100%;font-size:.83rem;">
+        <thead>
+          <tr>
+            <th style="background:var(--navy);color:var(--gold-lt);font-family:var(--mono);font-size:9px;text-transform:uppercase;padding:.5rem .75rem;text-align:left;">Cohort</th>
+            <th style="background:var(--navy);color:var(--gold-lt);font-family:var(--mono);font-size:9px;text-transform:uppercase;padding:.5rem .75rem;">#1 Barrier</th>
+            <th style="background:var(--navy);color:var(--gold-lt);font-family:var(--mono);font-size:9px;text-transform:uppercase;padding:.5rem .75rem;">#2 Barrier</th>
+            <th style="background:var(--navy);color:var(--gold-lt);font-family:var(--mono);font-size:9px;text-transform:uppercase;padding:.5rem .75rem;">#3 Barrier</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:.45rem .75rem;border-bottom:1px solid var(--rule);font-size:.8rem;font-weight:600;color:var(--navy);">10+ yrs</td><td style="padding:.45rem .75rem;border-bottom:1px solid var(--rule);font-size:.78rem;color:var(--mid);">Programs don't fit / Already engaged</td><td style="padding:.45rem .75rem;border-bottom:1px solid var(--rule);font-size:.78rem;color:var(--mid);">Schedule</td><td style="padding:.45rem .75rem;border-bottom:1px solid var(--rule);font-size:.78rem;color:var(--mid);">Don't feel connected</td></tr>
+          <tr><td style="padding:.45rem .75rem;border-bottom:1px solid var(--rule);font-size:.8rem;font-weight:600;color:var(--navy);">7–10 yrs</td><td style="padding:.45rem .75rem;border-bottom:1px solid var(--rule);font-size:.78rem;color:var(--mid);">Schedule (22x)</td><td style="padding:.45rem .75rem;border-bottom:1px solid var(--rule);font-size:.78rem;color:var(--mid);">Programs don't fit</td><td style="padding:.45rem .75rem;border-bottom:1px solid var(--rule);font-size:.78rem;color:var(--mid);">Already engaged</td></tr>
+          <tr><td style="padding:.45rem .75rem;border-bottom:1px solid var(--rule);font-size:.8rem;font-weight:600;color:var(--navy);">5–7 yrs</td><td style="padding:.45rem .75rem;border-bottom:1px solid var(--rule);font-size:.78rem;color:var(--mid);">Schedule</td><td style="padding:.45rem .75rem;border-bottom:1px solid var(--rule);font-size:.78rem;color:var(--mid);">Childcare logistics</td><td style="padding:.45rem .75rem;border-bottom:1px solid var(--rule);font-size:.78rem;color:var(--mid);">Don't feel connected</td></tr>
+          <tr><td style="padding:.45rem .75rem;border-bottom:1px solid var(--rule);font-size:.8rem;font-weight:600;color:var(--navy);">2–5 yrs</td><td style="padding:.45rem .75rem;border-bottom:1px solid var(--rule);font-size:.78rem;color:var(--mid);">Schedule (19x)</td><td style="padding:.45rem .75rem;border-bottom:1px solid var(--rule);font-size:.78rem;color:var(--mid);">Programs don't fit</td><td style="padding:.45rem .75rem;border-bottom:1px solid var(--rule);font-size:.78rem;color:var(--mid);">Childcare logistics</td></tr>
+          <tr><td style="padding:.45rem .75rem;font-size:.8rem;font-weight:600;color:var(--navy);">&lt;2 yrs</td><td style="padding:.45rem .75rem;font-size:.78rem;color:var(--mid);">Schedule</td><td style="padding:.45rem .75rem;font-size:.78rem;color:var(--mid);">Childcare logistics</td><td style="padding:.45rem .75rem;font-size:.78rem;color:var(--mid);">Don't know what's available</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div>
+      <div class="insight" style="margin-top:0;">
+        <h4>What the Barrier Shift Tells Us</h4>
+        <ul>
+          <li>Legacy members are hitting a ceiling — "already engaged" means SVAJ is successfully keeping them in, but there's no deeper tier to graduate to</li>
+          <li>The childcare problem peaks at 5–7 years — these families have settled in and have the most young kids at home right now</li>
+          <li>"Don't know what's available" is highest among newest members — a pure communications and onboarding failure, not a programming failure</li>
+          <li>"Don't feel connected" appears in every cohort at 6–7 mentions — it is persistent and tenure-independent, pointing to a structural belonging gap rather than a new-member issue</li>
+          <li>The 7–10 year cohort's #1 barrier is schedule — they're in peak career and parenting years; programming timing must serve them</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ISRAEL BY TENURE -->
+<section id="israel">
+<div class="container">
+  <div class="eye">A Special Case</div>
+  <h2>Israel Priority — The Trend Is Unmistakable</h2>
+  <div class="rule"></div>
+  <p class="body">Israel programming priority scores show the clearest directional trend of any item in the survey: it rises with recency of joining. The community is becoming more explicitly Zionist over time, not less.</p>
+
+  <div style="max-width:600px;margin:1.5rem 0;">
+    <div style="font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--light);margin-bottom:.75rem;">Israel Programming Priority (1–5 scale)</div>
+    <div class="barrier-chart" id="israel-chart"></div>
+  </div>
+
+  <div class="two">
+    <div>
+      <p class="body">The 5–7 year cohort (2018–2019) is the notable outlier at 3.13 — lowest of any group. This cohort arrived just before October 7 and the surge of explicit Zionist identity that followed. Their Israel scores on both priority and satisfaction are the lowest, suggesting a cohort that is more ambivalent or more cautious about politicizing the Israel question.</p>
+      <p class="body">The newest members (3.82) — most of whom joined after October 7 — appear to have chosen SVAJ partly <em>because</em> of its Israel identity. One new member notes: "Spirit of inclusion and commitment to Israel are palpable in all the events." Another cites "Zionistic, welcoming" as their ideal future SVAJ. The post-October 7 community is arriving pre-sorted for Zionist alignment.</p>
+    </div>
+    <div>
+      <div class="insight">
+        <h4>Strategic Implication</h4>
+        <ul>
+          <li>The newest and fastest-growing cohort has the highest Israel priority (3.82) — adding Israel to the mission statement will resonate most with SVAJ's growth engine</li>
+          <li>The 7–10 year cohort wants Israel programming (3.69 priority) but is most dissatisfied with what exists (2.91 satisfaction) — this is the implementation gap to close</li>
+          <li>The 5–7 year outlier (3.13) is real but small (n=24) and shouldn't drive the overall strategy — their caution is about politicization, not about Israel itself</li>
+          <li>Legacy members (3.33) are the least likely to prioritize Israel programming — but score Israel as central to values at 4.42 — the issue is programming investment, not identity</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- WOMEN BY TENURE -->
+<section id="women">
+<div class="container">
+  <div class="eye">A Shifting Signal</div>
+  <h2>Women's Participation — The Newest Members Lead</h2>
+  <div class="rule"></div>
+  <p class="body">Across all cohorts, the majority are satisfied with the current level of women's participation. But the newest members stand out: they are the only cohort where "expanded roles" outnumbers "current is fine."</p>
+
+  <div style="overflow-x:auto;">
+  <table style="border-collapse:collapse;font-size:.85rem;min-width:680px;">
+    <thead>
+      <tr>
+        <th style="background:var(--navy);color:var(--gold-lt);font-family:var(--mono);font-size:9px;text-transform:uppercase;padding:.55rem .85rem;text-align:left;">Cohort</th>
+        <th style="background:var(--navy);color:var(--gold-lt);font-family:var(--mono);font-size:9px;text-transform:uppercase;padding:.55rem .85rem;text-align:center;">Current = Fine</th>
+        <th style="background:var(--navy);color:var(--gold-lt);font-family:var(--mono);font-size:9px;text-transform:uppercase;padding:.55rem .85rem;text-align:center;">Want Expanded Roles</th>
+        <th style="background:var(--navy);color:var(--gold-lt);font-family:var(--mono);font-size:9px;text-transform:uppercase;padding:.55rem .85rem;text-align:center;">Prefer Less</th>
+        <th style="background:var(--navy);color:var(--gold-lt);font-family:var(--mono);font-size:9px;text-transform:uppercase;padding:.55rem .85rem;text-align:left;">Signal</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td style="padding:.5rem .85rem;border-bottom:1px solid var(--rule);font-weight:600;">10+ years</td><td style="padding:.5rem .85rem;border-bottom:1px solid var(--rule);text-align:center;">23 (59%)</td><td style="padding:.5rem .85rem;border-bottom:1px solid var(--rule);text-align:center;">15 (38%)</td><td style="padding:.5rem .85rem;border-bottom:1px solid var(--rule);text-align:center;">1 (3%)</td><td style="padding:.5rem .85rem;border-bottom:1px solid var(--rule);font-size:.8rem;color:var(--mid);">Comfortable with status quo</td></tr>
+      <tr><td style="padding:.5rem .85rem;border-bottom:1px solid var(--rule);font-weight:600;">7–10 years</td><td style="padding:.5rem .85rem;border-bottom:1px solid var(--rule);text-align:center;">23 (56%)</td><td style="padding:.5rem .85rem;border-bottom:1px solid var(--rule);text-align:center;">15 (37%)</td><td style="padding:.5rem .85rem;border-bottom:1px solid var(--rule);text-align:center;">3 (7%)</td><td style="padding:.5rem .85rem;border-bottom:1px solid var(--rule);font-size:.8rem;color:var(--mid);">Most "prefer less" of any cohort</td></tr>
+      <tr><td style="padding:.5rem .85rem;border-bottom:1px solid var(--rule);font-weight:600;">5–7 years</td><td style="padding:.5rem .85rem;border-bottom:1px solid var(--rule);text-align:center;">12 (50%)</td><td style="padding:.5rem .85rem;border-bottom:1px solid var(--rule);text-align:center;">9 (38%)</td><td style="padding:.5rem .85rem;border-bottom:1px solid var(--rule);text-align:center;">3 (13%)</td><td style="padding:.5rem .85rem;border-bottom:1px solid var(--rule);font-size:.8rem;color:var(--amber);">Most conservative of any cohort</td></tr>
+      <tr><td style="padding:.5rem .85rem;border-bottom:1px solid var(--rule);font-weight:600;">2–5 years</td><td style="padding:.5rem .85rem;border-bottom:1px solid var(--rule);text-align:center;">27 (68%)</td><td style="padding:.5rem .85rem;border-bottom:1px solid var(--rule);text-align:center;">10 (25%)</td><td style="padding:.5rem .85rem;border-bottom:1px solid var(--rule);text-align:center;">3 (8%)</td><td style="padding:.5rem .85rem;border-bottom:1px solid var(--rule);font-size:.8rem;color:var(--mid);">Most satisfied with current level</td></tr>
+      <tr style="background:rgba(45,106,79,.04);"><td style="padding:.5rem .85rem;font-weight:600;color:var(--green);">Past 2 years ★</td><td style="padding:.5rem .85rem;text-align:center;">9 (38%)</td><td style="padding:.5rem .85rem;text-align:center;font-weight:600;color:var(--green);">13 (54%)</td><td style="padding:.5rem .85rem;text-align:center;">2 (8%)</td><td style="padding:.5rem .85rem;font-size:.8rem;color:var(--green);">Only cohort where expanded &gt; current</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p class="body" style="margin-top:1rem;">The 5–7 year cohort has the highest "prefer less" rate (13%) and the most ambivalent overall split — consistent with this cohort being the most cautious on progressive identity questions across the board (lowest Israel priority, most "big tent" language in their free text).</p>
+</div>
+</section>
+
+<!-- IMPLICATIONS -->
+<section id="implications">
+<div class="container">
+  <div class="eye">So What</div>
+  <h2>What the Tenure Data Means Strategically</h2>
+  <div class="rule"></div>
+
+  <div class="insight">
+    <h4>The Most Important Finding: The 7–10 Year Cohort Is the Canary</h4>
+    <p>This group — who joined 2015–2017 at the beginning of the Rav Ari era — has the lowest composite satisfaction, lowest Israel programming satisfaction, most financial anxiety, and sharpest youth programming critique of any tenure group. They are also the most engaged (highest Shabbat attendance) and the most ideologically aligned (second-highest mission statement score). They care the most and are the most disappointed. If this cohort starts to disengage or leave, it signals something deeply wrong. If they become the next generation of board leadership — which the data suggests they should be — they will drive the right priorities.</p>
+  </div>
+
+  <div class="two" style="margin-top:2rem;">
+    <div>
+      <h3 class="sub" style="margin-top:0">What Each Cohort Needs Right Now</h3>
+      <table style="border-collapse:collapse;width:100%;font-size:.83rem;">
+        <thead><tr>
+          <th style="background:var(--navy);color:var(--gold-lt);font-family:var(--mono);font-size:9px;text-transform:uppercase;padding:.5rem .75rem;text-align:left;">Cohort</th>
+          <th style="background:var(--navy);color:var(--gold-lt);font-family:var(--mono);font-size:9px;text-transform:uppercase;padding:.5rem .75rem;text-align:left;">Most Urgent Need</th>
+        </tr></thead>
+        <tbody>
+          <tr><td style="padding:.45rem .75rem;border-bottom:1px solid var(--rule);font-weight:600;color:#5a3e7a;">10+ years</td><td style="padding:.45rem .75rem;border-bottom:1px solid var(--rule);font-size:.82rem;color:var(--mid);">Recognition, intergenerational roles, space ownership — stop the drift toward feeling like guests in their own shul</td></tr>
+          <tr><td style="padding:.45rem .75rem;border-bottom:1px solid var(--rule);font-weight:600;color:var(--blue);">7–10 years</td><td style="padding:.45rem .75rem;border-bottom:1px solid var(--rule);font-size:.82rem;color:var(--mid);">Visible capital investment (building, staff), Israel programming delivery, meaningful leadership pipeline — show them the plan is working</td></tr>
+          <tr><td style="padding:.45rem .75rem;border-bottom:1px solid var(--rule);font-weight:600;color:var(--blue);">5–7 years</td><td style="padding:.45rem .75rem;border-bottom:1px solid var(--rule);font-size:.82rem;color:var(--mid);">Active integration support — they're the most peripheral cohort, most at risk of quiet attrition without a direct outreach effort</td></tr>
+          <tr><td style="padding:.45rem .75rem;border-bottom:1px solid var(--rule);font-weight:600;color:#8a6b20;">2–5 years</td><td style="padding:.45rem .75rem;border-bottom:1px solid var(--rule);font-size:.82rem;color:var(--mid);">Youth programming fix, grade cohort community building, explicit Zionist identity — they came during growth and want it to mean something</td></tr>
+          <tr><td style="padding:.45rem .75rem;font-weight:600;color:var(--green);">Past 2 years</td><td style="padding:.45rem .75rem;font-size:.82rem;color:var(--mid);">Better onboarding, clear communications about what's available, structured pathways to volunteer and lead — don't let them fall through the cracks</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div>
+      <h3 class="sub" style="margin-top:0">Three Patterns That Cut Across All Cohorts</h3>
+      <div style="display:flex;flex-direction:column;gap:.85rem;">
+        <div style="border:1px solid var(--rule);background:var(--white);padding:1rem 1.25rem;">
+          <h5 style="font-family:var(--body);font-size:.9rem;font-weight:600;color:var(--navy);margin-bottom:.3rem;">The welcome is working. The belonging isn't.</h5>
+          <p style="font-size:.8rem;color:var(--mid);font-weight:300;">Welcoming scores are flat across all tenures (4.12–4.21). Integration scores drop steadily from legacy (4.22) to 2–5 year members (3.86). SVAJ gets people in the door warmly — but deep belonging takes years to build and is clearly not happening fast enough.</p>
+        </div>
+        <div style="border:1px solid var(--rule);background:var(--white);padding:1rem 1.25rem;">
+          <h5 style="font-family:var(--body);font-size:.9rem;font-weight:600;color:var(--navy);margin-bottom:.3rem;">Youth programming dissatisfaction grows with exposure.</h5>
+          <p style="font-size:.8rem;color:var(--mid);font-weight:300;">Legacy members (2.36) are more dissatisfied than newest members (2.91). They've watched the problem build for a decade. This is not a new-member problem — it's a structural failure that compounds over time.</p>
+        </div>
+        <div style="border:1px solid var(--rule);background:var(--white);padding:1rem 1.25rem;">
+          <h5 style="font-family:var(--body);font-size:.9rem;font-weight:600;color:var(--navy);margin-bottom:.3rem;">SVAJ is becoming more Zionist as it grows.</h5>
+          <p style="font-size:.8rem;color:var(--mid);font-weight:300;">Israel priority rises cleanly from 3.33 (legacy) to 3.82 (newest). The community is self-selecting for Zionist identity. The mission statement change isn't aspirational — it's already describing who is joining.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</section>
+
+<footer>
+  <div class="container">
+    <span>SVAJ Strategic Planning Committee</span> · Tenure Band Analysis · May 2025 · <span>175 respondents</span> · All responses anonymous
+  </div>
+</footer>
+
+<div class="tt" id="tt"></div>
+
+<style>
+.tt{position:fixed;z-index:9999;pointer-events:none;background:var(--navy);border:1px solid var(--gold);padding:.85rem 1.1rem;max-width:360px;min-width:220px;box-shadow:0 8px 28px rgba(0,0,0,.35);opacity:0;transition:opacity .12s;}
+.tt.show{opacity:1;}
+</style>
+
+<script>
+const tt = document.getElementById('tt');
+let vis = false;
+function showTT(e, html){ tt.innerHTML=html; tt.classList.add('show'); vis=true; moveTT(e); }
+function moveTT(e){
+  const m=14, vw=window.innerWidth, vh=window.innerHeight, tw=tt.offsetWidth, th=tt.offsetHeight;
+  let x=e.clientX+m, y=e.clientY+m;
+  if(x+tw>vw-8) x=e.clientX-tw-m;
+  if(y+th>vh-8) y=e.clientY-th-m;
+  tt.style.left=Math.max(6,x)+'px'; tt.style.top=Math.max(6,y)+'px';
+}
+function hideTT(){ tt.classList.remove('show'); vis=false; }
+document.addEventListener('mousemove', e=>{ if(vis) moveTT(e); });
+document.addEventListener('click', e=>{ if(!e.target.closest('tr[data-domain],.barrier-row')) hideTT(); });
+
+// TABLE ROW TOOLTIPS
+document.querySelectorAll('tr[data-domain]').forEach(row => {
+  row.style.cursor = 'pointer';
+  const cells = row.querySelectorAll('td:not(.lh)');
+  const vals = Array.from(cells).map(c => parseFloat(c.textContent)).filter(v=>!isNaN(v));
+  row.addEventListener('mouseenter', e => {
+    const domain = row.dataset.domain;
+    const note = row.dataset.note || '';
+    const bands = ['10+ Yrs','7–10 Yrs','5–7 Yrs','2–5 Yrs','<2 Yrs'];
+    const colors = ['#5a3e7a','#1a3350','#2c4f72','#c9a84c','#2d6a4f'];
+    if(!vals.length) return;
+    const max = Math.max(...vals), min = Math.min(...vals);
+    const maxBand = bands[vals.indexOf(max)];
+    const minBand = bands[vals.indexOf(min)];
+    let rows = vals.map((v,i)=>{
+      const pct = ((v-1)/4*100).toFixed(0);
+      return `<div style="display:flex;align-items:center;gap:.4rem;margin:.18rem 0;">
+        <span style="width:60px;font-family:var(--mono);font-size:.68rem;color:#9ab5c8;text-align:right;">${bands[i]}</span>
+        <div style="flex:1;height:9px;background:rgba(255,255,255,.1);">
+          <div style="width:${pct}%;height:9px;background:${colors[i]};"></div>
+        </div>
+        <span style="font-family:var(--mono);font-size:.72rem;color:#fff;min-width:28px;">${v.toFixed(2)}</span>
+      </div>`;
+    }).join('');
+    const html = `<div class="tt-title">${domain}</div>
+      ${rows}
+      <div style="height:1px;background:rgba(201,168,76,.22);margin:.4rem 0;"></div>
+      <div style="display:flex;justify-content:space-between;font-family:var(--mono);font-size:.68rem;margin-bottom:.3rem;">
+        <span style="color:#6d94b0;">Highest: <span style="color:#e8c96e;">${maxBand} (${max.toFixed(2)})</span></span>
+        <span style="color:#6d94b0;">Lowest: <span style="color:#e08080;">${minBand} (${min.toFixed(2)})</span></span>
+      </div>
+      ${note ? `<div style="font-size:.72rem;color:#9ab5c8;font-family:var(--body);font-weight:300;line-height:1.5;border-top:1px solid rgba(255,255,255,.07);padding-top:.4rem;margin-top:.2rem;">${note}</div>` : ''}`;
+    showTT(e, html);
+  });
+  row.addEventListener('mouseleave', hideTT);
+  row.addEventListener('click', e=>{ e.stopPropagation(); showTT(e, tt.innerHTML); });
+});
+
+// ISRAEL CHART
+const israelData = [
+  {band:'10+ Yrs', val:3.33, color:'#5a3e7a'},
+  {band:'7–10 Yrs', val:3.69, color:'#1a3350'},
+  {band:'5–7 Yrs', val:3.13, color:'#2c4f72'},
+  {band:'2–5 Yrs', val:3.59, color:'#c9a84c'},
+  {band:'<2 Yrs', val:3.82, color:'#2d6a4f'},
+];
+const ic = document.getElementById('israel-chart');
+if(ic){
+  const MIN=1, MAX=5;
+  ic.innerHTML = israelData.map(d=>{
+    const pct = ((d.val - MIN)/(MAX-MIN)*100).toFixed(1);
+    return `<div class="barrier-row" style="margin-bottom:.6rem;">
+      <span class="barrier-lbl" style="width:100px;">${d.band}</span>
+      <div style="flex:1;display:flex;align-items:center;gap:.5rem;">
+        <div style="flex:1;height:22px;background:rgba(0,0,0,.08);position:relative;">
+          <div style="position:absolute;left:${((3.0-MIN)/(MAX-MIN)*100)}%;top:0;bottom:0;width:1px;background:rgba(201,168,76,.25);"></div>
+          <div style="position:absolute;left:${((4.0-MIN)/(MAX-MIN)*100)}%;top:0;bottom:0;width:1px;background:rgba(45,106,79,.25);"></div>
+          <div style="width:${pct}%;height:22px;background:${d.color};display:flex;align-items:center;justify-content:flex-end;padding-right:6px;">
+            <span style="font-family:var(--mono);font-size:10px;color:#fff;">${d.val.toFixed(2)}</span>
+          </div>
+        </div>
+        <span style="font-family:var(--mono);font-size:9px;color:var(--light);min-width:60px;">${d.band==='<2 Yrs'?'★ highest':d.band==='5–7 Yrs'?'⚠ outlier':''}</span>
+      </div>
+    </div>`;
+  }).join('');
+  ic.insertAdjacentHTML('beforeend',`<div style="font-family:var(--mono);font-size:9px;color:var(--light);margin-top:.4rem;padding-left:100px;">│ 3.0 moderate &nbsp;&nbsp; │ 4.0 very important</div>`);
+}
+</script>
+</body>
+</html>
