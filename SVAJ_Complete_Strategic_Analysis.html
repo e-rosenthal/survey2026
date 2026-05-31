@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -620,30 +621,11 @@ footer span{color:var(--gold);}
   <div class="eyebrow">Section 05</div>
   <h2 class="sec-title">All 17 Strategic Priorities — Ranked</h2>
   <div class="sec-rule"></div>
-  <p class="sec-desc">Full ranking with scores (1–5 scale), the share rating each item Essential or Very Important (4–5), and the key demographic driver for each.</p>
+  <p class="sec-desc">Full ranking with scores (1–5 scale), the share rating each item Essential or Very Important (4–5), and full demographic breakdowns. <strong>Click or hover any bar to see the complete breakdown by segment.</strong></p>
 
-  <div class="chart-label">Strategic Priority Mean Score (1=Not Important → 5=Essential)</div>
-  <div class="bar-chart">
-    <div class="br"><span class="bl">Financial sustainability &amp; stewardship</span><div class="bt"><div class="bf green" style="width:78.4%"><span class="bv">3.92</span></div></div><span class="bve">71% rated 4–5 · Universal</span></div>
-    <div class="br"><span class="bl">Expanding youth, tween &amp; teen programming</span><div class="bt"><div class="bf green" style="width:76.6%"><span class="bv">3.83</span></div></div><span class="bve">64% rated 4–5 · Young families</span></div>
-    <div class="br"><span class="bl">Improving physical facilities &amp; accessibility</span><div class="bt"><div class="bf navy" style="width:75.2%"><span class="bv">3.76</span></div></div><span class="bve">65% rated 4–5 · Universal</span></div>
-    <div class="br"><span class="bl">Developing lay &amp; volunteer leadership pipeline</span><div class="bt"><div class="bf navy" style="width:74.8%"><span class="bv">3.74</span></div></div><span class="bve">60% rated 4–5 · Mid-era &amp; new</span></div>
-    <div class="br"><span class="bl">Growing and retaining membership</span><div class="bt"><div class="bf navy" style="width:74.2%"><span class="bv">3.71</span></div></div><span class="bve">62% rated 4–5 · Legacy</span></div>
-    <div class="br"><span class="bl">Strengthening family engagement &amp; support</span><div class="bt"><div class="bf gold" style="width:74.2%"><span class="bv">3.71</span></div></div><span class="bve">60% rated 4–5 · Young families</span></div>
-    <div class="br"><span class="bl">Strengthening adult education &amp; Torah learning</span><div class="bt"><div class="bf navy" style="width:73.2%"><span class="bv">3.66</span></div></div><span class="bve">57% rated 4–5 · Seniors &amp; no-kids</span></div>
-    <div class="br"><span class="bl">Improving volunteer engagement &amp; leadership</span><div class="bt"><div class="bf navy" style="width:72.4%"><span class="bv">3.62</span></div></div><span class="bve">57% rated 4–5 · No-kids &amp; female</span></div>
-    <div class="br"><span class="bl">Building chesed infrastructure &amp; social support</span><div class="bt"><div class="bf navy" style="width:72.2%"><span class="bv">3.61</span></div></div><span class="bve">54% rated 4–5 · Legacy &amp; female</span></div>
-    <div class="br"><span class="bl">Enhancing Shabbat &amp; davening experience</span><div class="bt"><div class="bf navy" style="width:71.8%"><span class="bv">3.59</span></div></div><span class="bve">54% rated 4–5 · Legacy &amp; mid-era</span></div>
-    <div class="br"><span class="bl">Building a more welcoming &amp; inclusive community</span><div class="bt"><div class="bf navy" style="width:71.6%"><span class="bv">3.58</span></div></div><span class="bve">54% rated 4–5 · No-kids &amp; legacy</span></div>
-    <div class="br"><span class="bl">Deepening Israel connection &amp; programming</span><div class="bt"><div class="bf amber" style="width:70.8%"><span class="bv">3.54</span></div></div><span class="bve">52% rated 4–5 · Seniors highest</span></div>
-    <div class="br"><span class="bl">Formalizing programming &amp; planning transparency</span><div class="bt"><div class="bf navy" style="width:70.6%"><span class="bv">3.53</span></div></div><span class="bve">51% rated 4–5 · Female-driven</span></div>
-    <div class="br"><span class="bl">Strengthening communications &amp; community awareness</span><div class="bt"><div class="bf navy" style="width:69.8%"><span class="bv">3.49</span></div></div><span class="bve">49% rated 4–5 · No-kids</span></div>
-    <div class="br"><span class="bl">Engaging with broader Skokie / Jewish community</span><div class="bt"><div class="bf navy" style="width:68.6%"><span class="bv">3.43</span></div></div><span class="bve">50% rated 4–5 · Mid cohort</span></div>
-    <div class="br"><span class="bl">Supporting member wellness &amp; mental health</span><div class="bt"><div class="bf navy" style="width:68.6%"><span class="bv">3.43</span></div></div><span class="bve">45% rated 4–5 · Female-driven</span></div>
-    <div class="br"><span class="bl">Supporting intergenerational connection</span><div class="bt"><div class="bf purple" style="width:67.6%"><span class="bv">3.38</span></div></div><span class="bve">44% rated 4–5 · Legacy &amp; female</span></div>
-  </div>
+  <div id="strat-chart"></div>
 
-  <h3 class="sub">Priority Tiers by Strategic Intent</h3>
+  <h3 class="sub" style="margin-top:3rem;">Priority Tiers by Strategic Intent</h3>
   <div class="three">
     <div class="card" style="border-top:3px solid var(--green);">
       <h4>🟢 Universal — Invest Immediately</h4>
@@ -1105,6 +1087,416 @@ footer span{color:var(--gold);}
     <span>175 respondents · 84 questions · All responses anonymous</span> · Prepared for internal strategic planning use
   </div>
 </footer>
+
+<!-- ═══════════════════════════════════════════════════════
+     INTERACTIVE CHART ENGINE
+     All charts built here with hover/click tooltips
+════════════════════════════════════════════════════════ -->
+<style>
+/* TOOLTIP */
+.tt{
+  position:fixed;z-index:9999;pointer-events:none;
+  background:var(--navy);border:1px solid var(--gold);border-radius:2px;
+  padding:.85rem 1.1rem;max-width:380px;min-width:260px;
+  box-shadow:0 8px 32px rgba(0,0,0,.35);
+  transition:opacity .12s;opacity:0;
+}
+.tt.show{opacity:1;}
+.tt-title{font-family:var(--serif);font-size:.92rem;font-weight:700;color:var(--gold-lt);margin-bottom:.6rem;line-height:1.3;}
+.tt-row{display:flex;justify-content:space-between;align-items:center;padding:.18rem 0;border-bottom:1px solid rgba(255,255,255,.07);}
+.tt-row:last-child{border-bottom:none;}
+.tt-lbl{font-family:var(--body);font-size:.75rem;color:#9ab5c8;font-weight:300;}
+.tt-val{font-family:var(--mono);font-size:.78rem;color:#fff;font-weight:500;}
+.tt-val.hi{color:var(--gold-lt);}
+.tt-val.lo{color:#e08080;}
+.tt-divider{height:1px;background:rgba(201,168,76,.25);margin:.4rem 0;}
+.tt-note{font-size:.72rem;color:#6d94b0;margin-top:.4rem;font-family:var(--mono);letter-spacing:.03em;}
+
+/* INTERACTIVE BAR ROWS */
+.ibar-row{
+  display:flex;align-items:center;gap:.75rem;margin-bottom:.55rem;
+  cursor:pointer;padding:.2rem .3rem;border-radius:2px;
+  transition:background .15s;
+}
+.ibar-row:hover,.ibar-row.active{background:rgba(201,168,76,.08);}
+.ibar-label{width:310px;flex-shrink:0;font-size:.82rem;color:var(--mid);text-align:right;line-height:1.3;}
+.ibar-label.sm{width:220px;}
+.ibar-track{flex:1;height:24px;background:rgba(0,0,0,.08);position:relative;overflow:visible;}
+.ibar-fill{height:24px;display:flex;align-items:center;justify-content:flex-end;padding-right:7px;transition:filter .15s;}
+.ibar-row:hover .ibar-fill,.ibar-row.active .ibar-fill{filter:brightness(1.15);}
+.ibar-val{font-family:var(--mono);font-size:10px;color:#fff;font-weight:500;}
+.ibar-ext{font-family:var(--mono);font-size:9.5px;color:var(--light);margin-left:.4rem;white-space:nowrap;}
+
+/* MINIBAR in tooltip */
+.mini-bar-wrap{margin:.35rem 0;}
+.mini-bar-row{display:flex;align-items:center;gap:.4rem;margin-bottom:.2rem;}
+.mini-bar-lbl{width:110px;flex-shrink:0;font-size:.7rem;color:#8aaec8;text-align:right;}
+.mini-bar-track{flex:1;height:10px;background:rgba(255,255,255,.1);}
+.mini-bar-fill{height:10px;}
+.mini-bar-val{font-family:var(--mono);font-size:.68rem;color:#dde8f0;margin-left:.3rem;min-width:28px;}
+
+/* Instruction hint */
+.chart-hint{font-family:var(--mono);font-size:9.5px;color:var(--gold);letter-spacing:.06em;margin-bottom:.75rem;opacity:.8;}
+</style>
+
+<div class="tt" id="tt"></div>
+
+<script>
+// ═══════════════════════════════
+// DATA
+// ═══════════════════════════════
+const STRAT = [{"name":"Increasing financial sustainability and stewardship","short":"Financial sustainability","overall":3.92,"pct_high":71.0,"n":159,"with_kids":3.85,"no_kids":4.0,"young":3.91,"middle":3.82,"senior":3.98,"new_mem":3.82,"mid_mem":4.1,"legacy":3.81,"female":3.87,"male":3.97,"young_fam":3.81},{"name":"Expanding youth, tween, and teen programming","short":"Youth/tween/teen programming","overall":3.83,"pct_high":64.0,"n":158,"with_kids":4.22,"no_kids":3.34,"young":4.25,"middle":3.84,"senior":3.51,"new_mem":4.03,"mid_mem":3.66,"legacy":3.55,"female":3.88,"male":3.77,"young_fam":4.26},{"name":"Improving physical facilities, space usage, and accessibility","short":"Physical facilities","overall":3.76,"pct_high":65.0,"n":158,"with_kids":3.63,"no_kids":3.92,"young":3.77,"middle":3.6,"senior":3.88,"new_mem":3.68,"mid_mem":3.87,"legacy":3.76,"female":3.79,"male":3.72,"young_fam":3.69},{"name":"Developing lay and volunteer leadership pipeline","short":"Leadership pipeline","overall":3.74,"pct_high":60.0,"n":159,"with_kids":3.62,"no_kids":3.88,"young":3.64,"middle":3.8,"senior":3.76,"new_mem":3.81,"mid_mem":3.73,"legacy":3.48,"female":3.85,"male":3.59,"young_fam":3.57},{"name":"Growing and retaining membership","short":"Growing & retaining membership","overall":3.71,"pct_high":62.0,"n":161,"with_kids":3.71,"no_kids":3.72,"young":3.6,"middle":3.76,"senior":3.78,"new_mem":3.74,"mid_mem":3.6,"legacy":3.91,"female":3.67,"male":3.77,"young_fam":3.64},{"name":"Strengthening family engagement and support","short":"Family engagement & support","overall":3.71,"pct_high":60.0,"n":157,"with_kids":3.89,"no_kids":3.49,"young":4.11,"middle":3.44,"senior":3.6,"new_mem":3.93,"mid_mem":3.49,"legacy":3.71,"female":3.8,"male":3.59,"young_fam":3.97},{"name":"Strengthening adult education and Torah learning","short":"Adult education & Torah","overall":3.66,"pct_high":57.0,"n":159,"with_kids":3.26,"no_kids":4.14,"young":3.36,"middle":3.32,"senior":4.14,"new_mem":3.6,"mid_mem":3.74,"legacy":3.64,"female":3.67,"male":3.65,"young_fam":3.21},{"name":"Improving volunteer engagement and leadership development","short":"Volunteer engagement","overall":3.62,"pct_high":57.0,"n":159,"with_kids":3.46,"no_kids":3.81,"young":3.5,"middle":3.71,"senior":3.68,"new_mem":3.64,"mid_mem":3.57,"legacy":3.59,"female":3.72,"male":3.49,"young_fam":3.43},{"name":"Building chesed infrastructure and social support","short":"Chesed infrastructure","overall":3.61,"pct_high":54.0,"n":161,"with_kids":3.48,"no_kids":3.76,"young":3.52,"middle":3.63,"senior":3.69,"new_mem":3.68,"mid_mem":3.43,"legacy":3.82,"female":3.74,"male":3.45,"young_fam":3.42},{"name":"Enhancing Shabbat and davening experience","short":"Shabbat & davening","overall":3.59,"pct_high":54.0,"n":159,"with_kids":3.49,"no_kids":3.71,"young":3.56,"middle":3.49,"senior":3.68,"new_mem":3.39,"mid_mem":3.76,"legacy":3.73,"female":3.63,"male":3.56,"young_fam":3.61},{"name":"Building a more welcoming and inclusive community","short":"Welcoming & inclusive community","overall":3.58,"pct_high":54.0,"n":160,"with_kids":3.4,"no_kids":3.79,"young":3.6,"middle":3.53,"senior":3.63,"new_mem":3.72,"mid_mem":3.38,"legacy":3.76,"female":3.67,"male":3.47,"young_fam":3.38},{"name":"Deepening Israel connection and programming","short":"Israel connection","overall":3.54,"pct_high":52.0,"n":160,"with_kids":3.45,"no_kids":3.65,"young":3.61,"middle":3.27,"senior":3.73,"new_mem":3.57,"mid_mem":3.48,"legacy":3.5,"female":3.58,"male":3.5,"young_fam":3.53},{"name":"Formalizing programming and improving planning transparency","short":"Planning transparency","overall":3.53,"pct_high":51.0,"n":158,"with_kids":3.43,"no_kids":3.65,"young":3.59,"middle":3.4,"senior":3.56,"new_mem":3.57,"mid_mem":3.48,"legacy":3.48,"female":3.7,"male":3.31,"young_fam":3.53},{"name":"Strengthening communications and community awareness","short":"Communications","overall":3.49,"pct_high":49.0,"n":156,"with_kids":3.32,"no_kids":3.69,"young":3.34,"middle":3.55,"senior":3.55,"new_mem":3.51,"mid_mem":3.46,"legacy":3.52,"female":3.55,"male":3.42,"young_fam":3.37},{"name":"Engaging with the broader Skokie / North Shore and Jewish community","short":"Broader community engagement","overall":3.43,"pct_high":50.0,"n":159,"with_kids":3.37,"no_kids":3.51,"young":3.2,"middle":3.61,"senior":3.47,"new_mem":3.41,"mid_mem":3.43,"legacy":3.52,"female":3.48,"male":3.38,"young_fam":3.37},{"name":"Supporting member wellness and mental health","short":"Member wellness","overall":3.43,"pct_high":45.0,"n":159,"with_kids":3.24,"no_kids":3.64,"young":3.28,"middle":3.41,"senior":3.57,"new_mem":3.41,"mid_mem":3.4,"legacy":3.59,"female":3.59,"male":3.23,"young_fam":3.3},{"name":"Supporting intergenerational connection","short":"Intergenerational connection","overall":3.38,"pct_high":44.0,"n":160,"with_kids":3.1,"no_kids":3.69,"young":3.07,"middle":3.18,"senior":3.78,"new_mem":3.25,"mid_mem":3.25,"legacy":3.96,"female":3.64,"male":3.06,"young_fam":2.98}];
+
+const SAT = [{"name":"Rabbinic team's leadership and accessibility","mean":3.75,"n":170,"very_sat":134,"sat":30,"dis":6,"very_dis":0,"na":0,"with_kids":3.74,"no_kids":3.76,"young":3.77,"senior":3.8},{"name":"Support during lifecycle events","mean":3.64,"n":137,"very_sat":96,"sat":35,"dis":4,"very_dis":2,"na":0,"with_kids":3.58,"no_kids":3.71,"young":3.63,"senior":3.8},{"name":"Chesed and community support","mean":3.5,"n":158,"very_sat":83,"sat":71,"dis":4,"very_dis":0,"na":0,"with_kids":3.41,"no_kids":3.6,"young":3.35,"senior":3.66},{"name":"Sense of community and belonging","mean":3.48,"n":166,"very_sat":97,"sat":55,"dis":10,"very_dis":4,"na":0,"with_kids":3.44,"no_kids":3.51,"young":3.53,"senior":3.61},{"name":"Communication from shul leadership","mean":3.45,"n":163,"very_sat":87,"sat":64,"dis":11,"very_dis":1,"na":0,"with_kids":3.4,"no_kids":3.51,"young":3.28,"senior":3.61},{"name":"Shabbat and Yom Tov davening experience","mean":3.43,"n":162,"very_sat":85,"sat":63,"dis":13,"very_dis":1,"na":0,"with_kids":3.34,"no_kids":3.54,"young":3.3,"senior":3.57},{"name":"Israel programming","mean":3.24,"n":148,"very_sat":57,"sat":74,"dis":12,"very_dis":5,"na":0,"with_kids":3.23,"no_kids":3.24,"young":3.14,"senior":3.31},{"name":"Adult education and learning opportunities","mean":3.15,"n":137,"very_sat":41,"sat":77,"dis":18,"very_dis":1,"na":0,"with_kids":3.06,"no_kids":3.24,"young":2.87,"senior":3.33},{"name":"Physical facility and space","mean":3.09,"n":169,"very_sat":51,"sat":86,"dis":28,"very_dis":4,"na":0,"with_kids":3.0,"no_kids":3.19,"young":2.85,"senior":3.22},{"name":"Children's and youth programming","mean":2.67,"n":85,"very_sat":19,"sat":27,"dis":31,"very_dis":8,"na":0,"with_kids":2.68,"no_kids":2.56,"young":2.67,"senior":2.62}];
+
+const DREW = [{"label":"Rabbi / clergy","n":107},{"label":"Warmth & welcoming","n":84},{"label":"Hashkafic alignment","n":77},{"label":"Friends / family members","n":67},{"label":"Location / proximity","n":28},{"label":"Children's / youth programming","n":16},{"label":"Quality of davening","n":10},{"label":"Community reputation","n":10}];
+
+const BARRIERS = [{"label":"Schedule conflicts","all":81,"kids":47,"no_kids":34},{"label":"Programs don't fit life stage","all":62,"kids":34,"no_kids":28},{"label":"Already engaged enough","all":43,"kids":17,"no_kids":26},{"label":"Childcare / family logistics","all":43,"kids":41,"no_kids":2},{"label":"Don't feel socially connected","all":29,"kids":16,"no_kids":13},{"label":"Don't know what's available","all":11,"kids":6,"no_kids":5},{"label":"Cost / financial barriers","all":10,"kids":5,"no_kids":5},{"label":"Physical accessibility","all":8,"kids":1,"no_kids":7}];
+
+// ═══════════════════════════════
+// TOOLTIP ENGINE
+// ═══════════════════════════════
+const tt = document.getElementById('tt');
+let ttVisible = false;
+
+function showTT(e, html) {
+  tt.innerHTML = html;
+  tt.classList.add('show');
+  ttVisible = true;
+  moveTT(e);
+}
+function moveTT(e) {
+  const m = 16, vw = window.innerWidth, vh = window.innerHeight;
+  const tw = tt.offsetWidth, th = tt.offsetHeight;
+  let x = e.clientX + m, y = e.clientY + m;
+  if (x + tw > vw - 10) x = e.clientX - tw - m;
+  if (y + th > vh - 10) y = e.clientY - th - m;
+  tt.style.left = Math.max(8, x) + 'px';
+  tt.style.top = Math.max(8, y) + 'px';
+}
+function hideTT() { tt.classList.remove('show'); ttVisible = false; }
+
+document.addEventListener('mousemove', e => { if (ttVisible) moveTT(e); });
+document.addEventListener('click', e => { if (!e.target.closest('.ibar-row')) hideTT(); });
+
+// ═══════════════════════════════
+// COLOR SCALE for scores
+// ═══════════════════════════════
+function scoreColor(v, max=5) {
+  const pct = (v - 2.5) / (max - 2.5);
+  if (v >= 4.0) return '#1b5e3a';
+  if (v >= 3.7) return '#2d6a4f';
+  if (v >= 3.4) return '#52b788';
+  if (v >= 3.0) return '#c9a84c';
+  if (v >= 2.7) return '#b5621b';
+  return '#8b2020';
+}
+function fillColor(v) {
+  if (v >= 4.0) return '#1b5e3a';
+  if (v >= 3.7) return '#2d6a4f';
+  if (v >= 3.4) return '#2c4f72';
+  if (v >= 3.1) return '#b5621b';
+  return '#8b2020';
+}
+
+// ═══════════════════════════════
+// MINI BAR IN TOOLTIP
+// ═══════════════════════════════
+function miniBar(label, val, max, color) {
+  const pct = Math.max(0, Math.min(100, ((val - 1) / (max - 1)) * 100));
+  const c = scoreColor(val, max);
+  return `<div class="mini-bar-row">
+    <span class="mini-bar-lbl">${label}</span>
+    <div class="mini-bar-track"><div class="mini-bar-fill" style="width:${pct}%;background:${c}"></div></div>
+    <span class="mini-bar-val">${val.toFixed(2)}</span>
+  </div>`;
+}
+
+// ═══════════════════════════════
+// BUILD STRAT CHART
+// ═══════════════════════════════
+function buildStratChart() {
+  const el = document.getElementById('strat-chart');
+  if (!el) return;
+  const MIN = 1, MAX = 5, SCALE = MAX - MIN;
+
+  let html = `<div class="chart-hint">↖ Click or hover any row for full demographic breakdown</div>`;
+  html += `<div style="display:flex;align-items:center;gap:.75rem;margin-bottom:.3rem;padding:.2rem .3rem;">
+    <span style="width:310px;flex-shrink:0;font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--light);text-align:right;">Priority</span>
+    <div style="flex:1;display:flex;justify-content:space-between;font-family:var(--mono);font-size:9px;color:var(--light);padding:0 2px;">
+      <span>1.0</span><span>2.0</span><span>3.0</span><span>4.0</span><span>5.0</span>
+    </div>
+    <span style="width:120px;font-family:var(--mono);font-size:9px;color:var(--light);">Score · %High</span>
+  </div>`;
+
+  STRAT.forEach((d, i) => {
+    const pct = ((d.overall - MIN) / SCALE) * 100;
+    const fc = fillColor(d.overall);
+    const ref30 = ((3.0 - MIN) / SCALE) * 100;
+    const ref40 = ((4.0 - MIN) / SCALE) * 100;
+    html += `<div class="ibar-row" data-idx="${i}" tabindex="0">
+      <span class="ibar-label">${d.short || d.name}</span>
+      <div class="ibar-track" style="position:relative;">
+        <div style="position:absolute;left:${ref30}%;top:0;bottom:0;width:1px;background:rgba(201,168,76,.2);pointer-events:none;"></div>
+        <div style="position:absolute;left:${ref40}%;top:0;bottom:0;width:1px;background:rgba(45,106,79,.25);pointer-events:none;"></div>
+        <div class="ibar-fill" style="width:${pct}%;background:${fc};">
+          <span class="ibar-val">${d.overall.toFixed(2)}</span>
+        </div>
+      </div>
+      <span class="ibar-ext">${d.pct_high.toFixed(0)}% high · n=${d.n}</span>
+    </div>`;
+  });
+
+  html += `<div style="display:flex;gap:1.5rem;margin-top:.75rem;padding-left:316px;font-family:var(--mono);font-size:9px;color:var(--light);">
+    <span>│ = 3.0 (moderate)</span><span style="color:rgba(45,106,79,.7);">│ = 4.0 (very important)</span>
+  </div>`;
+
+  el.innerHTML = html;
+
+  el.querySelectorAll('.ibar-row').forEach(row => {
+    const d = STRAT[+row.dataset.idx];
+    const ttHtml = () => `
+      <div class="tt-title">${d.name}</div>
+      <div class="tt-row"><span class="tt-lbl">Overall mean</span><span class="tt-val hi">${d.overall.toFixed(2)} / 5.0</span></div>
+      <div class="tt-row"><span class="tt-lbl">Rated Essential/Very Imp.</span><span class="tt-val">${d.pct_high.toFixed(0)}% (n=${d.n})</span></div>
+      <div class="tt-divider"></div>
+      <div style="font-family:var(--mono);font-size:9px;letter-spacing:.07em;text-transform:uppercase;color:#6d94b0;margin:.3rem 0;">By Household</div>
+      <div class="mini-bar-wrap">
+        ${miniBar('With Kids', d.with_kids, 5)}
+        ${miniBar('Without Kids', d.no_kids, 5)}
+        ${miniBar('Young Families', d.young_fam, 5)}
+      </div>
+      <div class="tt-divider"></div>
+      <div style="font-family:var(--mono);font-size:9px;letter-spacing:.07em;text-transform:uppercase;color:#6d94b0;margin:.3rem 0;">By Age Group</div>
+      <div class="mini-bar-wrap">
+        ${miniBar('Under 40', d.young, 5)}
+        ${miniBar('40–54', d.middle, 5)}
+        ${miniBar('55+', d.senior, 5)}
+      </div>
+      <div class="tt-divider"></div>
+      <div style="font-family:var(--mono);font-size:9px;letter-spacing:.07em;text-transform:uppercase;color:#6d94b0;margin:.3rem 0;">By Tenure</div>
+      <div class="mini-bar-wrap">
+        ${miniBar('New (2020+)', d.new_mem, 5)}
+        ${miniBar('Mid (2015–19)', d.mid_mem, 5)}
+        ${miniBar('Legacy (<2015)', d.legacy, 5)}
+      </div>
+      <div class="tt-divider"></div>
+      <div class="mini-bar-wrap">
+        ${miniBar('Female', d.female, 5)}
+        ${miniBar('Male', d.male, 5)}
+      </div>
+      <div class="tt-note">Highest: ${getHighest(d)} · Lowest: ${getLowest(d)}</div>`;
+
+    row.addEventListener('mouseenter', e => showTT(e, ttHtml()));
+    row.addEventListener('mouseleave', hideTT);
+    row.addEventListener('click', e => { e.stopPropagation(); showTT(e, ttHtml()); });
+    row.addEventListener('focus', e => showTT(e, ttHtml()));
+    row.addEventListener('blur', hideTT);
+  });
+}
+
+function getHighest(d) {
+  const segs = {
+    'With Kids': d.with_kids, 'No Kids': d.no_kids, 'Young Fam': d.young_fam,
+    'Under 40': d.young, '40-54': d.middle, '55+': d.senior,
+    'New': d.new_mem, 'Mid': d.mid_mem, 'Legacy': d.legacy,
+    'Female': d.female, 'Male': d.male
+  };
+  const sorted = Object.entries(segs).sort((a,b)=>b[1]-a[1]);
+  return `${sorted[0][0]} (${sorted[0][1].toFixed(2)})`;
+}
+function getLowest(d) {
+  const segs = {
+    'With Kids': d.with_kids, 'No Kids': d.no_kids, 'Young Fam': d.young_fam,
+    'Under 40': d.young, '40-54': d.middle, '55+': d.senior,
+    'New': d.new_mem, 'Mid': d.mid_mem, 'Legacy': d.legacy,
+    'Female': d.female, 'Male': d.male
+  };
+  const sorted = Object.entries(segs).sort((a,b)=>a[1]-b[1]);
+  return `${sorted[0][0]} (${sorted[0][1].toFixed(2)})`;
+}
+
+// ═══════════════════════════════
+// MAKE ALL EXISTING STATIC BARS INTERACTIVE
+// We find bar-chart divs that have .br rows and add tooltips
+// ═══════════════════════════════
+function upgradeStaticBars() {
+  // Satisfaction chart in portrait section
+  upgradeSatBars();
+  upgradeDrawBars();
+  upgradeBarrierBars();
+  upgradeVolunteerBars();
+}
+
+function upgradeSatBars() {
+  // Find the satisfaction chart by looking for known domain text
+  document.querySelectorAll('.br').forEach(row => {
+    const lbl = row.querySelector('.bl');
+    if (!lbl) return;
+    const text = lbl.textContent.trim();
+    const d = SAT.find(s => {
+      const short = s.name.replace(/'/g,"'").replace(/\u2019/g,"'");
+      return text.includes('Rabbinic') && short.includes('Rabbinic') ||
+             text.includes('lifecycle') && short.includes('lifecycle') ||
+             text.includes('davening') && short.includes('davening') ||
+             text.includes('Chesed') && short.includes('Chesed') ||
+             text.includes('belonging') && short.includes('belonging') ||
+             text.includes('Communication') && short.includes('Communication') ||
+             text.includes('Israel prog') && short.includes('Israel') ||
+             text.includes('Adult ed') && short.includes('Adult ed') ||
+             text.includes('facility') && short.includes('facility') ||
+             text.includes('youth prog') && short.includes('youth') ||
+             text.includes('Youth') && short.includes('youth') ||
+             text.includes('Adult') && short.includes('Adult') && !text.includes('facility');
+    });
+    if (!d) return;
+    row.style.cursor = 'pointer';
+    row.style.padding = '.15rem .3rem';
+    row.style.borderRadius = '2px';
+    row.style.transition = 'background .15s';
+    row.addEventListener('mouseenter', e => {
+      row.style.background = 'rgba(201,168,76,.08)';
+      const ttHtml = `
+        <div class="tt-title">${d.name}</div>
+        <div class="tt-row"><span class="tt-lbl">Mean satisfaction</span><span class="tt-val hi">${d.mean.toFixed(2)} / 4.0</span></div>
+        <div class="tt-row"><span class="tt-lbl">Respondents</span><span class="tt-val">n=${d.n}</span></div>
+        <div class="tt-divider"></div>
+        <div class="tt-row"><span class="tt-lbl">Very Satisfied</span><span class="tt-val">${d.very_sat} (${(d.very_sat/d.n*100).toFixed(0)}%)</span></div>
+        <div class="tt-row"><span class="tt-lbl">Satisfied</span><span class="tt-val">${d.sat} (${(d.sat/d.n*100).toFixed(0)}%)</span></div>
+        <div class="tt-row"><span class="tt-lbl">Dissatisfied</span><span class="tt-val ${d.dis > 20 ? 'lo' : ''}">${d.dis} (${(d.dis/d.n*100).toFixed(0)}%)</span></div>
+        <div class="tt-row"><span class="tt-lbl">Very Dissatisfied</span><span class="tt-val ${d.very_dis > 5 ? 'lo' : ''}">${d.very_dis} (${(d.very_dis/d.n*100).toFixed(0)}%)</span></div>
+        <div class="tt-divider"></div>
+        <div style="font-family:var(--mono);font-size:9px;letter-spacing:.07em;text-transform:uppercase;color:#6d94b0;margin:.3rem 0;">By Segment</div>
+        <div class="mini-bar-wrap">
+          ${miniBar('With Kids', d.with_kids, 4)}
+          ${miniBar('Without Kids', d.no_kids, 4)}
+          ${miniBar('Under 40', d.young, 4)}
+          ${miniBar('55+', d.senior, 4)}
+        </div>`;
+      showTT(e, ttHtml);
+    });
+    row.addEventListener('mouseleave', () => { row.style.background = ''; hideTT(); });
+    row.addEventListener('click', e => { e.stopPropagation(); });
+  });
+}
+
+function upgradeDrawBars() {
+  let idx = 0;
+  document.querySelectorAll('.br').forEach(row => {
+    const lbl = row.querySelector('.bl');
+    if (!lbl) return;
+    const text = lbl.textContent.trim();
+    const d = DREW.find(x => text.toLowerCase().includes(x.label.toLowerCase().substring(0, 8)));
+    if (!d) return;
+    row.style.cursor = 'pointer';
+    row.style.padding = '.15rem .3rem';
+    row.style.borderRadius = '2px';
+    row.style.transition = 'background .15s';
+    row.addEventListener('mouseenter', e => {
+      row.style.background = 'rgba(201,168,76,.08)';
+      const ttHtml = `
+        <div class="tt-title">Primary Draw: ${d.label}</div>
+        <div class="tt-row"><span class="tt-lbl">Respondents who cited this</span><span class="tt-val hi">${d.n} of 175</span></div>
+        <div class="tt-row"><span class="tt-lbl">Share of total</span><span class="tt-val">${(d.n/175*100).toFixed(0)}%</span></div>
+        <div class="tt-note">Up to 3 choices per respondent · Total n=175</div>`;
+      showTT(e, ttHtml);
+    });
+    row.addEventListener('mouseleave', () => { row.style.background = ''; hideTT(); });
+  });
+}
+
+function upgradeBarrierBars() {
+  document.querySelectorAll('.br').forEach(row => {
+    const lbl = row.querySelector('.bl');
+    if (!lbl) return;
+    const text = lbl.textContent.trim();
+    const d = BARRIERS.find(x => text.toLowerCase().includes(x.label.toLowerCase().substring(0,8)));
+    if (!d) return;
+    row.style.cursor = 'pointer';
+    row.style.padding = '.15rem .3rem';
+    row.style.borderRadius = '2px';
+    row.style.transition = 'background .15s';
+    row.addEventListener('mouseenter', e => {
+      row.style.background = 'rgba(201,168,76,.08)';
+      const ttHtml = `
+        <div class="tt-title">Barrier: ${d.label}</div>
+        <div class="tt-row"><span class="tt-lbl">All respondents</span><span class="tt-val hi">${d.all} mentions</span></div>
+        <div class="tt-divider"></div>
+        <div class="mini-bar-wrap">
+          ${miniBar('With Kids', d.kids, d.all * 1.2)}
+          ${miniBar('Without Kids', d.no_kids, d.all * 1.2)}
+        </div>
+        <div class="tt-note">Raw mention counts · multiple barriers per person allowed</div>`;
+      showTT(e, ttHtml);
+    });
+    row.addEventListener('mouseleave', () => { row.style.background = ''; hideTT(); });
+  });
+}
+
+function upgradeVolunteerBars() {
+  // volunteer bars in flywheel section - look for bars showing 2.10, 2.13 etc
+  document.querySelectorAll('.br').forEach(row => {
+    const lbl = row.querySelector('.bl');
+    if (!lbl) return;
+    const text = lbl.textContent.trim().toLowerCase();
+    if (!text.includes('young famil') && !text.includes('senior') && !text.includes('middle') && !text.includes('with kids') && !text.includes('without kids')) return;
+    row.style.cursor = 'pointer';
+    row.style.padding = '.15rem .3rem';
+    row.style.borderRadius = '2px';
+    row.style.transition = 'background .15s';
+    row.addEventListener('mouseenter', e => {
+      row.style.background = 'rgba(201,168,76,.08)';
+      const val = row.querySelector('.bv')?.textContent || '';
+      const notes = {
+        'young famil': 'Constrained by childcare (51% cite it as barrier). Want to volunteer more but cannot currently.',
+        'senior': 'Available, experienced, and seeking intergenerational connection. Currently underutilized.',
+        'middle': 'Most active group. Risk of burnout without structural support.',
+        'with kids': 'Volunteer desire exists but childcare logistics prevent full participation.',
+        'without kids': 'More available time; volunteer engagement design can reach this group.'
+      };
+      const key = Object.keys(notes).find(k => text.includes(k));
+      const ttHtml = `
+        <div class="tt-title">Volunteer Frequency: ${lbl.textContent.trim()}</div>
+        <div class="tt-row"><span class="tt-lbl">Mean engagement score</span><span class="tt-val hi">${val} / 5.0</span></div>
+        <div class="tt-divider"></div>
+        <p style="font-size:.78rem;color:#9ab5c8;line-height:1.55;">${key ? notes[key] : ''}</p>`;
+      showTT(e, ttHtml);
+    });
+    row.addEventListener('mouseleave', () => { row.style.background = ''; hideTT(); });
+  });
+}
+
+// ═══════════════════════════════
+// UPGRADE EXISTING STATIC ibar-rows (heatmap section already has inline data)
+// Add hover to ALL .br rows that have numeric values
+// ═══════════════════════════════
+function upgradeAllRemainingBrs() {
+  document.querySelectorAll('.br').forEach(row => {
+    if (row._upgraded) return;
+    const fill = row.querySelector('.bf, .bv');
+    if (!fill) return;
+    const valEl = row.querySelector('.bv');
+    if (!valEl) return;
+    const val = parseFloat(valEl.textContent);
+    if (isNaN(val)) return;
+    const lbl = row.querySelector('.bl,.bl.sm')?.textContent?.trim() || '';
+    if (!lbl) return;
+    row._upgraded = true;
+    row.style.cursor = 'default';
+  });
+}
+
+// ═══════════════════════════════
+// INIT
+// ═══════════════════════════════
+document.addEventListener('DOMContentLoaded', () => {
+  buildStratChart();
+  setTimeout(() => {
+    upgradeStaticBars();
+    upgradeAllRemainingBrs();
+  }, 100);
+});
+</script>
 
 </body>
 </html>
